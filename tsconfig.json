@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ES2022",
+		"moduleResolution": "Node",
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"skipLibCheck": true,
+		"lib": [
+			"ES2023",
+			"ES2023.Array",
+			"ES2023.Collection"
+		]
+	},
+	"include": [
+		"src/**/*.ts",
+		"*.js"
+	]
+}
