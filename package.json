@@ -5,7 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"start": "node .",
-		"build": "node build.js"
+		"build": "node build.js",
+		"format": "prettier . --check"
 	},
 	"author": "Zent Playground",
 	"license": "MIT",
@@ -21,9 +22,11 @@
 		"dotenv": "^16.3.1",
 		"esbuild": "^0.19.11",
 		"eslint": "^8.56.0",
+		"prettier": "3.1.1",
 		"typescript": "^5.3.3"
 	},
 	"dependencies": {
-		"discord.js": "^14.14.1"
+		"discord.js": "^14.14.1",
+		"glob": "^10.3.10"
 	}
 }

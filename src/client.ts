@@ -1,11 +1,22 @@
-import { Client, GatewayIntentBits } from "discord.js";
+import { Client, Collection, GatewayIntentBits } from "discord.js";
+import { loadCommands, loadEvents } from "./utils/loader.js";
 
 const client = new Client({
-	intents: [GatewayIntentBits.Guilds],
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildMembers,
+	],
+	allowedMentions: {
+		repliedUser: false,
+		parse: [],
+	},
 });
 
-client.on("ready", (client) => {
-	console.log(`Successfully logged as '${client.user.tag}'.`);
-});
+client.commands = new Collection();
+
+loadEvents(client);
+loadCommands(client);
 
 client.login(process.env.BOT_TOKEN!);
