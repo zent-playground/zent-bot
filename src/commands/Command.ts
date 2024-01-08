@@ -9,12 +9,8 @@ import {
 	RESTPostAPIApplicationCommandsJSONBody,
 	UserContextMenuCommandInteraction,
 } from "discord.js";
-
-interface CommandOptions {
-	name: string;
-	description: string;
-	aliases?: string[]
-}
+import { Subcommand } from "../types/subcommand.js";
+import Arguments from "./Args.js";
 
 namespace Command {
 	export type ChatInput = ChatInputCommandInteraction;
@@ -23,6 +19,14 @@ namespace Command {
 	export type MessageContextMenu = MessageContextMenuCommandInteraction;
 	export type Autocomplete = AutocompleteInteraction;
 	export type HybridContext = import("./HybridContext.js").HybridContext;
+	export type Args = import("./Args.js").default;
+}
+
+interface CommandOptions {
+	name: string;
+	description: string;
+	aliases?: string[];
+	subcommands?: Subcommand[];
 }
 
 class Command {
@@ -31,6 +35,7 @@ class Command {
 	public aliases: string[];
 	public applicationCommands: RESTPostAPIApplicationCommandsJSONBody[] = [];
 	public client!: Client<true>;
+	public subcommand?: Subcommand;
 
 	public constructor(public options: CommandOptions) {
 		this.name = options.name;
@@ -42,8 +47,8 @@ class Command {
 	public executeAutocomplete?(interaction: Command.Autocomplete): Awaitable<void>;
 	public executeChatInput?(interaction: Command.ChatInput): Awaitable<void>;
 	public executeContextMenu?(interaction: Command.ContextMenu): Awaitable<void>;
-	public executeHybrid?(context: Command.HybridContext, args: string[]): Awaitable<void>;
-	public executeMessage?(message: Message, args: string[]): Awaitable<void>;
+	public executeHybrid?(context: Command.HybridContext, args: Arguments): Awaitable<void>;
+	public executeMessage?(message: Message, args: Arguments): Awaitable<void>;
 	public executeMessageContextMenu?(interaction: Command.MessageContextMenu): Awaitable<void>;
 	public executeUserContextMenu?(interaction: Command.UserContextMenu): Awaitable<void>;
 }

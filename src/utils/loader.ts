@@ -25,7 +25,7 @@ export const loadCommands = async (client: Client) => {
 	const path = join(_dirname, "..", "commands").replace(/\\/g, "/");
 
 	const files = await glob(`${path}/**/*.js`, {
-		ignore: ["Command", "HybridContext"].map((name) => `${path}/${name}.js`),
+		ignore: ["Command", "HybridContext", "Args"].map((name) => `${path}/${name}.js`),
 	});
 
 	for (const file of files) {

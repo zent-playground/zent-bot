@@ -11,14 +11,14 @@ import {
 } from "discord.js";
 
 export class BasedHybridContext {
-	public user: User;
+	public author: User;
 	public guild: Guild;
 	public member: GuildMember;
 	public channel: GuildTextBasedChannel;
 	public createdTimestamp: number;
 
 	public constructor(public context: ChatInputCommandInteraction | Message<true>) {
-		this.user = "author" in context ? context.author : context.user;
+		this.author = "author" in context ? context.author : context.user;
 		this.member = context.member as GuildMember;
 		this.guild = context.guild as Guild;
 		this.channel = context.channel as GuildTextBasedChannel;

@@ -2,6 +2,8 @@ import { Message } from "discord.js";
 
 import Listener from "./Listener.js";
 import { BasedHybridContext, HybridContext } from "../commands/HybridContext.js";
+import Args from "../commands/Args.js";
+import Command from "../commands/Command.js";
 
 class MessageCreate extends Listener {
 	public constructor() {
@@ -30,8 +32,48 @@ class MessageCreate extends Listener {
 
 		if (!command) return;
 
-		command.executeMessage?.(message, args);
-		command.executeHybrid?.(new BasedHybridContext(message) as HybridContext, args);
+		const commandArgs = new Args(args);
+
+		command.executeMessage?.(message, commandArgs);
+		command.executeHybrid?.(new BasedHybridContext(message) as HybridContext, commandArgs);
+		this.handleSubcommand(message, command, commandArgs);
+	}
+
+	public async handleSubcommand(message: Message<true>, command: Command, commandArgs: Args) {
+		let [subcommand, subcommandGroup] = commandArgs.entries;
+
+		subcommand = subcommand?.toLowerCase();
+		subcommandGroup = subcommandGroup?.toLowerCase();
+
+		const parsed =
+			this.client.utils.parseSubcommand(command, `${subcommandGroup}:${subcommand}`) ||
+			this.client.utils.parseSubcommand(command, `${subcommand}`);
+
+		if (!parsed) {
+			return;
+		}
+
+		const { entry, parent, args } = parsed;
+
+		args.entries = commandArgs.entries;
+
+		if (subcommand === entry.name) {
+			args.entries = args.entries.slice(1);
+		}
+
+		if (subcommandGroup === parent.name && parent.type === "subcommand-group") {
+			args.entries = args.entries.slice(1);
+		}
+
+		if (entry.message) {
+			const func = command[entry.name as keyof typeof command] as typeof command.executeMessage;
+			await func?.bind(command)(message, args);
+		}
+
+		if (entry.hybrid) {
+			const func = command[entry.name as keyof typeof command] as typeof command.executeHybrid;
+			await func?.bind(command)(new BasedHybridContext(message) as HybridContext, args);
+		}
 	}
 }
 

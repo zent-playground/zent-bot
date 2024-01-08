@@ -1,6 +1,7 @@
 import "dotenv/config.js";
 import { ShardingManager } from "discord.js";
+import config from "./config.js";
 
 new ShardingManager("dist/client.js", {
-	token: process.env.BOT_TOKEN,
+	token: config.token,
 }).spawn();
