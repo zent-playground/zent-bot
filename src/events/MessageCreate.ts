@@ -40,38 +40,38 @@ class MessageCreate extends Listener {
 	}
 
 	public async handleSubcommand(message: Message<true>, command: Command, commandArgs: Args) {
-		let [subcommand, subcommandGroup] = commandArgs.entries;
+		let [first, second] = commandArgs.entries;
 
-		subcommand = subcommand?.toLowerCase();
-		subcommandGroup = subcommandGroup?.toLowerCase();
+		first = first?.toLowerCase();
+		second = second?.toLowerCase();
 
 		const parsed =
-			this.client.utils.parseSubcommand(command, { subcommand, subcommandGroup }) ||
-			this.client.utils.parseSubcommand(command, { subcommand });
+			this.client.utils.parseSubcommand(command, { subcommandGroup: first, subcommand: second }) ||
+			this.client.utils.parseSubcommand(command, { subcommand: first });
 
 		if (!parsed) {
 			return;
 		}
 
 		const { entry, parent, args } = parsed;
-
+		
 		args.entries = commandArgs.entries;
 
-		if (subcommand === entry.name) {
+		if (entry.type === parent.type) {
 			args.entries = args.entries.slice(1);
 		}
 
-		if (subcommandGroup === parent.name && parent.type === "subcommand-group") {
+		if (parent.type === "subcommand-group") {
 			args.entries = args.entries.slice(1);
 		}
 
 		if (entry.message) {
-			const func = command[entry.name as keyof typeof command] as typeof command.executeMessage;
+			const func = command[entry.message as keyof typeof command] as typeof command.executeMessage;
 			await func?.bind(command)(message, args);
 		}
 
 		if (entry.hybrid) {
-			const func = command[entry.name as keyof typeof command] as typeof command.executeHybrid;
+			const func = command[entry.hybrid as keyof typeof command] as typeof command.executeHybrid;
 			await func?.bind(command)(new BasedHybridContext(message) as HybridContext, args);
 		}
 	}

@@ -64,12 +64,12 @@ class InteractionCreate extends Listener {
 		const { entry, args } = parsed;
 
 		if (entry.chatInput) {
-			const func = command[entry.name as keyof typeof command] as typeof command.executeChatInput;
+			const func = command[entry.chatInput as keyof typeof command] as typeof command.executeChatInput;
 			await func?.bind(command)(interaction);
 		}
 
 		if (entry.hybrid) {
-			const func = command[entry.name as keyof typeof command] as typeof command.executeHybrid;
+			const func = command[entry.chatInput as keyof typeof command] as typeof command.executeHybrid;
 			await func?.bind(command)(new BasedHybridContext(interaction) as HybridContext, args);
 		}
 	}

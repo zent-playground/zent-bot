@@ -1,6 +1,6 @@
 export interface SubcommandBody {
 	name: string;
-	type: "subcommand";
+	type?: "subcommand";
 	chatInput?: string;
 	hybrid?: string;
 	message?: string;

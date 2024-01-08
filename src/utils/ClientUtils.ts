@@ -16,20 +16,39 @@ class ClientUtils {
 	) {
 		const { subcommand, subcommandGroup } = options;
 
-		const parent = command.options.subcommands?.find((e) => {
-			if (subcommandGroup) {
-				return e.type === "subcommand-group" && e.name === subcommandGroup;
-			} else {
-				return (e.type === "subcommand" && e.name === subcommand) || e.default;
+		let parent;
+
+		for (const e of command.options.subcommands || []) {
+			if (e.type === "subcommand-group" && e.name === subcommandGroup) {
+				parent = e;
+				break;
 			}
-		});
+
+			if (!e.type || e.type === "subcommand") {
+				const target = subcommandGroup || subcommand;
+
+				if (e.name === target) {
+					parent = e;
+					break;
+				} else if (e.default) {
+					parent = e;
+				}
+			}
+		}
 
 		if (!parent) return;
 
 		let entry;
 
 		if (parent.type === "subcommand-group") {
-			entry = parent.subcommands.find((x) => x.name === subcommand || x.default);
+			for (const sub of parent.subcommands) {
+				if (sub.name === subcommand) {
+					entry = sub;
+					break;
+				} else if (sub.default) {
+					entry = sub;
+				}
+			}
 		} else {
 			entry = parent;
 		}
