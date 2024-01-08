@@ -1,9 +1,9 @@
 import { Message } from "discord.js";
 
-import Listener from "./Listener.js";
-import { BasedHybridContext, HybridContext } from "../commands/HybridContext.js";
-import Args from "../commands/Args.js";
-import Command from "../commands/Command.js";
+import Listener from "../Listener.js";
+import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
+import Args from "../../commands/Args.js";
+import Command from "../../commands/Command.js";
 
 class MessageCreate extends Listener {
 	public constructor() {
@@ -54,14 +54,14 @@ class MessageCreate extends Listener {
 		}
 
 		const { entry, parent, args } = parsed;
-		
+
 		args.entries = commandArgs.entries;
 
 		if (entry.type === parent.type) {
 			args.entries = args.entries.slice(1);
 		}
 
-		if (parent.type === "subcommand-group") {
+		if (parent.type === "group") {
 			args.entries = args.entries.slice(1);
 		}
 

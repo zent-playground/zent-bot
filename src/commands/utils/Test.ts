@@ -1,3 +1,4 @@
+import { SlashCommandBuilder } from "discord.js";
 import Command from "../Command.js";
 
 class Test extends Command {
@@ -8,7 +9,7 @@ class Test extends Command {
 			subcommands: [
 				{
 					name: "food",
-					type: "subcommand-group",
+					type: "group",
 					subcommands: [
 						{
 							name: "list",
@@ -23,7 +24,7 @@ class Test extends Command {
 				},
 				{
 					name: "toy",
-					type: "subcommand-group",
+					type: "group",
 					subcommands: [
 						{
 							name: "list",
@@ -43,6 +44,29 @@ class Test extends Command {
 				},
 			],
 		});
+	}
+
+	public initialize() {
+		this.applicationCommands.push(
+			new SlashCommandBuilder()
+				.setName(this.name)
+				.setDescription(this.description)
+				.addSubcommandGroup((group) =>
+					group
+						.setName("food")
+						.setDescription("Food!")
+						.addSubcommand((subcommand) => subcommand.setName("list").setDescription("..."))
+						.addSubcommand((subcommand) => subcommand.setName("add").setDescription("...")),
+				)
+				.addSubcommandGroup((group) =>
+					group
+						.setName("toy")
+						.setDescription("Toy!")
+						.addSubcommand((subcommand) => subcommand.setName("list").setDescription("..."))
+						.addSubcommand((subcommand) => subcommand.setName("add").setDescription("...")),
+				)
+				.toJSON(),
+		);
 	}
 
 	public async default(ctx: Command.HybridContext) {

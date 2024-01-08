@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import Listener from "./Listener.js";
+import Listener from "../Listener.js";
 
 class Ready extends Listener {
 	public constructor() {

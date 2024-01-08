@@ -12,7 +12,7 @@ const _dirname = dirname(fileURLToPath(import.meta.url));
 export const loadEvents = async (client: Client) => {
 	const path = join(_dirname, "..", "events").replace(/\\/g, "/");
 
-	const files = await glob(`${path}/**/*.js`, { ignore: [`${path}/Listener.js`] });
+	const files = await glob(`${path}/*/**/*.js`);
 
 	for (const file of files) {
 		const listener = new (await import(`${pathToFileURL(file)}`)).default() as Listener;
@@ -24,9 +24,7 @@ export const loadEvents = async (client: Client) => {
 export const loadCommands = async (client: Client) => {
 	const path = join(_dirname, "..", "commands").replace(/\\/g, "/");
 
-	const files = await glob(`${path}/**/*.js`, {
-		ignore: ["Command", "HybridContext", "Args"].map((name) => `${path}/${name}.js`),
-	});
+	const files = await glob(`${path}/*/**/*.js`);
 
 	for (const file of files) {
 		const command = new (await import(`${pathToFileURL(file)}`)).default() as Command;

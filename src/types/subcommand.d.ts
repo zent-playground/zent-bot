@@ -7,8 +7,8 @@ export interface SubcommandBody {
 	default?: boolean;
 }
 
-export interface SubcommandGroupBody extends SubcommandBody {
-	type: "subcommand-group";
+export interface SubcommandGroupBody extends Omit<SubcommandBody, "default"> {
+	type: "group";
 	subcommands: SubcommandBody[];
 }
 

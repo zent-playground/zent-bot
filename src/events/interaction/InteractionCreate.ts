@@ -1,9 +1,9 @@
 import { ChatInputCommandInteraction, Interaction } from "discord.js";
 
-import Listener from "./Listener.js";
-import { BasedHybridContext, HybridContext } from "../commands/HybridContext.js";
-import Command from "../commands/Command.js";
-import Args from "../commands/Args.js";
+import Listener from "../Listener.js";
+import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
+import Command from "../../commands/Command.js";
+import Args from "../../commands/Args.js";
 
 class InteractionCreate extends Listener {
 	public constructor() {
@@ -69,7 +69,7 @@ class InteractionCreate extends Listener {
 		}
 
 		if (entry.hybrid) {
-			const func = command[entry.chatInput as keyof typeof command] as typeof command.executeHybrid;
+			const func = command[entry.hybrid as keyof typeof command] as typeof command.executeHybrid;
 			await func?.bind(command)(new BasedHybridContext(interaction) as HybridContext, args);
 		}
 	}

@@ -19,7 +19,7 @@ class ClientUtils {
 		let parent;
 
 		for (const e of command.options.subcommands || []) {
-			if (e.type === "subcommand-group" && e.name === subcommandGroup) {
+			if (e.type === "group" && e.name === subcommandGroup) {
 				parent = e;
 				break;
 			}
@@ -40,7 +40,7 @@ class ClientUtils {
 
 		let entry;
 
-		if (parent.type === "subcommand-group") {
+		if (parent.type === "group") {
 			for (const sub of parent.subcommands) {
 				if (sub.name === subcommand) {
 					entry = sub;
