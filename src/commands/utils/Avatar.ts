@@ -68,6 +68,7 @@ class Avatar extends Command {
 			embeds: [
 				new EmbedBuilder()
 					.setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() })
+					.setTitle("User avatar")
 					.setImage(user.displayAvatarURL({ size: 4096 }))
 					.setColor(user.hexAccentColor || null)
 					.setTimestamp(),
@@ -99,6 +100,7 @@ class Avatar extends Command {
 			embeds: [
 				new EmbedBuilder()
 					.setAuthor({ name: member.user.tag, iconURL: member.user.displayAvatarURL() })
+					.setTitle("Member avatar")
 					.setImage(member.displayAvatarURL({ size: 4096 }))
 					.setColor(member.user.hexAccentColor || null)
 					.setTimestamp(),

@@ -10,20 +10,11 @@ class ClientUtils {
 		return value.match(/[0-9]+/)?.[0];
 	}
 
-	public parseSubcommand(command: Command, name: string) {
-		if (!name) return;
-
-		let subcommand: string | undefined;
-		let subcommandGroup: string | undefined;
-
-		const splitted = name.split(":");
-
-		if (splitted.length > 1) {
-			subcommand = splitted[1];
-			subcommandGroup = splitted[0];
-		} else {
-			subcommand = splitted[0];
-		}
+	public parseSubcommand(
+		command: Command,
+		options: { subcommand?: string; subcommandGroup?: string },
+	) {
+		const { subcommand, subcommandGroup } = options;
 
 		const parent = command.options.subcommands?.find((e) => {
 			if (subcommandGroup) {

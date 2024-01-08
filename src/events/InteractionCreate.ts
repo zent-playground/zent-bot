@@ -52,13 +52,10 @@ class InteractionCreate extends Listener {
 	}
 
 	public async handleSubcommand(interaction: ChatInputCommandInteraction, command: Command) {
-		const subcommand = interaction.options.getSubcommand(false);
-		const subcommandGroup = interaction.options.getSubcommandGroup(false);
+		const subcommand = interaction.options.getSubcommand(false) || undefined;
+		const subcommandGroup = interaction.options.getSubcommandGroup(false) || undefined;
 
-		const parsed = this.client.utils.parseSubcommand(
-			command,
-			subcommandGroup ? `${subcommandGroup}:${subcommand}` : `${subcommand}`,
-		);
+		const parsed = this.client.utils.parseSubcommand(command, { subcommand, subcommandGroup });
 
 		if (!parsed) {
 			return;

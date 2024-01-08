@@ -46,8 +46,8 @@ class MessageCreate extends Listener {
 		subcommandGroup = subcommandGroup?.toLowerCase();
 
 		const parsed =
-			this.client.utils.parseSubcommand(command, `${subcommandGroup}:${subcommand}`) ||
-			this.client.utils.parseSubcommand(command, `${subcommand}`);
+			this.client.utils.parseSubcommand(command, { subcommand, subcommandGroup }) ||
+			this.client.utils.parseSubcommand(command, { subcommand });
 
 		if (!parsed) {
 			return;
