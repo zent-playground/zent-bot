@@ -5,8 +5,9 @@
 	"type": "module",
 	"scripts": {
 		"start": "node .",
-		"build": "node build.js",
-		"format": "prettier . --check"
+		"build": "node scripts/build.js",
+		"dev": "node scripts/watch.js",
+		"lint": "npx eslint ."
 	},
 	"author": "Zent Playground",
 	"license": "MIT",
@@ -19,6 +20,7 @@
 	"devDependencies": {
 		"@typescript-eslint/eslint-plugin": "^6.17.0",
 		"@typescript-eslint/parser": "^6.17.0",
+		"chalk": "^5.3.0",
 		"dotenv": "^16.3.1",
 		"esbuild": "^0.19.11",
 		"eslint": "^8.56.0",
@@ -26,6 +28,7 @@
 		"typescript": "^5.3.3"
 	},
 	"dependencies": {
+		"discord-api-types": "^0.37.67",
 		"discord.js": "^14.14.1",
 		"glob": "^10.3.10"
 	}
