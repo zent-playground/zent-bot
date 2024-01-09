@@ -36,12 +36,12 @@ jobs:
           echo BOT_TOKEN=${{ secrets.BOT_TOKEN }} >> .env
           echo MYSQL_HOST=${{ secrets.HOST }} >> .env
           echo MYSQL_PORT=${{ secrets.MYSQL_PORT }} >> .env
-          echo MYSQL_USERNAME=${{ secrets.PROD_MYSQL_USERNAME }} >> .env
+          echo MYSQL_USER=${{ secrets.PROD_MYSQL_USERNAME }} >> .env
           echo MYSQL_DATABASE=${{ secrets.PROD_MYSQL_DATABASE }} >> .env
           echo MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }} >> .env
           echo REDIS_HOST=${{ secrets.HOST }} >> .env
           echo REDIS_PORT=${{ secrets.REDIS_PORT }} >> .env
-          echo REDIS_USERNAME=${{ secrets.PROD_REDIS_USERNAME }} >> .env
+          echo REDIS_USER=${{ secrets.PROD_REDIS_USERNAME }} >> .env
           echo REDIS_PASSWORD=${{ secrets.PROD_REDIS_PASSWORD }} >> .env
           echo REDIS_PREFIX=prod: >> .env
 
