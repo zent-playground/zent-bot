@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Interaction } from "discord.js";
+import { ChatInputCommandInteraction, Events, Interaction } from "discord.js";
 
 import Listener from "../Listener.js";
 import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
@@ -7,7 +7,7 @@ import Args from "../../commands/Args.js";
 
 class InteractionCreate extends Listener {
 	public constructor() {
-		super("interactionCreate");
+		super(Events.InteractionCreate);
 	}
 
 	public async execute(interaction: Interaction) {

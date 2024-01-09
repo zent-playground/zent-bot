@@ -1,4 +1,4 @@
-import { Message } from "discord.js";
+import { Events, Message } from "discord.js";
 
 import Listener from "../Listener.js";
 import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
@@ -7,7 +7,7 @@ import Command from "../../commands/Command.js";
 
 class MessageCreate extends Listener {
 	public constructor() {
-		super("messageCreate");
+		super(Events.MessageCreate);
 	}
 
 	public async execute(message: Message<true>) {
@@ -20,7 +20,7 @@ class MessageCreate extends Listener {
 
 		const [name, ...args] = message.content.slice(prefix.length).trim().split(/ +/g);
 
-		let command;
+		let command: Command | undefined;
 
 		if (name) {
 			command =

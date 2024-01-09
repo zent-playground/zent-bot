@@ -1,15 +1,16 @@
-import { Client } from "discord.js";
+import { Client, Events } from "discord.js";
+import Logger from "../../utils/Logger.js";
 import Listener from "../Listener.js";
 
 class Ready extends Listener {
 	public constructor() {
-		super("ready", true);
+		super(Events.ClientReady, true);
 	}
 
 	public async execute(client: Client<true>) {
-		console.log(`Successfully logged as '${client.user.tag}'.`);
-		
-		client.application.commands.set(
+		Logger.Info(`Successfully logged as '${client.user.tag}'.`);
+
+		await client.application.commands.set(
 			client.commands.map((command) => command.applicationCommands).flat(),
 		);
 	}
