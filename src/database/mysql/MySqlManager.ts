@@ -1,4 +1,4 @@
-import MySql from "./MySql";
+import MySql from "./MySql.js";
 
 class MySqlManager<T> {
 	private db: MySql;
