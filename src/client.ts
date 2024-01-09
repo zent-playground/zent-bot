@@ -3,6 +3,11 @@ import { Client, Collection, GatewayIntentBits } from "discord.js";
 import { loadCommands, loadEvents } from "./utils/loader.js";
 import config from "./config.js";
 import ClientUtils from "./utils/ClientUtils.js";
+import Managers from "./database/Managers.js";
+import MySql from "./database/mysql/MySql.js";
+import Redis from "./database/redis/Redis.js";
+import command from "./commands/Command";
+import Logger from "./utils/Logger";
 
 const client = new Client({
 	intents: [
@@ -20,6 +25,12 @@ const client = new Client({
 client.commands = new Collection();
 client.config = config;
 client.utils = new ClientUtils(client);
+client.mysql = new MySql(client.config.mysql);
+client.redis = new Redis(client.config.redis);
+client.managers = new Managers(client.mysql, client.redis);
+
+client.mysql.connect().catch(err => { throw err; } );
+client.redis.connect().catch(err => { throw err; } );
 
 loadEvents(client);
 loadCommands(client);

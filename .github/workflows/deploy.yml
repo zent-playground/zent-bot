@@ -43,6 +43,7 @@ jobs:
           echo REDIS_PORT=${{ secrets.REDIS_PORT }} >> .env
           echo REDIS_USERNAME=${{ secrets.PROD_REDIS_USERNAME }} >> .env
           echo REDIS_PASSWORD=${{ secrets.PROD_REDIS_PASSWORD }} >> .env
+          echo REDIS_PREFIX=prod: >> .env
 
       - name: Install Dependencies and Build
         run: |
@@ -82,5 +83,6 @@ jobs:
             cd /home/zent
             docker stop discord-bot || true
             docker rm discord-bot || true
-            docker build -t discord-bot .
-            docker run -d --env-file .env discord-bot
+            docker rmi discord-bot-image || true
+            docker build -t discord-bot-image .
+            docker run -d --name discord-bot --env-file .env discord-bot-image
