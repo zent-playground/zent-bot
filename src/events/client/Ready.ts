@@ -1,10 +1,10 @@
-import { Client } from "discord.js";
+import { Client, Events } from "discord.js";
 import Logger from "../../utils/Logger.js";
 import Listener from "../Listener.js";
 
 class Ready extends Listener {
 	public constructor() {
-		super("ready", true);
+		super(Events.ClientReady, true);
 	}
 
 	public async execute(client: Client<true>) {

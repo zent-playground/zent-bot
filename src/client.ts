@@ -6,8 +6,6 @@ import ClientUtils from "./utils/ClientUtils.js";
 import Managers from "./database/Managers.js";
 import MySql from "./database/mysql/MySql.js";
 import Redis from "./database/redis/Redis.js";
-import command from "./commands/Command";
-import Logger from "./utils/Logger";
 
 const client = new Client({
 	intents: [
@@ -29,8 +27,8 @@ client.mysql = new MySql(client.config.mysql);
 client.redis = new Redis(client.config.redis);
 client.managers = new Managers(client.mysql, client.redis);
 
-client.mysql.connect().catch(err => { throw err; } );
-client.redis.connect().catch(err => { throw err; } );
+client.mysql.connect().catch(err => { throw new Error(err); } );
+client.redis.connect().catch(err => { throw new Error(err); } );
 
 loadEvents(client);
 loadCommands(client);

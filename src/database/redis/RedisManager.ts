@@ -1,4 +1,5 @@
 import { RedisClientType } from "redis";
+import Logger from "../../utils/Logger";
 
 class RedisManager<T> {
 	private client: RedisClientType;
@@ -36,7 +37,8 @@ class RedisManager<T> {
 		const existingValue = await this.find(this.getId(key));
 
 		if (!existingValue) {
-			throw new Error(`No record found for id ${key}`);
+			Logger.Warn(`No record found for id ${key}`);
+			return;
 		}
 
 		const updatedValue = { ...existingValue, ...values };

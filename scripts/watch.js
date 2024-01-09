@@ -8,7 +8,4 @@ const buildOptions = {
 	sourcemap: true,
 };
 
-(async () => {
-	const result = await context(buildOptions);
-	await result.watch();
-})();
+await context(buildOptions).then((ctx) => ctx.watch());
