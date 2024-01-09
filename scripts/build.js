@@ -10,9 +10,7 @@ const buildOptions = {
 };
 
 (async () => {
-	await rm("dist", { recursive: true, force: false }).catch(err => {
-		throw err;
-	});
+	await rm("dist", { recursive: true, force: false }).catch(() => void 0);
 
 	await build(buildOptions);
 })();
