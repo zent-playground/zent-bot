@@ -32,13 +32,17 @@ class Avatar extends Command {
 					subcommand
 						.setName("user")
 						.setDescription("Displays user avatar.")
-						.addUserOption((option) => option.setName("user").setDescription("Choose a user.")),
+						.addUserOption((option) =>
+							option.setName("user").setDescription("Choose a user."),
+						),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("member")
 						.setDescription("Displays member avatar.")
-						.addUserOption((option) => option.setName("member").setDescription("Choose a member.")),
+						.addUserOption((option) =>
+							option.setName("member").setDescription("Choose a member."),
+						),
 				)
 				.toJSON(),
 		);
@@ -53,7 +57,9 @@ class Avatar extends Command {
 			targetId = this.client.utils.parseId(args.entries[0]) || targetId;
 		}
 
-		const user = await this.client.users.fetch(targetId, { force: true }).catch(() => null);
+		const user = await this.client.users
+			.fetch(targetId, { force: true })
+			.catch(() => null);
 
 		if (!user) {
 			await ctx.send({
@@ -85,7 +91,9 @@ class Avatar extends Command {
 			targetId = this.client.utils.parseId(args.entries[0]) || targetId;
 		}
 
-		const member = await ctx.guild.members.fetch({ user: targetId, force: true }).catch(() => null);
+		const member = await ctx.guild.members
+			.fetch({ user: targetId, force: true })
+			.catch(() => null);
 
 		if (!member) {
 			await ctx.send({
@@ -99,7 +107,10 @@ class Avatar extends Command {
 		await ctx.send({
 			embeds: [
 				new EmbedBuilder()
-					.setAuthor({ name: member.user.tag, iconURL: member.user.displayAvatarURL() })
+					.setAuthor({
+						name: member.user.tag,
+						iconURL: member.user.displayAvatarURL(),
+					})
 					.setTitle("Member avatar")
 					.setImage(member.displayAvatarURL({ size: 4096 }))
 					.setColor(member.user.hexAccentColor || null)

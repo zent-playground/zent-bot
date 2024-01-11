@@ -1,7 +1,10 @@
 import { ChatInputCommandInteraction, Events, Interaction } from "discord.js";
 
 import Listener from "../Listener.js";
-import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
+import {
+	BasedHybridContext,
+	HybridContext,
+} from "../../commands/HybridContext.js";
 import Command from "../../commands/Command.js";
 import Args from "../../commands/Args.js";
 
@@ -13,7 +16,9 @@ class InteractionCreate extends Listener {
 	public async execute(interaction: Interaction) {
 		if (interaction.isCommand() || interaction.isAutocomplete()) {
 			const command = this.client.commands.find((command) =>
-				command.applicationCommands.some((data) => data.name === interaction.commandName),
+				command.applicationCommands.some(
+					(data) => data.name === interaction.commandName,
+				),
 			);
 
 			if (!command) return;
@@ -30,7 +35,10 @@ class InteractionCreate extends Listener {
 
 				if (interaction.isChatInputCommand()) {
 					command.executeChatInput?.(interaction);
-					command.executeHybrid?.(new BasedHybridContext(interaction) as HybridContext, new Args());
+					command.executeHybrid?.(
+						new BasedHybridContext(interaction) as HybridContext,
+						new Args(),
+					);
 					this.handleSubcommand(interaction, command);
 				}
 
@@ -51,11 +59,18 @@ class InteractionCreate extends Listener {
 		}
 	}
 
-	public async handleSubcommand(interaction: ChatInputCommandInteraction, command: Command) {
+	public async handleSubcommand(
+		interaction: ChatInputCommandInteraction,
+		command: Command,
+	) {
 		const subcommand = interaction.options.getSubcommand(false) || undefined;
-		const subcommandGroup = interaction.options.getSubcommandGroup(false) || undefined;
+		const subcommandGroup =
+			interaction.options.getSubcommandGroup(false) || undefined;
 
-		const parsed = this.client.utils.parseSubcommand(command, { subcommand, subcommandGroup });
+		const parsed = this.client.utils.parseSubcommand(command, {
+			subcommand,
+			subcommandGroup,
+		});
 
 		if (!parsed) {
 			return;
@@ -64,13 +79,20 @@ class InteractionCreate extends Listener {
 		const { entry, args } = parsed;
 
 		if (entry.chatInput) {
-			const func = command[entry.chatInput as keyof typeof command] as typeof command.executeChatInput;
+			const func = command[
+				entry.chatInput as keyof typeof command
+			] as typeof command.executeChatInput;
 			await func?.bind(command)(interaction);
 		}
 
 		if (entry.hybrid) {
-			const func = command[entry.hybrid as keyof typeof command] as typeof command.executeHybrid;
-			await func?.bind(command)(new BasedHybridContext(interaction) as HybridContext, args);
+			const func = command[
+				entry.hybrid as keyof typeof command
+			] as typeof command.executeHybrid;
+			await func?.bind(command)(
+				new BasedHybridContext(interaction) as HybridContext,
+				args,
+			);
 		}
 	}
 }

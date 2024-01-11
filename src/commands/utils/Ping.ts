@@ -11,7 +11,10 @@ class Ping extends Command {
 
 	public initialize() {
 		this.applicationCommands.push(
-			new SlashCommandBuilder().setName(this.name).setDescription(this.description).toJSON(),
+			new SlashCommandBuilder()
+				.setName(this.name)
+				.setDescription(this.description)
+				.toJSON(),
 		);
 	}
 
@@ -19,7 +22,9 @@ class Ping extends Command {
 		const message = await ctx.send({ content: "Pinging..." });
 
 		await message.edit({
-			content: `Pong! API: \`${message.createdTimestamp - ctx.createdTimestamp}\`ms - Heartbeat: \`${this.client.ws.ping}\`ms!`,
+			content: `Pong! API: \`${
+				message.createdTimestamp - ctx.createdTimestamp
+			}\`ms - Heartbeat: \`${this.client.ws.ping}\`ms!`,
 		});
 	}
 }

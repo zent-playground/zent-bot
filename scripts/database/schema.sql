@@ -1,0 +1,4 @@
+CREATE TABLE guilds (
+	id VARCHAR(255) NOT NULL,
+	prefix VARCHAR(5) DEFAULT 'z'
+)

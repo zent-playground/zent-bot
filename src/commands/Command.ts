@@ -44,13 +44,22 @@ class Command {
 	}
 
 	public initialize?(): Awaitable<void>;
-	public executeAutocomplete?(interaction: Command.Autocomplete): Awaitable<void>;
+	public executeAutocomplete?(
+		interaction: Command.Autocomplete,
+	): Awaitable<void>;
 	public executeChatInput?(interaction: Command.ChatInput): Awaitable<void>;
 	public executeContextMenu?(interaction: Command.ContextMenu): Awaitable<void>;
-	public executeHybrid?(context: Command.HybridContext, args: Arguments): Awaitable<void>;
+	public executeHybrid?(
+		context: Command.HybridContext,
+		args: Arguments,
+	): Awaitable<void>;
 	public executeMessage?(message: Message, args: Arguments): Awaitable<void>;
-	public executeMessageContextMenu?(interaction: Command.MessageContextMenu): Awaitable<void>;
-	public executeUserContextMenu?(interaction: Command.UserContextMenu): Awaitable<void>;
+	public executeMessageContextMenu?(
+		interaction: Command.MessageContextMenu,
+	): Awaitable<void>;
+	public executeUserContextMenu?(
+		interaction: Command.UserContextMenu,
+	): Awaitable<void>;
 }
 
 export default Command;
