@@ -30,9 +30,12 @@ client.managers = new Managers(client.mysql, client.redis);
 client.mysql.connect().catch((err) => {
 	throw new Error(err);
 });
+
 client.redis.connect().catch((err) => {
 	throw new Error(err);
 });
+
+process.on("uncaughtException", console.error);
 
 loadEvents(client);
 loadCommands(client);
