@@ -8,14 +8,7 @@
 		"strict": true,
 		"skipLibCheck": true,
 		"noImplicitAny": false,
-		"lib": [
-			"ES2023",
-			"ES2023.Array",
-			"ES2023.Collection"
-		]
+		"lib": ["ES2023", "ES2023.Array", "ES2023.Collection"]
 	},
-	"include": [
-		"src/**/*.ts",
-		"*.js"
-	]
+	"include": ["src/**/*.ts", "*.js"]
 }

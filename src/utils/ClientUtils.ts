@@ -1,6 +1,7 @@
 import { Client } from "discord.js";
 import Command from "../commands/Command.js";
 import Args from "../commands/Args.js";
+import { Subcommand, SubcommandBody } from "../types/subcommand.js";
 
 class ClientUtils {
 	public constructor(public client: Client) {}
@@ -16,7 +17,7 @@ class ClientUtils {
 	) {
 		const { subcommand, subcommandGroup } = options;
 
-		let parent;
+		let parent: Subcommand | undefined;
 
 		for (const e of command.options.subcommands || []) {
 			if (e.type === "group" && e.name === subcommandGroup) {
@@ -38,7 +39,7 @@ class ClientUtils {
 
 		if (!parent) return;
 
-		let entry;
+		let entry: SubcommandBody | undefined;
 
 		if (parent.type === "group") {
 			for (const sub of parent.subcommands) {

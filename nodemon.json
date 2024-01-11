@@ -1,0 +1,11 @@
+{
+	"watch": [
+		"src"
+	],
+	"ext": "ts",
+	"exec": "pnpm build && pnpm start",
+	"env": {
+		"REDIS_PREFIX": "dev:",
+		"NODE_ENV": "DEVELOPMENT"
+	}
+}

@@ -3,18 +3,23 @@ import chalk from "chalk";
 enum LogLevel {
 	INFO,
 	WARN,
-	ERROR
+	ERROR,
 }
 
 class Logger {
 	private static formatMessage(level: LogLevel, messages: string[]): string {
 		const timestamp = new Date().toISOString();
+
 		const formattedLevel = (() => {
 			switch (level) {
-			case LogLevel.INFO: return chalk.blue("[INFO]");
-			case LogLevel.WARN: return chalk.yellow("[WARN]");
-			case LogLevel.ERROR: return chalk.red("[ERROR]");
-			default: return "";
+				case LogLevel.INFO:
+					return chalk.blue("[INFO]");
+				case LogLevel.WARN:
+					return chalk.yellow("[WARN]");
+				case LogLevel.ERROR:
+					return chalk.red("[ERROR]");
+				default:
+					return "";
 			}
 		})();
 

@@ -27,8 +27,12 @@ client.mysql = new MySql(client.config.mysql);
 client.redis = new Redis(client.config.redis);
 client.managers = new Managers(client.mysql, client.redis);
 
-client.mysql.connect().catch(err => { throw new Error(err); } );
-client.redis.connect().catch(err => { throw new Error(err); } );
+client.mysql.connect().catch((err) => {
+	throw new Error(err);
+});
+client.redis.connect().catch((err) => {
+	throw new Error(err);
+});
 
 loadEvents(client);
 loadCommands(client);

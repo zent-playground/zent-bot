@@ -1,5 +1,6 @@
 export interface Guild {
-	id: string;
+	readonly id: string;
 	prefix: string;
-	created_at: string;
+	language: string;
+	readonly created_at: string;
 }

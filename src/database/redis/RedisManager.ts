@@ -14,7 +14,8 @@ class RedisManager<T> {
 		return this.prefix + key;
 	}
 
-	async insert(key: string, values: T): Promise<void> {
+	async set(key: string, values: T): Promise<void> {
+		if (!values) return;
 		const serializedValues = JSON.stringify(values);
 		await this.client.set(this.getId(key), serializedValues);
 	}
@@ -23,18 +24,14 @@ class RedisManager<T> {
 		await this.client.del(this.getId(key));
 	}
 
-	async find(key: string): Promise<T | null> {
+	async get(key: string): Promise<T | null> {
 		const result = await this.client.get(this.getId(key));
-
-		if (!result) {
-			return null;
-		}
-
+		if (!result) return null;
 		return JSON.parse(result) as T;
 	}
 
 	async update(key: string, values: Partial<T>): Promise<void> {
-		const existingValue = await this.find(this.getId(key));
+		const existingValue = await this.get(this.getId(key));
 
 		if (!existingValue) {
 			Logger.Warn(`No record found for id ${key}`);
@@ -42,7 +39,7 @@ class RedisManager<T> {
 		}
 
 		const updatedValue = { ...existingValue, ...values };
-		await this.insert(this.getId(key), updatedValue as T);
+		await this.set(this.getId(key), updatedValue as T);
 	}
 }
 

@@ -11,7 +11,10 @@ class Help extends Command {
 
 	public initialize() {
 		this.applicationCommands.push(
-			new SlashCommandBuilder().setName(this.name).setDescription(this.description).toJSON(),
+			new SlashCommandBuilder()
+				.setName(this.name)
+				.setDescription(this.description)
+				.toJSON(),
 		);
 	}
 

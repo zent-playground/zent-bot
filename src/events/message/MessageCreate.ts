@@ -1,7 +1,10 @@
 import { Events, Message } from "discord.js";
 
 import Listener from "../Listener.js";
-import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
+import {
+	BasedHybridContext,
+	HybridContext,
+} from "../../commands/HybridContext.js";
 import Args from "../../commands/Args.js";
 import Command from "../../commands/Command.js";
 
@@ -13,12 +16,24 @@ class MessageCreate extends Listener {
 	public async execute(message: Message<true>) {
 		if (message.author.bot || !message.guild) return;
 
-		const prefixes = ["z", this.client.user.toString()];
-		const prefix = prefixes.find((p) => message.content.toLowerCase().startsWith(p));
+		const guild = (await this.client.managers.guilds.get(message.guildId))!;
+
+		const prefixes: string[] = [this.client.user.toString()];
+
+		if (process.env.NODE_ENV !== "DEVELOPMENT") {
+			prefixes.push(guild.prefix);
+		}
+
+		const prefix = prefixes.find((p) =>
+			message.content.toLowerCase().startsWith(p),
+		);
 
 		if (!prefix) return;
 
-		const [name, ...args] = message.content.slice(prefix.length).trim().split(/ +/g);
+		const [name, ...args] = message.content
+			.slice(prefix.length)
+			.trim()
+			.split(/ +/g);
 
 		let command: Command | undefined;
 
@@ -35,19 +50,28 @@ class MessageCreate extends Listener {
 		const commandArgs = new Args(args);
 
 		command.executeMessage?.(message, commandArgs);
-		command.executeHybrid?.(new BasedHybridContext(message) as HybridContext, commandArgs);
+		command.executeHybrid?.(
+			new BasedHybridContext(message) as HybridContext,
+			commandArgs,
+		);
 		this.handleSubcommand(message, command, commandArgs);
 	}
 
-	public async handleSubcommand(message: Message<true>, command: Command, commandArgs: Args) {
+	public async handleSubcommand(
+		message: Message<true>,
+		command: Command,
+		commandArgs: Args,
+	) {
 		let [first, second] = commandArgs.entries;
 
 		first = first?.toLowerCase();
 		second = second?.toLowerCase();
 
 		const parsed =
-			this.client.utils.parseSubcommand(command, { subcommandGroup: first, subcommand: second }) ||
-			this.client.utils.parseSubcommand(command, { subcommand: first });
+			this.client.utils.parseSubcommand(command, {
+				subcommandGroup: first,
+				subcommand: second,
+			}) || this.client.utils.parseSubcommand(command, { subcommand: first });
 
 		if (!parsed) {
 			return;
@@ -66,13 +90,20 @@ class MessageCreate extends Listener {
 		}
 
 		if (entry.message) {
-			const func = command[entry.message as keyof typeof command] as typeof command.executeMessage;
+			const func = command[
+				entry.message as keyof typeof command
+			] as typeof command.executeMessage;
 			await func?.bind(command)(message, args);
 		}
 
 		if (entry.hybrid) {
-			const func = command[entry.hybrid as keyof typeof command] as typeof command.executeHybrid;
-			await func?.bind(command)(new BasedHybridContext(message) as HybridContext, args);
+			const func = command[
+				entry.hybrid as keyof typeof command
+			] as typeof command.executeHybrid;
+			await func?.bind(command)(
+				new BasedHybridContext(message) as HybridContext,
+				args,
+			);
 		}
 	}
 }

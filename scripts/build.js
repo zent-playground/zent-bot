@@ -4,7 +4,7 @@ import { rm } from "fs/promises";
 const buildOptions = {
 	entryPoints: ["src/**/*.ts"],
 	outdir: "dist",
-	minify: true,
+	minify: process.env.NODE_ENV === "DEVELOPMENT" ? false : true,
 	format: "esm",
 	sourcemap: false,
 };

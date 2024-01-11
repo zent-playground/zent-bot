@@ -1,0 +1,35 @@
+{
+  "commands": {
+    "avatar": {
+      "data": {
+        "name": " ",
+        "description": " ",
+        "subcommands": {
+          "user": {
+            "name": " ",
+            "description": " "
+          },
+          "member": {
+            "name": " ",
+            "description": " "
+          }
+        }
+      },
+      "messages": {}
+    },
+    "ping": {
+      "data": {
+        "name": " ",
+        "description": " "
+      },
+      "messages": {}
+    },
+    "help": {
+      "data": {
+        "name": " ",
+        "description": " "
+      },
+      "messages": {}
+    }
+  }
+}

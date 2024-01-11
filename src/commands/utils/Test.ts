@@ -55,15 +55,23 @@ class Test extends Command {
 					group
 						.setName("food")
 						.setDescription("Food!")
-						.addSubcommand((subcommand) => subcommand.setName("list").setDescription("..."))
-						.addSubcommand((subcommand) => subcommand.setName("add").setDescription("...")),
+						.addSubcommand((subcommand) =>
+							subcommand.setName("list").setDescription("..."),
+						)
+						.addSubcommand((subcommand) =>
+							subcommand.setName("add").setDescription("..."),
+						),
 				)
 				.addSubcommandGroup((group) =>
 					group
 						.setName("toy")
 						.setDescription("Toy!")
-						.addSubcommand((subcommand) => subcommand.setName("list").setDescription("..."))
-						.addSubcommand((subcommand) => subcommand.setName("add").setDescription("...")),
+						.addSubcommand((subcommand) =>
+							subcommand.setName("list").setDescription("..."),
+						)
+						.addSubcommand((subcommand) =>
+							subcommand.setName("add").setDescription("..."),
+						),
 				)
 				.toJSON(),
 		);

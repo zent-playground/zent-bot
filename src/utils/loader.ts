@@ -15,9 +15,14 @@ export const loadEvents = async (client: Client) => {
 	const files = await glob(`${path}/*/**/*.js`);
 
 	for (const file of files) {
-		const listener = new (await import(`${pathToFileURL(file)}`)).default() as Listener;
+		const listener = new (
+			await import(`${pathToFileURL(file)}`)
+		).default() as Listener;
 		listener.client = client as Client<true>;
-		client[listener.once ? "once" : "on"](listener.name, listener.execute!.bind(listener));
+		client[listener.once ? "once" : "on"](
+			listener.name,
+			listener.execute!.bind(listener),
+		);
 	}
 };
 
@@ -27,7 +32,9 @@ export const loadCommands = async (client: Client) => {
 	const files = await glob(`${path}/*/**/*.js`);
 
 	for (const file of files) {
-		const command = new (await import(`${pathToFileURL(file)}`)).default() as Command;
+		const command = new (
+			await import(`${pathToFileURL(file)}`)
+		).default() as Command;
 		command.client = client as Client<true>;
 		await command.initialize?.();
 		client.commands.set(command.name, command);
