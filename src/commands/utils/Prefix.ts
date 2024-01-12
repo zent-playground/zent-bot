@@ -30,7 +30,7 @@ class Prefix extends Command {
 			?.split(/ +/g)[0]
 			.toLowerCase();
 
-		if (prefixToSet) {
+		if (prefixToSet && ctx.member.permissions.has("ManageGuild")) {
 			await guilds.update(ctx.guild.id, { prefix: prefixToSet });
 
 			await ctx.send({

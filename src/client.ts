@@ -40,7 +40,7 @@ client.mysql
 
 client.redis
 	.connect()
-	.then(() => client.redis.client.flushAll())
+	//.then(() => client.redis.client.flushAll())
 	.catch((err) => {
 		Logger.Error("Unable to connect to Redis:\t");
 		console.error(err);

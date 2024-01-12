@@ -6,6 +6,14 @@
 				"member_avatar": "Avatar thành viên",
 				"user_avatar": "Avatar người dùng"
 			}
+		},
+		"language": {
+			"data": {},
+			"messages": {
+				"unsupported_language": "Ngôn ngữ này không được hỗ trỡ!",
+				"set_language": "Đã đặt ngôn ngữ thành Tiếng Việt (Vietnamese).",
+				"current_language": "Ngôn ngữ hiện tại là Tiếng Việt (Vietnamese)."
+			}
 		}
 	}
 }

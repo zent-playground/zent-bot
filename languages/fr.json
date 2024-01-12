@@ -6,6 +6,14 @@
 				"member_avatar": "Member avatar",
 				"user_avatar": "User avatar"
 			}
+		},
+		"language": {
+			"data": {},
+			"messages": {
+				"unsupported_language": "Unsupported language!",
+				"set_language": "Set language to English.",
+				"current_language": "The current language is English."
+			}
 		}
 	}
 }

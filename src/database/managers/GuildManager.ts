@@ -25,7 +25,7 @@ class GuildManager extends BaseManager<Guild> {
 
 	public override async update(id: string, values: Partial<Guild>) {
 		await super.update(`id = '${id}'`, values);
-		await this.cache.update(id, values);
+		await this.cache.set(id, Object.assign((await this.get(id))!, values));
 	}
 
 	public override async delete(id: string) {
