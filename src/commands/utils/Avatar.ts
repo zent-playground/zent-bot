@@ -64,7 +64,11 @@ class Avatar extends Command {
 
 		if (!user) {
 			await ctx.send({
-				content: "Invalid user!",
+				embeds: [
+					new EmbedBuilder()
+						.setDescription(i18next.t("commands.avatar.messages.invalid_user", { lng: args.language }))
+						.setColor(this.client.config.colors.error)
+				],
 				ephemeral: true,
 			});
 
@@ -77,7 +81,7 @@ class Avatar extends Command {
 					.setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() })
 					.setTitle(i18next.t("commands.avatar.messages.user_avatar", { lng: args.language }))
 					.setImage(user.displayAvatarURL({ size: 4096 }))
-					.setColor(user.hexAccentColor || null)
+					.setColor(user.hexAccentColor || this.client.config.colors.default)
 					.setTimestamp(),
 			],
 		});
@@ -98,7 +102,11 @@ class Avatar extends Command {
 
 		if (!member) {
 			await ctx.send({
-				content: "Invalid member!",
+				embeds: [
+					new EmbedBuilder()
+						.setDescription(i18next.t("commands.avatar.messages.invalid_member", { lng: args.language }))
+						.setColor(this.client.config.colors.error)
+				],
 				ephemeral: true,
 			});
 

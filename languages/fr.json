@@ -1,18 +1,28 @@
 {
 	"commands": {
+		"insufficient_permission": "Vous n'avez pas la permission d'effectuer cette commande !",
 		"avatar": {
 			"data": {},
 			"messages": {
-				"member_avatar": "Member avatar",
-				"user_avatar": "User avatar"
+				"invalid_user": "L'utilisateur spécifié est invalide !",
+				"invalid_member": "Le membre spécifié est invalide !",
+				"member_avatar": "L'avatar du membre sur le serveur",
+				"user_avatar": "L'avatar par défaut de l'utilisateur"
 			}
 		},
 		"language": {
 			"data": {},
 			"messages": {
-				"unsupported_language": "Unsupported language!",
-				"set_language": "Set language to English.",
-				"current_language": "The current language is English."
+				"unsupported_language": "Ce langage n'est pas pris en charge !",
+				"set_language": "La langue a été définie en `Français`.",
+				"current_language": "La langue actuelle est le `Français`."
+			}
+		},
+		"prefix": {
+			"data": {},
+			"messages": {
+				"set_prefix": "Le nouveau préfixe a été défini sur `{{prefix}}` !",
+				"current_prefix": "Le préfixe actuel est `{{prefix}}` !"
 			}
 		}
 	}

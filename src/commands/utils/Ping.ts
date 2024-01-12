@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import Command from "../Command.js";
 
 class Ping extends Command {
@@ -19,12 +19,23 @@ class Ping extends Command {
 	}
 
 	public async executeHybrid(ctx: Command.HybridContext) {
-		const message = await ctx.send({ content: "Pinging..." });
+		const message = await ctx.send({
+			embeds: [
+				new EmbedBuilder()
+					.setTitle("Pinging...")
+					.setColor(this.client.config.colors.default)
+			]
+		});
 
 		await message.edit({
-			content: `Pong! API: \`${
-				message.createdTimestamp - ctx.createdTimestamp
-			}\`ms - Heartbeat: \`${this.client.ws.ping}\`ms!`,
+			embeds: [
+				new EmbedBuilder()
+					.setTitle("Pong!")
+					.setDescription(`API: \`${
+						message.createdTimestamp - ctx.createdTimestamp
+					}\`ms\nHeartbeat: \`${this.client.ws.ping}\`ms\nDatabase: \`${await this.client.mysql.ping()}\`ms`)
+					.setColor(this.client.config.colors.default)
+			]
 		});
 	}
 }

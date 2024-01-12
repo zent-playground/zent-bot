@@ -1,4 +1,5 @@
-import { SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { PermissionFlagsBits } from "discord-api-types/v10";
 import Command from "../Command.js";
 import i18next from "i18next";
 
@@ -32,33 +33,53 @@ class Language extends Command {
 			?.split(/ +/g)[0]
 			.toLowerCase();
 
-		if (languageToSet && ctx.member.permissions.has("ManageGuild")) {
-			if (!(i18next.options.preload as string[])?.includes(languageToSet)) {
-				await ctx.send({
-					content: i18next.t(
-						"commands.language.messages.unsupported_language",
-						{ lng: args.language },
-					),
-					ephemeral: true,
-				});
-
-				return;
-			}
-
-			await guilds.update(ctx.guild.id, { language: languageToSet });
-
+		if (!languageToSet) {
 			await ctx.send({
-				content: i18next.t("commands.language.messages.set_language", {
-					lng: languageToSet,
-				}),
+				embeds: [
+					new EmbedBuilder()
+						.setDescription(i18next.t("commands.language.messages.current_language", { lng: args.language }))
+						.setColor(this.client.config.colors.default)
+				],
 			});
-		} else {
-			await ctx.send({
-				content: i18next.t("commands.language.messages.current_language", {
-					lng: args.language,
-				}),
-			});
+
+			return;
 		}
+
+		if (!ctx.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription(i18next.t("commands.insufficient_permission", { lng: args.language }))
+						.setColor(this.client.config.colors.error)
+				],
+				ephemeral: true,
+			});
+
+			return;
+		}
+
+		if (!(i18next.options.preload as string[])?.includes(languageToSet)) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription(i18next.t("commands.language.messages.unsupported_language", { lng: args.language }))
+						.setColor(this.client.config.colors.error)
+				],
+				ephemeral: true,
+			});
+
+			return;
+		}
+
+		await guilds.update(ctx.guild.id, { language: languageToSet });
+
+		await ctx.send({
+			embeds: [
+				new EmbedBuilder()
+					.setDescription(i18next.t("commands.language.messages.set_language", { lng: args.language }))
+					.setColor(this.client.config.colors.success)
+			],
+		});
 	}
 }
 

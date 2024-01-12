@@ -1,4 +1,9 @@
 const config = {
+	colors: {
+		default: 0xc8ad7f,
+		error: 0xff6961,
+		success: 0x7abd7e,
+	},
 	mysql: {
 		host: process.env.MYSQL_HOST!,
 		port: process.env.MYSQL_PORT ? Number(process.env.MYSQL_PORT) : 3306,
