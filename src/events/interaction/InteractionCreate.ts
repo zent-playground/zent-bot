@@ -7,6 +7,7 @@ import {
 } from "../../commands/HybridContext.js";
 import Command from "../../commands/Command.js";
 import Args from "../../commands/Args.js";
+import { Translator } from "../../utils/i18n";
 
 class InteractionCreate extends Listener {
 	public constructor() {

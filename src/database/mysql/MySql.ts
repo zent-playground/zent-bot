@@ -36,7 +36,7 @@ class MySql {
 			const [rows] = await this.pool.query(sql, params);
 			return rows;
 		} catch (error) {
-			Logger.Error("Query Error:", (error as Error).message);
+			Logger.Error("MySql Query Error:\t", (error as Error).message);
 		}
 	}
 

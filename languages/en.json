@@ -1,13 +1,13 @@
 {
-  "commands": {
-    "avatar": {
-      "messages": {}
-    },
-    "ping": {
-      "messages": {}
-    },
-    "help": {
-      "messages": {}
-    }
-  }
+	"commands": {
+		"avatar": {
+			"messages": {}
+		},
+		"ping": {
+			"messages": {}
+		},
+		"help": {
+			"messages": {}
+		}
+	}
 }

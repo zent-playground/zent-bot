@@ -10,32 +10,24 @@ class GuildManager extends BaseManager<Guild> {
 		let data = await this.cache.get(id);
 
 		if (!data) {
-			data = (await this.select(`id = '${id}'`))[0];
+			data = (await super.select(`id = '${id}'`))[0];
 			await this.cache.set(id, data);
 		}
 
 		return data || null;
 	}
 
-	public async set(id: string, values: Partial<Guild>): Promise<Guild> {
-		values.id = id;
-
-		let guild = await this.get(id);
-
-		if (guild) {
-			await this.update(values, `id = '${id}'`);
-			guild = Object.assign(guild, values);
-		} else {
-			await this.insert({ id });
-			guild = (await this.select(`id = '${id}'`))[0];
-		}
-
-		await this.cache.set(id, guild);
-
-		return guild;
+	public async set(id: string, values: Partial<Guild>) {
+		await super.insert(values);
+		await this.cache.set(id, (await super.select(`id = '${id}'`))[0]);
 	}
 
-	public async delete(id: string) {
+	public override async update(id: string, values: Partial<Guild>) {
+		await super.update(`id = '${id}'`, values);
+		await this.cache.update(id, values);
+	}
+
+	public override async delete(id: string) {
 		await super.delete(`id = '${id}'`);
 		await this.cache.delete(id);
 	}

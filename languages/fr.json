@@ -1,35 +1,35 @@
 {
-  "commands": {
-    "avatar": {
-      "data": {
-        "name": "avatar",
-        "description": "Affiche la photo de profil de l'utilisateur/membre.",
-        "subcommands": {
-          "user": {
-            "name": "utilisateur",
-            "description": "Affiche la photo de profil de l'utilisateur."
-          },
-          "member": {
-            "name": "membre",
-            "description": "Affiche la photo de profil du membre."
-          }
-        }
-      },
-      "messages": {}
-    },
-    "ping": {
-      "data": {
-        "name": "ping",
-        "description": "Affiche la latence du bot."
-      },
-      "messages": {}
-    },
-    "help": {
-      "data": {
-        "name": "aide",
-        "description": "Obtient des informations à propos de moi."
-      },
-      "messages": {}
-    }
-  }
+	"commands": {
+		"avatar": {
+			"data": {
+				"name": "avatar",
+				"description": "Affiche la photo de profil de l'utilisateur/membre.",
+				"subcommands": {
+					"user": {
+						"name": "utilisateur",
+						"description": "Affiche la photo de profil de l'utilisateur."
+					},
+					"member": {
+						"name": "membre",
+						"description": "Affiche la photo de profil du membre."
+					}
+				}
+			},
+			"messages": {}
+		},
+		"ping": {
+			"data": {
+				"name": "ping",
+				"description": "Affiche la latence du bot."
+			},
+			"messages": {}
+		},
+		"help": {
+			"data": {
+				"name": "aide",
+				"description": "Obtient des informations à propos de moi."
+			},
+			"messages": {}
+		}
+	}
 }

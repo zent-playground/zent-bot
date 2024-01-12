@@ -31,7 +31,7 @@ class Prefix extends Command {
 			.toLowerCase();
 
 		if (prefixToSet) {
-			await guilds.set(ctx.guild.id, { prefix: prefixToSet });
+			await guilds.update(ctx.guild.id, { prefix: prefixToSet });
 
 			await ctx.send({
 				content: `Set prefix to \`${prefixToSet}\`!`,

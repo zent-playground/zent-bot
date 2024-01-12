@@ -6,6 +6,7 @@ import ClientUtils from "./utils/ClientUtils.js";
 import Managers from "./database/Managers.js";
 import MySql from "./database/mysql/MySql.js";
 import Redis from "./database/redis/Redis.js";
+import Logger from "./utils/Logger.js";
 
 const client = new Client({
 	intents: [
@@ -28,11 +29,13 @@ client.redis = new Redis(client.config.redis);
 client.managers = new Managers(client.mysql, client.redis);
 
 client.mysql.connect().catch((err) => {
-	throw new Error(err);
+	Logger.Error("Unable to connect to MySql:\t", err);
+	process.exit(1);
 });
 
 client.redis.connect().catch((err) => {
-	throw new Error(err);
+	Logger.Error("Unable to connect to Redis:\t", err);
+	process.exit(1);
 });
 
 process.on("uncaughtException", console.error);
