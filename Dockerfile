@@ -11,7 +11,8 @@ COPY package.json pnpm-lock.yaml* ./
 
 RUN pnpm install
 
-COPY dist/ languages/
+COPY languages/
+COPY dist/ dist/
 
 EXPOSE 3000
 
