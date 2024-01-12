@@ -18,6 +18,7 @@ class GuildManager extends BaseManager<Guild> {
 	}
 
 	public async set(id: string, values: Partial<Guild>) {
+		values = Object.assign(values, { id });
 		await super.insert(values);
 		await this.cache.set(id, (await super.select(`id = '${id}'`))[0]);
 	}

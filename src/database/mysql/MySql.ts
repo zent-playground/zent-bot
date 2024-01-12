@@ -23,12 +23,6 @@ class MySql {
 			connectionLimit: 10,
 			queueLimit: 0,
 		});
-
-		this.setupEventHandlers();
-	}
-
-	private setupEventHandlers(): void {
-		this.pool.on("connection", () => Logger.Info("MySql connected."));
 	}
 
 	public async query(sql: string, params?: never[]): Promise<any> {
@@ -36,7 +30,8 @@ class MySql {
 			const [rows] = await this.pool.query(sql, params);
 			return rows;
 		} catch (error) {
-			Logger.Error("MySql Query Error:\t", (error as Error).message);
+			Logger.Error("MySql Query Error:\t");
+			console.error(error);
 		}
 	}
 

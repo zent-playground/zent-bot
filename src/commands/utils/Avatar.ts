@@ -1,5 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import Command from "../Command.js";
+import i18next from "i18next";
 
 class Avatar extends Command {
 	public constructor() {
@@ -74,7 +75,7 @@ class Avatar extends Command {
 			embeds: [
 				new EmbedBuilder()
 					.setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() })
-					.setTitle("User avatar")
+					.setTitle(i18next.t("commands.avatar.messages.user_avatar", { lng: args.language }))
 					.setImage(user.displayAvatarURL({ size: 4096 }))
 					.setColor(user.hexAccentColor || null)
 					.setTimestamp(),
@@ -111,7 +112,7 @@ class Avatar extends Command {
 						name: member.user.tag,
 						iconURL: member.user.displayAvatarURL(),
 					})
-					.setTitle("Member avatar")
+					.setTitle(i18next.t("commands.avatar.messages.member_avatar", { lng: args.language }))
 					.setImage(member.displayAvatarURL({ size: 4096 }))
 					.setColor(member.user.hexAccentColor || null)
 					.setTimestamp(),

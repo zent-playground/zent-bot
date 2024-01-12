@@ -49,6 +49,8 @@ class MessageCreate extends Listener {
 
 		const commandArgs = new Args(args);
 
+		commandArgs.language = guild.language;
+
 		command.executeMessage?.(message, commandArgs);
 		command.executeHybrid?.(
 			new BasedHybridContext(message) as HybridContext,
@@ -80,12 +82,16 @@ class MessageCreate extends Listener {
 		const { entry, parent, args } = parsed;
 
 		args.entries = commandArgs.entries;
+		args.language = commandArgs.language;
 
-		if (entry.type === parent.type) {
+		if (parent.type === "group") {
 			args.entries = args.entries.slice(1);
 		}
 
-		if (parent.type === "group") {
+		if (
+			entry.type === parent.type &&
+			entry.name === args.entries[0]?.toLowerCase()
+		) {
 			args.entries = args.entries.slice(1);
 		}
 
@@ -93,6 +99,7 @@ class MessageCreate extends Listener {
 			const func = command[
 				entry.message as keyof typeof command
 			] as typeof command.executeMessage;
+
 			await func?.bind(command)(message, args);
 		}
 
@@ -100,6 +107,7 @@ class MessageCreate extends Listener {
 			const func = command[
 				entry.hybrid as keyof typeof command
 			] as typeof command.executeHybrid;
+
 			await func?.bind(command)(
 				new BasedHybridContext(message) as HybridContext,
 				args,

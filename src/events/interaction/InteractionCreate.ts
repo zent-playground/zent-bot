@@ -5,9 +5,9 @@ import {
 	BasedHybridContext,
 	HybridContext,
 } from "../../commands/HybridContext.js";
+
 import Command from "../../commands/Command.js";
 import Args from "../../commands/Args.js";
-import { Translator } from "../../utils/i18n";
 
 class InteractionCreate extends Listener {
 	public constructor() {
@@ -34,13 +34,21 @@ class InteractionCreate extends Listener {
 					return;
 				}
 
+				const guild = (await this.client.managers.guilds.get(
+					interaction.guild.id,
+				))!;
+
+				const args = new Args();
+
+				args.language = guild.language;
+
 				if (interaction.isChatInputCommand()) {
 					command.executeChatInput?.(interaction);
 					command.executeHybrid?.(
 						new BasedHybridContext(interaction) as HybridContext,
-						new Args(),
+						args,
 					);
-					this.handleSubcommand(interaction, command);
+					this.handleSubcommand(interaction, command, args);
 				}
 
 				if (interaction.isContextMenuCommand()) {
@@ -63,6 +71,7 @@ class InteractionCreate extends Listener {
 	public async handleSubcommand(
 		interaction: ChatInputCommandInteraction,
 		command: Command,
+		commandArgs: Args,
 	) {
 		const subcommand = interaction.options.getSubcommand(false) || undefined;
 		const subcommandGroup =
@@ -78,6 +87,8 @@ class InteractionCreate extends Listener {
 		}
 
 		const { entry, args } = parsed;
+
+		args.language = commandArgs.language;
 
 		if (entry.chatInput) {
 			const func = command[
