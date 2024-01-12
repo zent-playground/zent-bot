@@ -14,5 +14,6 @@ declare module "discord.js" {
 		mysql: MySql;
 		redis: Redis;
 		managers: Managers;
+		// i18n: i18next;
 	}
 }

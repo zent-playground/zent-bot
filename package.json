@@ -7,7 +7,7 @@
 		"start": "node .",
 		"build": "node scripts/build.js",
 		"dev": "nodemon",
-		"lint": "eslint .",
+		"lint": "eslint . --fix",
 		"format": "prettier . --write"
 	},
 	"author": "Zent Playground",
@@ -36,6 +36,8 @@
 		"discord-api-types": "^0.37.67",
 		"discord.js": "^14.14.1",
 		"glob": "^10.3.10",
+		"i18next": "^23.7.16",
+		"i18next-fs-backend": "^2.3.1",
 		"mysql2": "^3.7.0",
 		"redis": "^4.6.12"
 	}

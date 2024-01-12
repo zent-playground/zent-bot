@@ -30,7 +30,7 @@ class MessageCreate extends Listener {
 
 		if (!prefix) return;
 
-		const [name, ...args] = message.content
+		const [name, ...content] = message.content
 			.slice(prefix.length)
 			.trim()
 			.split(/ +/g);
@@ -47,52 +47,46 @@ class MessageCreate extends Listener {
 
 		if (!command) return;
 
-		const commandArgs = new Args(args);
+		const args = new Args(content);
 
-		command.executeMessage?.(message, commandArgs);
+		args.language = guild.language;
+
+		command.executeMessage?.(message, args);
 		command.executeHybrid?.(
 			new BasedHybridContext(message) as HybridContext,
-			commandArgs,
+			args,
 		);
-		this.handleSubcommand(message, command, commandArgs);
+		this.handleSubcommand(message, command, args);
 	}
 
 	public async handleSubcommand(
 		message: Message<true>,
 		command: Command,
-		commandArgs: Args,
+		args: Args,
 	) {
-		let [first, second] = commandArgs.entries;
+		let [first, second] = args.entries;
 
 		first = first?.toLowerCase();
 		second = second?.toLowerCase();
 
 		const parsed =
-			this.client.utils.parseSubcommand(command, {
+			this.client.utils.parseSubcommand(command, args, {
 				subcommandGroup: first,
 				subcommand: second,
-			}) || this.client.utils.parseSubcommand(command, { subcommand: first });
+			}) ||
+			this.client.utils.parseSubcommand(command, args, { subcommand: first });
 
 		if (!parsed) {
 			return;
 		}
 
-		const { entry, parent, args } = parsed;
-
-		args.entries = commandArgs.entries;
-
-		if (entry.type === parent.type) {
-			args.entries = args.entries.slice(1);
-		}
-
-		if (parent.type === "group") {
-			args.entries = args.entries.slice(1);
-		}
-
+		const { entry } = parsed;
+		
 		if (entry.message) {
 			const func = command[
 				entry.message as keyof typeof command
 			] as typeof command.executeMessage;
+
 			await func?.bind(command)(message, args);
 		}
 
@@ -100,6 +94,7 @@ class MessageCreate extends Listener {
 			const func = command[
 				entry.hybrid as keyof typeof command
 			] as typeof command.executeHybrid;
+
 			await func?.bind(command)(
 				new BasedHybridContext(message) as HybridContext,
 				args,

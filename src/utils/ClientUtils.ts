@@ -13,6 +13,7 @@ class ClientUtils {
 
 	public parseSubcommand(
 		command: Command,
+		args: Args,
 		options: { subcommand?: string; subcommandGroup?: string },
 	) {
 		const { subcommand, subcommandGroup } = options;
@@ -56,13 +57,21 @@ class ClientUtils {
 
 		if (!entry) return;
 
-		const args = new Args();
-
 		args.entrySubcommand = entry;
 		args.parentSubcommand = parent;
 
+		if (parent.type === "group") {
+			args.entries = args.entries.slice(1);
+		}
+
+		if (
+			entry.type === "subcommand" &&
+			args.entries[0]?.toLowerCase() === entry.name
+		) {
+			args.entries = args.entries.slice(1);
+		}
+
 		return {
-			args,
 			entry,
 			parent,
 			command,

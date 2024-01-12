@@ -5,6 +5,7 @@ import {
 	BasedHybridContext,
 	HybridContext,
 } from "../../commands/HybridContext.js";
+
 import Command from "../../commands/Command.js";
 import Args from "../../commands/Args.js";
 
@@ -33,13 +34,21 @@ class InteractionCreate extends Listener {
 					return;
 				}
 
+				const guild = (await this.client.managers.guilds.get(
+					interaction.guild.id,
+				))!;
+
+				const args = new Args();
+
+				args.language = guild.language;
+
 				if (interaction.isChatInputCommand()) {
 					command.executeChatInput?.(interaction);
 					command.executeHybrid?.(
 						new BasedHybridContext(interaction) as HybridContext,
-						new Args(),
+						args,
 					);
-					this.handleSubcommand(interaction, command);
+					this.handleSubcommand(interaction, command, args);
 				}
 
 				if (interaction.isContextMenuCommand()) {
@@ -62,12 +71,13 @@ class InteractionCreate extends Listener {
 	public async handleSubcommand(
 		interaction: ChatInputCommandInteraction,
 		command: Command,
+		args: Args,
 	) {
 		const subcommand = interaction.options.getSubcommand(false) || undefined;
 		const subcommandGroup =
 			interaction.options.getSubcommandGroup(false) || undefined;
 
-		const parsed = this.client.utils.parseSubcommand(command, {
+		const parsed = this.client.utils.parseSubcommand(command, args, {
 			subcommand,
 			subcommandGroup,
 		});
@@ -76,7 +86,7 @@ class InteractionCreate extends Listener {
 			return;
 		}
 
-		const { entry, args } = parsed;
+		const { entry } = parsed;
 
 		if (entry.chatInput) {
 			const func = command[

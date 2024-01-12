@@ -34,7 +34,7 @@ class MySqlManager<T> {
 		);
 	}
 
-	public async update(values: Partial<T>, condition: string) {
+	public async update(condition: string, values: Partial<T>) {
 		const updates = Object.keys(values)
 			.map((key) => {
 				const value = (values as any)[key];

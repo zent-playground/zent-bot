@@ -23,7 +23,7 @@ class Redis {
 	}
 
 	private setupEventHandlers(): void {
-		this.client.on("error", (err) => Logger.Error("Redis Client Error.", err));
+		this.client.on("error", (err) => Logger.Error("Redis Client Error.\t", err));
 		this.client.on("connect", () => Logger.Info("Redis connected."));
 		this.client.on("end", () => Logger.Info("Redis disconnected."));
 	}

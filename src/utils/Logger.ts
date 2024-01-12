@@ -6,7 +6,7 @@ enum LogLevel {
 	ERROR,
 }
 
-class Logger {
+abstract class Logger {
 	private static formatMessage(level: LogLevel, messages: string[]): string {
 		const timestamp = new Date().toISOString();
 

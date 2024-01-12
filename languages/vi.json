@@ -1,35 +1,19 @@
 {
-  "commands": {
-    "avatar": {
-      "data": {
-        "name": " ",
-        "description": " ",
-        "subcommands": {
-          "user": {
-            "name": " ",
-            "description": " "
-          },
-          "member": {
-            "name": " ",
-            "description": " "
-          }
-        }
-      },
-      "messages": {}
-    },
-    "ping": {
-      "data": {
-        "name": " ",
-        "description": " "
-      },
-      "messages": {}
-    },
-    "help": {
-      "data": {
-        "name": " ",
-        "description": " "
-      },
-      "messages": {}
-    }
-  }
+	"commands": {
+		"avatar": {
+			"data": {},
+			"messages": {
+				"member_avatar": "Avatar thành viên",
+				"user_avatar": "Avatar người dùng"
+			}
+		},
+		"language": {
+			"data": {},
+			"messages": {
+				"unsupported_language": "Ngôn ngữ này không được hỗ trỡ!",
+				"set_language": "Đã đặt ngôn ngữ thành Tiếng Việt (Vietnamese).",
+				"current_language": "Ngôn ngữ hiện tại là Tiếng Việt (Vietnamese)."
+			}
+		}
+	}
 }
