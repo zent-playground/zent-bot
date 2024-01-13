@@ -1,6 +1,6 @@
 {
 	"commands": {
-		"insufficient_permission": "Vous n'êtes pas autorisé à exécuter cette commande!",
+		"insufficient_permission": "Vous n'êtes pas autorisé à exécuter cette commande !",
 		"avatar": {
 			"data": {
 				"description": "Afficher l'avatar d'un utilisateur ou d'un membre.",
@@ -24,8 +24,8 @@
 				}
 			},
 			"messages": {
-				"invalid_user": "L'utilisateur spécifié est invalide!",
-				"invalid_member": "Le membre spécifié est invalide!",
+				"invalid_user": "L'utilisateur spécifié n'est pas valide !",
+				"invalid_member": "Le membre spécifié n'est pas valide !",
 				"member_avatar": "Avatar du membre",
 				"user_avatar": "Avatar de l'utilisateur"
 			}
@@ -53,10 +53,15 @@
 				}
 			},
 			"messages": {
-				"missing_argument": "You must specify a language to set!",
-				"unsupported_language": "Cette langue n'est pas prise en charge!",
+				"missing_argument": "Vous devez spécifier une langue à définir !",
+				"unsupported_language": "Cette langue n'est pas prise en charge !",
 				"set_language": "Langue définie sur `Français`.",
 				"current_language": "La langue actuelle est `Français`."
+			},
+			"components": {
+				"buttons": {
+					"set_language": "Changez la Langue"
+				}
 			}
 		},
 		"ping": {
@@ -82,9 +87,14 @@
 				}
 			},
 			"messages": {
-				"set_prefix": "Le nouveau préfixe a été défini sur `{{prefix}}`!",
-				"current_prefix": "Le préfixe actuel est `{{prefix}}`!",
-				"missing_argument": "You must specify a prefix to set!"
+				"set_prefix": "Le nouveau préfixe a été défini sur `{{prefix}}` !",
+				"current_prefix": "Le préfixe actuel est `{{prefix}}` !",
+				"missing_argument": "Vous devez spécifier un préfixe à définir !"
+			},
+			"components": {
+				"buttons": {
+					"set_prefix": "Changez le Préfixe"
+				}
 			}
 		}
 	}

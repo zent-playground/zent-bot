@@ -57,6 +57,11 @@
 				"unsupported_language": "Ngôn ngữ này không được hỗ trợ!",
 				"set_language": "Đã đặt ngôn ngữ thành `Tiếng Việt (Vietnamese)`.",
 				"current_language": "Ngôn ngữ hiện tại là `Tiếng Việt (Vietnamese)`."
+			},
+			"components": {
+				"buttons": {
+					"set_language": "Edit Language"
+				}
 			}
 		},
 		"ping": {
@@ -85,6 +90,11 @@
 				"set_prefix": "Đã đặt prefix mới thành `{{prefix}}`!",
 				"current_prefix": "Prefix hiện tại là `{{prefix}}`!",
 				"missing_argument": "Cậu phải cung cấp một prefix mới để đặt!"
+			},
+			"components": {
+				"buttons": {
+					"set_prefix": "Edit Prefix"
+				}
 			}
 		}
 	}

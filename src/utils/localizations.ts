@@ -2,68 +2,49 @@ import i18next from "i18next";
 import { Collection } from "discord.js";
 
 export interface Localization {
-	names: { [x: string]: string };
-	descriptions: { [x: string]: string };
-	options: { [x: string]: Localization };
+	names: Record<string, string>;
+	descriptions: Record<string, string>;
+	options: Record<string, Localization>;
+}
+
+interface CommandData {
+	[key: string]: any;
 }
 
 const localizations = new Collection<string, Localization>();
 
-function init() {
-	for (const k of Object.keys(i18next.store.data)) {
-		const { commands } = i18next.store.data[k]["translation"] as any;
+const initLocalization = () => {
+	Object.keys(i18next.store.data).forEach(lang => {
+		const commands: Record<string, { data?: CommandData }> = (i18next.store.data[lang]["translation"] as any).commands || {};
 
-		for (const name of Object.keys(commands)) {
-			const { data } = commands[name];
+		Object.entries(commands).forEach(([name, { data }]) => {
+			if (!data) return;
 
-			if (!data) {
-				continue;
-			}
+			const command = localizations.get(name) ?? { names: {}, descriptions: {}, options: {} };
+			localizations.set(name, command);
 
-			let command = localizations.get(name);
+			command.names[lang] = data.name ?? command.names[lang];
+			command.descriptions[lang] = data.description ?? command.descriptions[lang];
 
-			if (!command) {
-				command = { names: {}, descriptions: {}, options: {} };
-				localizations.set(name, command);
-			}
+			initOptions(command.options, data.options, lang);
+		});
+	});
+};
 
-			if (data.name) {
-				command.names[k] = data.name;
-			}
-
-			if (data.description) {
-				command.descriptions[k] = data.description;
-			}
-
-			initOptions(command.options, data.options, k);
-		}
-	}
-}
-
-function initOptions(entry: Localization["options"], data: any, lang: string) {
+const initOptions = (entry: Record<string, Localization>, data: CommandData, lang: string) => {
 	if (!data) return;
 
-	for (const k of Object.keys(data || {})) {
-		const { name, description, options } = data[k];
+	Object.entries(data).forEach(([key, { name, description, options }]) => {
+		const option = entry[key] ?? { names: {}, descriptions: {}, options: {} };
+		entry[key] = option;
 
-		entry[k] = entry[k] || {
-			names: {},
-			descriptions: {},
-			options: {},
-		};
+		option.names[lang] = name ?? option.names[lang];
+		option.descriptions[lang] = description ?? option.descriptions[lang];
 
-		if (name) {
-			entry[k].names[lang] = name;
+		if (options) {
+			initOptions(option.options, options, lang);
 		}
+	});
+};
 
-		if (description) {
-			entry[k].descriptions[lang] = description;
-		}
-
-		if (options && Object.keys(options).length) {
-			initOptions(entry[k].options, options, lang);
-		}
-	}
-}
-
-export { localizations, init };
+export { localizations, initLocalization as init };
