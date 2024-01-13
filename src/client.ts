@@ -52,8 +52,6 @@ client.redis
 		process.exit(1);
 	});
 
-process.on("uncaughtException", console.error);
-
 loadEvents(client);
 loadCommands(client);
 loadComponents(client);

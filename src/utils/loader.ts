@@ -6,8 +6,8 @@ import { fileURLToPath, pathToFileURL } from "url";
 
 import Listener from "../events/Listener.js";
 import Command from "../commands/Command.js";
-import Component from "../components/Component";
-import { ClientComponents } from "../types";
+import Component from "../components/Component.js";
+import { ClientComponents } from "../types/index.js";
 
 const _dirname = dirname(fileURLToPath(import.meta.url));
 

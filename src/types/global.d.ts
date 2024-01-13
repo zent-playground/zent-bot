@@ -1,6 +1,6 @@
 import { Collection } from "discord.js";
 import Command from "../commands/Command.js";
-import { ClientComponents } from "./index";
+import { ClientComponents } from "./index.js";
 import config from "../config.js";
 import ClientUtils from "../utils/ClientUtils.js";
 import Managers from "../databases/Managers.js";
