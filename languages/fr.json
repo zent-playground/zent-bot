@@ -1,18 +1,90 @@
 {
 	"commands": {
+		"insufficient_permission": "Vous n'êtes pas autorisé à exécuter cette commande!",
 		"avatar": {
-			"data": {},
+			"data": {
+				"description": "Afficher l'avatar d'un utilisateur ou d'un membre.",
+				"options": {
+					"user": {
+						"description": "Afficher l'avatar d'un utilisateur.",
+						"options": {
+							"user": {
+								"description": "Choisir un utilisateur."
+							}
+						}
+					},
+					"member": {
+						"description": "Afficher l'avatar d'un membre.",
+						"options": {
+							"member": {
+								"description": "Choisir un membre."
+							}
+						}
+					}
+				}
+			},
 			"messages": {
-				"member_avatar": "Member avatar",
-				"user_avatar": "User avatar"
+				"invalid_user": "L'utilisateur spécifié est invalide!",
+				"invalid_member": "Le membre spécifié est invalide!",
+				"member_avatar": "Avatar du membre",
+				"user_avatar": "Avatar de l'utilisateur"
+			}
+		},
+		"help": {
+			"data": {
+				"description": "Obtenir des informations sur moi."
 			}
 		},
 		"language": {
-			"data": {},
+			"data": {
+				"description": "Afficher la langue actuelle ou en définir une autre.",
+				"options": {
+					"set": {
+						"description": "Définir une autre langue pour ce serveur.",
+						"options": {
+							"language": {
+								"description": "Langue à définir."
+							}
+						}
+					},
+					"show": {
+						"description": "Afficher la langue actuelle de ce serveur."
+					}
+				}
+			},
 			"messages": {
-				"unsupported_language": "Unsupported language!",
-				"set_language": "Set language to English.",
-				"current_language": "The current language is English."
+				"missing_argument": "You must specify a language to set!",
+				"unsupported_language": "Cette langue n'est pas prise en charge!",
+				"set_language": "Langue définie sur `Français`.",
+				"current_language": "La langue actuelle est `Français`."
+			}
+		},
+		"ping": {
+			"data": {
+				"description": "Afficher la latence du bot."
+			}
+		},
+		"prefix": {
+			"data": {
+				"description": "Afficher le préfixe actuel ou en définir un autre.",
+				"options": {
+					"set": {
+						"description": "Définir un autre préfixe pour ce serveur.",
+						"options": {
+							"prefix": {
+								"description": "Préfixe à définir."
+							}
+						}
+					},
+					"show": {
+						"description": "Afficher le préfixe actuel de ce serveur."
+					}
+				}
+			},
+			"messages": {
+				"set_prefix": "Le nouveau préfixe a été défini sur `{{prefix}}`!",
+				"current_prefix": "Le préfixe actuel est `{{prefix}}`!",
+				"missing_argument": "You must specify a prefix to set!"
 			}
 		}
 	}

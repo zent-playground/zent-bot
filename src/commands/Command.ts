@@ -24,14 +24,12 @@ namespace Command {
 
 interface CommandOptions {
 	name: string;
-	description: string;
 	aliases?: string[];
 	subcommands?: Subcommand[];
 }
 
 class Command {
 	public name: string;
-	public description: string;
 	public aliases: string[];
 	public applicationCommands: RESTPostAPIApplicationCommandsJSONBody[] = [];
 	public client!: Client<true>;
@@ -39,7 +37,6 @@ class Command {
 
 	public constructor(public options: CommandOptions) {
 		this.name = options.name;
-		this.description = options.description;
 		this.aliases = options.aliases || [];
 	}
 
