@@ -1,14 +1,14 @@
 import { Client, Collection, GatewayIntentBits } from "discord.js";
 
-import { loadCommands, loadEvents } from "./utils/loader.js";
+import { loadCommands, loadComponents, loadEvents } from "./utils/loader.js";
 import config from "./config.js";
 import ClientUtils from "./utils/ClientUtils.js";
 import Logger from "./utils/Logger.js";
 import "./utils/i18next.js";
 
-import Managers from "./database/Managers.js";
-import MySql from "./database/mysql/MySql.js";
-import Redis from "./database/redis/Redis.js";
+import Managers from "./databases/Managers.js";
+import MySql from "./databases/mysql/MySql.js";
+import Redis from "./databases/redis/Redis.js";
 
 const client = new Client({
 	intents: [
@@ -24,6 +24,11 @@ const client = new Client({
 });
 
 client.commands = new Collection();
+client.components = {
+	buttons: new Collection(),
+	selectMenus: new Collection(),
+	modals: new Collection(),
+};
 client.config = config;
 client.utils = new ClientUtils(client);
 client.mysql = new MySql(client.config.mysql);
@@ -51,5 +56,6 @@ process.on("uncaughtException", console.error);
 
 loadEvents(client);
 loadCommands(client);
+loadComponents(client);
 
 client.login(process.env.BOT_TOKEN!);

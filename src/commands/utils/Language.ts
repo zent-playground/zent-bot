@@ -1,5 +1,5 @@
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { PermissionFlagsBits } from "discord-api-types/v10";
+import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ButtonStyle, PermissionFlagsBits } from "discord-api-types/v10";
 import Command from "../Command.js";
 import i18next from "i18next";
 import { localizations } from "../../utils/localizations.js";
@@ -69,13 +69,22 @@ class Language extends Command {
 		await ctx.send({
 			embeds: [
 				new EmbedBuilder()
+					.setAuthor({ name: ctx.guild.name, iconURL: ctx.guild.iconURL({ forceStatic: true })! })
 					.setDescription(
-						i18next.t("commands.language.messages.current_language", {
+						i18next.t(`commands.${this.name}.messages.current_language`, {
 							lng: args.language,
 						}),
 					)
 					.setColor(this.client.config.colors.default),
 			],
+			components: [
+				new ActionRowBuilder<ButtonBuilder>().addComponents([
+					new ButtonBuilder()
+						.setLabel(i18next.t(`commands.${this.name}.components.buttons.set_language`, { lng: args.language }))
+						.setStyle(ButtonStyle.Secondary)
+						.setCustomId("language")
+				])
+			]
 		});
 	}
 
@@ -110,7 +119,7 @@ class Language extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t("commands.language.messages.missing_argument", {
+							i18next.t(`commands.${this.name}.messages.missing_argument`, {
 								lng: args.language,
 							}),
 						)
@@ -135,7 +144,7 @@ class Language extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t("commands.language.messages.unsupported_language", {
+							i18next.t(`commands.${this.name}.messages.unsupported_language`, {
 								lng: args.language,
 							}),
 						)
@@ -152,8 +161,9 @@ class Language extends Command {
 		await ctx.send({
 			embeds: [
 				new EmbedBuilder()
+					.setAuthor({ name: ctx.guild.name, iconURL: ctx.guild.iconURL({ forceStatic: true })! })
 					.setDescription(
-						i18next.t("commands.language.messages.set_language", {
+						i18next.t(`commands.${this.name}.messages.set_language`, {
 							lng: languageToSet,
 						}),
 					)

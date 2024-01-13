@@ -57,6 +57,11 @@
 				"unsupported_language": "This language is not supported!",
 				"set_language": "Set language to `English`.",
 				"current_language": "The current language is `English`."
+			},
+			"components": {
+				"buttons": {
+					"set_language": "Edit Language"
+				}
 			}
 		},
 		"ping": {
@@ -85,6 +90,11 @@
 				"set_prefix": "The new prefix has been set to `{{prefix}}`!",
 				"current_prefix": "The current prefix is `{{prefix}}`!",
 				"missing_argument": "You must specify a prefix to set!"
+			},
+			"components": {
+				"buttons": {
+					"set_prefix": "Edit Prefix"
+				}
 			}
 		}
 	}

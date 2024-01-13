@@ -82,7 +82,7 @@ class Avatar extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t("commands.avatar.messages.invalid_user", {
+							i18next.t(`commands.${this.name}.messages.invalid_user`, {
 								lng: args.language,
 							}),
 						)
@@ -99,7 +99,7 @@ class Avatar extends Command {
 				new EmbedBuilder()
 					.setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() })
 					.setTitle(
-						i18next.t("commands.avatar.messages.user_avatar", {
+						i18next.t(`commands.${this.name}.messages.user_avatar`, {
 							lng: args.language,
 						}),
 					)
@@ -128,7 +128,7 @@ class Avatar extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t("commands.avatar.messages.invalid_member", {
+							i18next.t(`commands.${this.name}.messages.invalid_member`, {
 								lng: args.language,
 							}),
 						)
@@ -148,7 +148,7 @@ class Avatar extends Command {
 						iconURL: member.user.displayAvatarURL(),
 					})
 					.setTitle(
-						i18next.t("commands.avatar.messages.member_avatar", {
+						i18next.t(`commands.${this.name}.messages.member_avatar`, {
 							lng: args.language,
 						}),
 					)

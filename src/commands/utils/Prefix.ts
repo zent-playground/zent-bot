@@ -1,7 +1,7 @@
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import Command from "../Command.js";
 import i18next from "i18next";
-import { PermissionFlagsBits } from "discord-api-types/v10";
+import { ButtonStyle, PermissionFlagsBits } from "discord-api-types/v10";
 import { localizations } from "../../utils/localizations.js";
 
 class Prefix extends Command {
@@ -60,14 +60,23 @@ class Prefix extends Command {
 		await ctx.send({
 			embeds: [
 				new EmbedBuilder()
+					.setAuthor({ name: ctx.guild.name, iconURL: ctx.guild.iconURL({ forceStatic: true })! })
 					.setDescription(
-						i18next.t("commands.prefix.messages.current_prefix", {
+						i18next.t(`commands.${this.name}.messages.current_prefix`, {
 							prefix: prefix,
 							lng: args.language,
 						}),
 					)
 					.setColor(this.client.config.colors.default),
 			],
+			components: [
+				new ActionRowBuilder<ButtonBuilder>().addComponents([
+					new ButtonBuilder()
+						.setLabel(i18next.t(`commands.${this.name}.components.buttons.set_prefix`, { lng: args.language }))
+						.setStyle(ButtonStyle.Secondary)
+						.setCustomId("prefix")
+				])
+			]
 		});
 
 		return;
@@ -87,7 +96,7 @@ class Prefix extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t("commands.prefix.messages.missing_argument", {
+							i18next.t(`commands.${this.name}.messages.missing_argument`, {
 								lng: args.language,
 							}),
 						)
@@ -109,7 +118,6 @@ class Prefix extends Command {
 						)
 						.setColor(this.client.config.colors.error),
 				],
-				ephemeral: true,
 			});
 
 			return;
@@ -120,8 +128,9 @@ class Prefix extends Command {
 		await ctx.send({
 			embeds: [
 				new EmbedBuilder()
+					.setAuthor({ name: ctx.guild.name, iconURL: ctx.guild.iconURL({ forceStatic: true })! })
 					.setDescription(
-						i18next.t("commands.prefix.messages.set_prefix", {
+						i18next.t(`commands.${this.name}.messages.set_prefix`, {
 							prefix: prefixToSet,
 							lng: args.language,
 						}),

@@ -1,11 +1,13 @@
 import { Client } from "discord.js";
 
 import { glob } from "glob";
-import { dirname, join } from "path";
+import { dirname, join, sep } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 
 import Listener from "../events/Listener.js";
 import Command from "../commands/Command.js";
+import Component from "../components/Component";
+import { ClientComponents } from "../types";
 
 const _dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -38,5 +40,23 @@ export const loadCommands = async (client: Client) => {
 		command.client = client as Client<true>;
 		await command.initialize?.();
 		client.commands.set(command.name, command);
+	}
+};
+
+export const loadComponents = async  (client: Client)=> {
+	const path = join(_dirname, "..", "components").replace(/\\/g, "/");
+
+	const files = await glob(`${path}/*/**/*.js`);
+
+	for (const file of files) {
+		const dirs = file.split(sep);
+		const component = new (
+			await import(`${pathToFileURL(file)}`)
+		).default() as Component;
+		component.client = client as Client<true>;
+		client.components[dirs[dirs.length - 3] as keyof ClientComponents].set(
+			component.preCustomId,
+			component
+		);
 	}
 };

@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Events, Interaction } from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder, Events, Interaction } from "discord.js";
 
 import Listener from "../Listener.js";
 import {
@@ -8,6 +8,7 @@ import {
 
 import Command from "../../commands/Command.js";
 import Args from "../../commands/Args.js";
+import Component from "../../components/Component";
 
 class InteractionCreate extends Listener {
 	public constructor() {
@@ -66,9 +67,67 @@ class InteractionCreate extends Listener {
 				command.executeAutocomplete?.(interaction);
 			}
 		}
+
+		if (interaction.isMessageComponent() || interaction.isModalSubmit()) {
+			const splitted = interaction.customId.split("-");
+			const [preCustomId, ...args] = splitted;
+
+			let component: Component | undefined;
+
+			if (interaction.isAnySelectMenu()) {
+				component = this.client.components.selectMenus.get(preCustomId);
+			}
+
+			if (interaction.isButton()) {
+				component = this.client.components.buttons.get(preCustomId);
+			}
+
+			if (interaction.isModalSubmit()) {
+				component = this.client.components.modals.get(preCustomId);
+			}
+
+			if (!component) return;
+
+			const embed = new EmbedBuilder()
+				.setDescription(
+					"You are not authorized to use this interaction!"
+				)
+				.setColor(this.client.config.colors.error);
+
+			if (
+				await this.client.users
+					.fetch(args[args.length - 1])
+					.then(() => true)
+					.catch(() => false)
+			) {
+				const userId = args[args.length - 1];
+
+				if (interaction.user.id !== userId) {
+					await interaction.reply({
+						embeds: [embed],
+						ephemeral: true,
+					});
+
+					return;
+				}
+			}
+
+			if (
+				component.options?.memberPermissions &&
+				!interaction.memberPermissions?.has(component.options.memberPermissions)
+			) {
+				await interaction.reply({
+					embeds: [embed],
+					ephemeral: true,
+				});
+				return;
+			}
+
+			await component.execute?.(interaction, args);
+		}
 	}
 
-	public async handleSubcommand(
+	private async handleSubcommand(
 		interaction: ChatInputCommandInteraction,
 		command: Command,
 		args: Args,
