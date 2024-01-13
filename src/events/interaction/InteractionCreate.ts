@@ -7,8 +7,10 @@ import {
 } from "../../commands/HybridContext.js";
 
 import Command from "../../commands/Command.js";
-import Args from "../../commands/Args.js";
-import Component from "../../components/Component";
+import CommandArgs from "../../commands/Args.js";
+import Component from "../../components/Component.js";
+import ComponentArgs from "../../components/Args.js";
+import i18next from "i18next";
 
 class InteractionCreate extends Listener {
 	public constructor() {
@@ -28,7 +30,11 @@ class InteractionCreate extends Listener {
 			if (interaction.isCommand()) {
 				if (!interaction.guild) {
 					await interaction.reply({
-						content: "You can only use my commands in the server.",
+						embeds: [
+							new EmbedBuilder()
+								.setDescription("You can only use my commands in the server.")
+								.setColor(this.client.config.colors.error)
+						],
 						ephemeral: true,
 					});
 
@@ -39,7 +45,7 @@ class InteractionCreate extends Listener {
 					interaction.guild.id,
 				))!;
 
-				const args = new Args();
+				const args = new CommandArgs();
 
 				args.language = guild.language;
 
@@ -70,7 +76,7 @@ class InteractionCreate extends Listener {
 
 		if (interaction.isMessageComponent() || interaction.isModalSubmit()) {
 			const splitted = interaction.customId.split("-");
-			const [preCustomId, ...args] = splitted;
+			const [preCustomId, ...references] = splitted;
 
 			let component: Component | undefined;
 
@@ -88,19 +94,28 @@ class InteractionCreate extends Listener {
 
 			if (!component) return;
 
+			const guild = (await this.client.managers.guilds.get(
+				interaction.guild!.id,
+			))!;
+
+			const args = new ComponentArgs();
+
+			args.references = references;
+			args.language = guild.language;
+
 			const embed = new EmbedBuilder()
 				.setDescription(
-					"You are not authorized to use this interaction!"
+					i18next.t("interactions.insufficient_permission", { lng: args.language })
 				)
 				.setColor(this.client.config.colors.error);
 
 			if (
 				await this.client.users
-					.fetch(args[args.length - 1])
+					.fetch(args[args.references.length - 1])
 					.then(() => true)
 					.catch(() => false)
 			) {
-				const userId = args[args.length - 1];
+				const userId = args[args.references.length - 1];
 
 				if (interaction.user.id !== userId) {
 					await interaction.reply({
@@ -130,7 +145,7 @@ class InteractionCreate extends Listener {
 	private async handleSubcommand(
 		interaction: ChatInputCommandInteraction,
 		command: Command,
-		args: Args,
+		args: CommandArgs,
 	) {
 		const subcommand = interaction.options.getSubcommand(false) || undefined;
 		const subcommandGroup =

@@ -71,7 +71,7 @@ class Language extends Command {
 				new EmbedBuilder()
 					.setAuthor({ name: ctx.guild.name, iconURL: ctx.guild.iconURL({ forceStatic: true })! })
 					.setDescription(
-						i18next.t(`commands.${this.name}.messages.current_language`, {
+						i18next.t(`interactions.${this.name}.messages.current_language`, {
 							lng: args.language,
 						}),
 					)
@@ -80,7 +80,7 @@ class Language extends Command {
 			components: [
 				new ActionRowBuilder<ButtonBuilder>().addComponents([
 					new ButtonBuilder()
-						.setLabel(i18next.t(`commands.${this.name}.components.buttons.set_language`, { lng: args.language }))
+						.setLabel(i18next.t(`interactions.${this.name}.components.set_language`, { lng: args.language }))
 						.setStyle(ButtonStyle.Secondary)
 						.setCustomId("language")
 				])
@@ -96,7 +96,7 @@ class Language extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t("commands.insufficient_permission", {
+							i18next.t("interactions.insufficient_permission", {
 								lng: args.language,
 							}),
 						)
@@ -119,7 +119,7 @@ class Language extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t(`commands.${this.name}.messages.missing_argument`, {
+							i18next.t(`interactions.${this.name}.messages.missing_argument`, {
 								lng: args.language,
 							}),
 						)
@@ -144,7 +144,7 @@ class Language extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t(`commands.${this.name}.messages.unsupported_language`, {
+							i18next.t(`interactions.${this.name}.messages.unsupported_language`, {
 								lng: args.language,
 							}),
 						)
@@ -163,7 +163,7 @@ class Language extends Command {
 				new EmbedBuilder()
 					.setAuthor({ name: ctx.guild.name, iconURL: ctx.guild.iconURL({ forceStatic: true })! })
 					.setDescription(
-						i18next.t(`commands.${this.name}.messages.set_language`, {
+						i18next.t(`interactions.${this.name}.messages.set_language`, {
 							lng: languageToSet,
 						}),
 					)

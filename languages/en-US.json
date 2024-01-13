@@ -1,5 +1,5 @@
 {
-	"commands": {
+	"interactions": {
 		"insufficient_permission": "You are not authorized to execute this command!",
 		"avatar": {
 			"data": {
@@ -56,12 +56,11 @@
 				"missing_argument": "You must specify a language to set!",
 				"unsupported_language": "This language is not supported!",
 				"set_language": "Set language to `English`.",
-				"current_language": "The current language is `English`."
+				"current_language": "The current language is `English`.",
+				"edit_language": "Please choose a new language."
 			},
 			"components": {
-				"buttons": {
-					"set_language": "Edit Language"
-				}
+				"set_language": "Edit Language"
 			}
 		},
 		"ping": {
@@ -92,9 +91,8 @@
 				"missing_argument": "You must specify a prefix to set!"
 			},
 			"components": {
-				"buttons": {
-					"set_prefix": "Edit Prefix"
-				}
+				"label_prefix": "New Prefix",
+				"set_prefix": "Edit Prefix"
 			}
 		}
 	}

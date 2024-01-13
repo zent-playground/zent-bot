@@ -1,5 +1,5 @@
 {
-	"commands": {
+	"interactions": {
 		"insufficient_permission": "Vous n'êtes pas autorisé à exécuter cette commande !",
 		"avatar": {
 			"data": {
@@ -56,12 +56,11 @@
 				"missing_argument": "Vous devez spécifier une langue à définir !",
 				"unsupported_language": "Cette langue n'est pas prise en charge !",
 				"set_language": "Langue définie sur `Français`.",
-				"current_language": "La langue actuelle est `Français`."
+				"current_language": "La langue actuelle est `Français`.",
+				"edit_language": "Veuillez choisir une nouvelle langue."
 			},
 			"components": {
-				"buttons": {
-					"set_language": "Changez la Langue"
-				}
+				"set_language": "Changez la Langue"
 			}
 		},
 		"ping": {
@@ -92,9 +91,8 @@
 				"missing_argument": "Vous devez spécifier un préfixe à définir !"
 			},
 			"components": {
-				"buttons": {
-					"set_prefix": "Changez le Préfixe"
-				}
+				"label_prefix": "Nouveau Préfixe",
+				"set_prefix": "Changez le Préfixe"
 			}
 		}
 	}
