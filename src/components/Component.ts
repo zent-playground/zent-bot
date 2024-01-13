@@ -21,6 +21,7 @@ namespace Component {
 	export type StringSelectMenu = StringSelectMenuInteraction;
 	export type UserSelectMenu = UserSelectMenuInteraction;
 	export type ChannelSelectMenu = ChannelSelectMenuInteraction;
+	export type Args = import("./Args.js").default;
 }
 
 class Component {
@@ -31,7 +32,7 @@ class Component {
 
 	public execute?(
 		interaction: Component.Button | Component.Modal | Component.SelectMenu,
-		args: string[]
+		args: Component.Args
 	): Awaitable<void>;
 }
 

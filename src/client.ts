@@ -57,3 +57,5 @@ loadCommands(client);
 loadComponents(client);
 
 client.login(process.env.BOT_TOKEN!);
+
+

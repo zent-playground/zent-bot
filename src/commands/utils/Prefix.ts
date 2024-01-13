@@ -62,7 +62,7 @@ class Prefix extends Command {
 				new EmbedBuilder()
 					.setAuthor({ name: ctx.guild.name, iconURL: ctx.guild.iconURL({ forceStatic: true })! })
 					.setDescription(
-						i18next.t(`commands.${this.name}.messages.current_prefix`, {
+						i18next.t(`interactions.${this.name}.messages.current_prefix`, {
 							prefix: prefix,
 							lng: args.language,
 						}),
@@ -72,7 +72,7 @@ class Prefix extends Command {
 			components: [
 				new ActionRowBuilder<ButtonBuilder>().addComponents([
 					new ButtonBuilder()
-						.setLabel(i18next.t(`commands.${this.name}.components.buttons.set_prefix`, { lng: args.language }))
+						.setLabel(i18next.t(`interactions.${this.name}.components.set_prefix`, { lng: args.language }))
 						.setStyle(ButtonStyle.Secondary)
 						.setCustomId("prefix")
 				])
@@ -96,7 +96,7 @@ class Prefix extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t(`commands.${this.name}.messages.missing_argument`, {
+							i18next.t(`interactions.${this.name}.messages.missing_argument`, {
 								lng: args.language,
 							}),
 						)
@@ -112,7 +112,7 @@ class Prefix extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t("commands.insufficient_permission", {
+							i18next.t("interactions.insufficient_permission", {
 								lng: args.language,
 							}),
 						)
@@ -130,7 +130,7 @@ class Prefix extends Command {
 				new EmbedBuilder()
 					.setAuthor({ name: ctx.guild.name, iconURL: ctx.guild.iconURL({ forceStatic: true })! })
 					.setDescription(
-						i18next.t(`commands.${this.name}.messages.set_prefix`, {
+						i18next.t(`interactions.${this.name}.messages.set_prefix`, {
 							prefix: prefixToSet,
 							lng: args.language,
 						}),

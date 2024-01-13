@@ -1,5 +1,5 @@
 {
-	"commands": {
+	"interactions": {
 		"insufficient_permission": "Cậu không có quyền để dùng lệnh này!",
 		"avatar": {
 			"data": {
@@ -56,12 +56,11 @@
 				"missing_argument": "Cậu phải cung cấp một ngôn ngữ để đặt!",
 				"unsupported_language": "Ngôn ngữ này không được hỗ trợ!",
 				"set_language": "Đã đặt ngôn ngữ thành `Tiếng Việt (Vietnamese)`.",
-				"current_language": "Ngôn ngữ hiện tại là `Tiếng Việt (Vietnamese)`."
+				"current_language": "Ngôn ngữ hiện tại là `Tiếng Việt (Vietnamese)`.",
+				"edit_language": "Please choose a new language."
 			},
 			"components": {
-				"buttons": {
-					"set_language": "Edit Language"
-				}
+				"set_language": "Edit Language"
 			}
 		},
 		"ping": {
@@ -92,9 +91,8 @@
 				"missing_argument": "Cậu phải cung cấp một prefix mới để đặt!"
 			},
 			"components": {
-				"buttons": {
-					"set_prefix": "Edit Prefix"
-				}
+				"label_prefix": "New Prefix",
+				"set_prefix": "Edit Prefix"
 			}
 		}
 	}

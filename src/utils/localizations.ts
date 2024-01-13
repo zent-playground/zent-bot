@@ -15,7 +15,7 @@ const localizations = new Collection<string, Localization>();
 
 const initLocalization = () => {
 	Object.keys(i18next.store.data).forEach(lang => {
-		const commands: Record<string, { data?: CommandData }> = (i18next.store.data[lang]["translation"] as any).commands || {};
+		const commands: Record<string, { data?: CommandData }> = (i18next.store.data[lang]["translation"] as any).interactions || {};
 
 		Object.entries(commands).forEach(([name, { data }]) => {
 			if (!data) return;
