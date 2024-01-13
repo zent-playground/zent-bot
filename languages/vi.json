@@ -1,11 +1,11 @@
 {
 	"commands": {
-		"insufficient_permission": "You are not authorized to execute this command!",
+		"insufficient_permission": "Cậu không có quyền để sử dụng lệnh này!",
 		"avatar": {
 			"data": {},
 			"messages": {
-				"invalid_user": "The specified user is invalid!",
-				"invalid_member": "The specified member is invalid!",
+				"invalid_user": "Người dùng mà cậu cung cấp không hợp lệ!",
+				"invalid_member": "Thành viên mà cậu cung cấp không hợp lệ!",
 				"member_avatar": "Avatar thành viên",
 				"user_avatar": "Avatar người dùng"
 			}
@@ -21,8 +21,8 @@
 		"prefix": {
 			"data": {},
 			"messages": {
-				"set_prefix": "The new prefix has been set to `{{prefix}}`!",
-				"current_prefix": "The current prefix is `{{prefix}}`!"
+				"set_prefix": "Prefix mới đã được đặt thành `{{prefix}}`!",
+				"current_prefix": "Prefix hiện tại là `{{prefix}}`!"
 			}
 		}
 
