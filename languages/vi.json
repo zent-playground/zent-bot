@@ -1,30 +1,91 @@
 {
 	"commands": {
-		"insufficient_permission": "Cậu không có quyền để sử dụng lệnh này!",
+		"insufficient_permission": "Cậu không có quyền để dùng lệnh này!",
 		"avatar": {
-			"data": {},
+			"data": {
+				"description": "Xem ảnh đại diện người dùng/thành viên.",
+				"options": {
+					"user": {
+						"description": "Xme ảnh đại diện người dùng.",
+						"options": {
+							"user": {
+								"description": "Chọn một người dùng."
+							}
+						}
+					},
+					"member": {
+						"description": "Xem ảnh đại diện thành viên.",
+						"options": {
+							"member": {
+								"description": "Chọn một thành viên."
+							}
+						}
+					}
+				}
+			},
 			"messages": {
-				"invalid_user": "Người dùng mà cậu cung cấp không hợp lệ!",
+				"invalid_user": "Người mà cậu cung cấp không hợp lệ!",
 				"invalid_member": "Thành viên mà cậu cung cấp không hợp lệ!",
-				"member_avatar": "Avatar thành viên",
-				"user_avatar": "Avatar người dùng"
+				"member_avatar": "Ảnh đại diện thành viên",
+				"user_avatar": "Ảnh đại diện người dùng"
+			}
+		},
+		"help": {
+			"data": {
+				"description": "Xem một số thông tin về tớ."
 			}
 		},
 		"language": {
-			"data": {},
+			"data": {
+				"description": "Xem ngôn ngữ hiện tại đang dùng hoặc đặt một ngôn ngữ khác.",
+				"options": {
+					"set": {
+						"description": "Đặt một ngôn ngữ khác cho server.",
+						"options": {
+							"language": {
+								"description": "Ngôn ngữ để đặt."
+							}
+						}
+					},
+					"show": {
+						"description": "Xem ngôn ngữ hiện tại của server này."
+					}
+				}
+			},
 			"messages": {
-				"unsupported_language": "Ngôn ngữ này không được hỗ trỡ!",
-				"set_language": "Đã đặt ngôn ngữ thành Tiếng Việt (Vietnamese).",
-				"current_language": "Ngôn ngữ hiện tại là Tiếng Việt (Vietnamese)."
+				"missing_argument": "Cậu phải cung cấp một ngôn ngữ để đặt!",
+				"unsupported_language": "Ngôn ngữ này không được hỗ trợ!",
+				"set_language": "Đã đặt ngôn ngữ thành `Tiếng Việt (Vietnamese)`.",
+				"current_language": "Ngôn ngữ hiện tại là `Tiếng Việt (Vietnamese)`."
+			}
+		},
+		"ping": {
+			"data": {
+				"description": "Xem tốc độ phản hồi của bot."
 			}
 		},
 		"prefix": {
-			"data": {},
+			"data": {
+				"description": "Xem prefix hiện tại đang dùng hoặc đặt một prefix mới.",
+				"options": {
+					"set": {
+						"description": "Đặt một prefix mới cho server.",
+						"options": {
+							"prefix": {
+								"description": "Prefix để đặt."
+							}
+						}
+					},
+					"show": {
+						"description": "Xem prefix hiện tại của server này."
+					}
+				}
+			},
 			"messages": {
-				"set_prefix": "Prefix mới đã được đặt thành `{{prefix}}`!",
-				"current_prefix": "Prefix hiện tại là `{{prefix}}`!"
+				"set_prefix": "Đã đặt prefix mới thành `{{prefix}}`!",
+				"current_prefix": "Prefix hiện tại là `{{prefix}}`!",
+				"missing_argument": "Cậu phải cung cấp một prefix mới để đặt!"
 			}
 		}
-
 	}
 }

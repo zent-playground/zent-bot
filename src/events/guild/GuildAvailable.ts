@@ -11,7 +11,11 @@ class GuildCreate extends Listener {
 		const { guilds } = this.client.managers;
 
 		if (!(await guilds.get(guild.id))) {
-			await guilds.set(guild.id, { language: (i18next.options.preload as string[]).includes(guild.preferredLocale) ? guild.preferredLocale : "en" });
+			await guilds.set(guild.id, {
+				language: i18next.store.data[guild.preferredLocale]
+					? guild.preferredLocale
+					: i18next.language,
+			});
 		}
 	}
 }

@@ -65,7 +65,7 @@ class ClientUtils {
 		}
 
 		if (
-			entry.type === "subcommand" &&
+			(!entry.type || entry.type === "subcommand") &&
 			args.entries[0]?.toLowerCase() === entry.name
 		) {
 			args.entries = args.entries.slice(1);
