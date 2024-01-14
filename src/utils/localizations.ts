@@ -2,7 +2,9 @@ import i18next from "i18next";
 import { Collection } from "discord.js";
 
 export interface Localization {
+	name: string;
 	names: Record<string, string>;
+	description: string;
 	descriptions: Record<string, string>;
 	options: Record<string, Localization>;
 }
@@ -18,22 +20,26 @@ const initLocalization = () => {
 		const commands: Record<string, { data?: CommandData }> =
 			(i18next.store.data[lang]["translation"] as any).commands || {};
 
-		if (lang == "en") {
-			lang = "en-US";
-		}
-
 		Object.entries(commands).forEach(([name, { data }]) => {
 			if (!data) return;
 
 			const command = localizations.get(name) ?? {
+				name: "",
 				names: {},
+				description: "",
 				descriptions: {},
 				options: {},
 			};
+
 			localizations.set(name, command);
 
-			command.names[lang] = data.name ?? command.names[lang];
-			command.descriptions[lang] = data.description ?? command.descriptions[lang];
+			if (lang === "en") {
+				command.name = data.name ?? command.names[lang];
+				command.description = data.description ?? command.descriptions[lang];
+			} else {
+				command.names[lang] = data.name ?? command.names[lang];
+				command.descriptions[lang] = data.description ?? command.descriptions[lang];
+			}
 
 			initOptions(command.options, data.options, lang);
 		});
@@ -47,8 +53,13 @@ const initOptions = (entry: Record<string, Localization>, data: CommandData, lan
 		const option = entry[key] ?? { names: {}, descriptions: {}, options: {} };
 		entry[key] = option;
 
-		option.names[lang] = name ?? option.names[lang];
-		option.descriptions[lang] = description ?? option.descriptions[lang];
+		if (lang === "en") {
+			option.name = name ?? option.names[lang];
+			option.description = description ?? option.descriptions[lang];
+		} else {
+			option.names[lang] = name ?? option.names[lang];
+			option.descriptions[lang] = description ?? option.descriptions[lang];
+		}
 
 		if (options) {
 			initOptions(option.options, options, lang);

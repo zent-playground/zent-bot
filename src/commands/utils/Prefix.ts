@@ -32,29 +32,29 @@ class Prefix extends Command {
 	}
 
 	public initialize() {
-		const { descriptions, options } = localizations.get(this.name)!;
+		const { description, descriptions, options } = localizations.get(this.name)!;
 		const { show, set } = options;
 
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
 				.setName(this.name)
-				.setDescription(descriptions["en-US"])
+				.setDescription(description)
 				.setDescriptionLocalizations(descriptions)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("show")
-						.setDescription(show.descriptions["en-US"])
+						.setDescription(show.description)
 						.setDescriptionLocalizations(show.descriptions),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("set")
-						.setDescription(set.descriptions["en-US"])
+						.setDescription(set.description)
 						.setDescriptionLocalizations(set.descriptions)
 						.addStringOption((option) =>
 							option
 								.setName("prefix")
-								.setDescription(set.options.prefix.descriptions["en-US"])
+								.setDescription(set.options.prefix.description)
 								.setDescriptionLocalizations(set.options.prefix.descriptions)
 								.setRequired(true),
 						),

@@ -43,35 +43,35 @@ class Language extends Command {
 	}
 
 	public initialize() {
-		const { descriptions, options } = localizations.get(this.name)!;
+		const { description, descriptions, options } = localizations.get(this.name)!;
 		const { show, set, list } = options;
 
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
 				.setName(this.name)
-				.setDescription(descriptions["en-US"])
+				.setDescription(description)
 				.setDescriptionLocalizations(descriptions)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("show")
-						.setDescription(show.descriptions["en-US"])
+						.setDescription(show.description)
 						.setDescriptionLocalizations(show.descriptions),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("list")
-						.setDescription(list.descriptions["en-US"])
+						.setDescription(list.description)
 						.setDescriptionLocalizations(list.descriptions),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("set")
-						.setDescription(set.descriptions["en-US"])
+						.setDescription(set.description)
 						.setDescriptionLocalizations(set.descriptions)
 						.addStringOption((option) =>
 							option
 								.setName("language")
-								.setDescription(set.options.language.descriptions["en-US"])
+								.setDescription(set.options.language.description)
 								.setDescriptionLocalizations(set.options.language.descriptions)
 								.setAutocomplete(true)
 								.setRequired(true),

@@ -88,11 +88,11 @@ class ClientUtils {
 			example?: string;
 		},
 	) {
-		const { descriptions } = localizations.get(command.name)!;
+		const { description, descriptions } = localizations.get(command.name)!;
 
 		const embed = new EmbedBuilder()
 			.setTitle(command.name)
-			.setDescription(descriptions[options.language])
+			.setDescription(descriptions[options.language] || description)
 			.setColor(this.client.config.colors.default);
 
 		if (command.aliases.length) {
