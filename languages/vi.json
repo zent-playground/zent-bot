@@ -9,7 +9,7 @@
 				"description": "Xem ảnh đại diện người dùng/thành viên.",
 				"options": {
 					"user": {
-						"description": "Xme ảnh đại diện người dùng.",
+						"description": "Xem ảnh đại diện người dùng.",
 						"options": {
 							"user": {
 								"description": "Chọn một người dùng."
