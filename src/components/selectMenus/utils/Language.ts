@@ -10,7 +10,10 @@ export default class extends Component {
 		});
 	}
 
-	public override async execute(interaction: Component.StringSelectMenu, args: Component.Args) {
+	public override async execute(
+		interaction: Component.StringSelectMenu,
+		// args: Component.Args,
+	) {
 		const [language] = interaction.values;
 		const { guilds } = this.client.managers;
 
@@ -19,9 +22,12 @@ export default class extends Component {
 		await interaction.reply({
 			embeds: [
 				new EmbedBuilder()
-					.setAuthor({ name: interaction.guild!.name, iconURL: interaction.guild!.iconURL({ forceStatic: true })! })
+					.setAuthor({
+						name: interaction.guild!.name,
+						iconURL: interaction.guild!.iconURL({ forceStatic: true })!,
+					})
 					.setDescription(
-						i18next.t(`interactions.${this.preCustomId}.messages.set_language`, {
+						i18next.t(`commands.${this.preCustomId}.messages.set_language`, {
 							lng: language,
 						}),
 					)

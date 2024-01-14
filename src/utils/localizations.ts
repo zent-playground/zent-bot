@@ -14,13 +14,22 @@ interface CommandData {
 const localizations = new Collection<string, Localization>();
 
 const initLocalization = () => {
-	Object.keys(i18next.store.data).forEach(lang => {
-		const commands: Record<string, { data?: CommandData }> = (i18next.store.data[lang]["translation"] as any).interactions || {};
+	Object.keys(i18next.store.data).forEach((lang) => {
+		const commands: Record<string, { data?: CommandData }> =
+			(i18next.store.data[lang]["translation"] as any).commands || {};
+
+		if (lang == "en") {
+			lang = "en-US";
+		}
 
 		Object.entries(commands).forEach(([name, { data }]) => {
 			if (!data) return;
 
-			const command = localizations.get(name) ?? { names: {}, descriptions: {}, options: {} };
+			const command = localizations.get(name) ?? {
+				names: {},
+				descriptions: {},
+				options: {},
+			};
 			localizations.set(name, command);
 
 			command.names[lang] = data.name ?? command.names[lang];

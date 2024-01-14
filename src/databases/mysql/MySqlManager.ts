@@ -23,9 +23,7 @@ class MySqlManager<T> {
 	}
 
 	public async delete(condition?: string) {
-		await this.db.query(
-			`DELETE FROM ${this.table} ${condition ? `WHERE ${condition}` : ""}`,
-		);
+		await this.db.query(`DELETE FROM ${this.table} ${condition ? `WHERE ${condition}` : ""}`);
 	}
 
 	public async select(condition?: string): Promise<T[]> {
@@ -42,9 +40,7 @@ class MySqlManager<T> {
 			})
 			.join(", ");
 
-		await this.db.query(
-			`UPDATE ${this.table} SET ${updates} WHERE ${condition}`,
-		);
+		await this.db.query(`UPDATE ${this.table} SET ${updates} WHERE ${condition}`);
 	}
 }
 

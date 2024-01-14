@@ -1,7 +1,18 @@
-import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { ButtonStyle, PermissionFlagsBits } from "discord-api-types/v10";
-import Command from "../Command.js";
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	EmbedBuilder,
+	SlashCommandBuilder,
+	ButtonStyle,
+	PermissionFlagsBits,
+	codeBlock,
+} from "discord.js";
+
 import i18next from "i18next";
+import iso6391 from "iso-639-1";
+import { table } from "table";
+
+import Command from "../Command.js";
 import { localizations } from "../../utils/localizations.js";
 
 class Language extends Command {
@@ -11,6 +22,11 @@ class Language extends Command {
 			aliases: ["lang"],
 			subcommands: [
 				{
+					name: "help",
+					default: true,
+					hybrid: "help",
+				},
+				{
 					name: "show",
 					hybrid: "show",
 				},
@@ -18,13 +34,17 @@ class Language extends Command {
 					name: "set",
 					hybrid: "set",
 				},
+				{
+					name: "list",
+					hybrid: "list",
+				},
 			],
 		});
 	}
 
 	public initialize() {
 		const { descriptions, options } = localizations.get(this.name)!;
-		const { show, set } = options;
+		const { show, set, list } = options;
 
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
@@ -36,6 +56,12 @@ class Language extends Command {
 						.setName("show")
 						.setDescription(show.descriptions["en-US"])
 						.setDescriptionLocalizations(show.descriptions),
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName("list")
+						.setDescription(list.descriptions["en-US"])
+						.setDescriptionLocalizations(list.descriptions),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
@@ -55,13 +81,51 @@ class Language extends Command {
 		);
 	}
 
+	public async help(ctx: Command.HybridContext, args: Command.Args) {
+		const { language, prefix } = args;
+
+		await ctx.send({
+			embeds: [
+				ctx.client.utils.createHelpEmbed(this, {
+					language,
+					usage: [`${prefix} language show`, `${prefix} language set <language>`].join("\n"),
+					example: [`${prefix} language set vi`, `${prefix} language set vietnamese`].join(
+						"\n",
+					),
+				}),
+			],
+		});
+	}
+
+	public async list(ctx: Command.HybridContext) {
+		const list = [["\u001b[1;33mLanguage\u001b[0m", "\u001b[1;33mISO 639 (Set 1)\u001b[0m"]];
+
+		for (const language of Object.keys(i18next.store.data)) {
+			list.push([iso6391.getName(language), language]);
+		}
+
+		const createdTable = table(list);
+
+		const embed = new EmbedBuilder()
+			.setTitle("List of supported language.")
+			.setDescription(codeBlock("ansi", createdTable))
+			.setColor(ctx.client.config.colors.default);
+
+		await ctx.send({
+			embeds: [embed],
+		});
+	}
+
 	public async executeAutocomplete(interaction: Command.Autocomplete) {
 		const focused = interaction.options.getFocused().toLowerCase();
-		const choices = Object.keys(i18next.store.data).filter((k) =>
-			k.toLowerCase().includes(focused),
+		const choices = Object.keys(i18next.store.data).filter(
+			(k) =>
+				k.toLowerCase().includes(focused) ||
+				iso6391.getName(k).toLowerCase().includes(focused) ||
+				iso6391.getNativeName(k).toLowerCase().includes(focused),
 		);
 		await interaction.respond(
-			choices.map((choice) => ({ name: choice, value: choice })),
+			choices.map((choice) => ({ name: iso6391.getName(choice), value: choice })),
 		);
 	}
 
@@ -69,9 +133,12 @@ class Language extends Command {
 		await ctx.send({
 			embeds: [
 				new EmbedBuilder()
-					.setAuthor({ name: ctx.guild.name, iconURL: ctx.guild.iconURL({ forceStatic: true })! })
+					.setAuthor({
+						name: ctx.guild.name,
+						iconURL: ctx.guild.iconURL({ forceStatic: true })!,
+					})
 					.setDescription(
-						i18next.t(`interactions.${this.name}.messages.current_language`, {
+						i18next.t(`commands.${this.name}.messages.current_language`, {
 							lng: args.language,
 						}),
 					)
@@ -80,11 +147,15 @@ class Language extends Command {
 			components: [
 				new ActionRowBuilder<ButtonBuilder>().addComponents([
 					new ButtonBuilder()
-						.setLabel(i18next.t(`interactions.${this.name}.components.set_language`, { lng: args.language }))
+						.setLabel(
+							i18next.t(`commands.${this.name}.components.set_language`, {
+								lng: args.language,
+							}),
+						)
 						.setStyle(ButtonStyle.Secondary)
-						.setCustomId("language")
-				])
-			]
+						.setCustomId("language"),
+				]),
+			],
 		});
 	}
 
@@ -96,7 +167,7 @@ class Language extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t("interactions.insufficient_permission", {
+							i18next.t("commands.insufficient_permission", {
 								lng: args.language,
 							}),
 						)
@@ -109,17 +180,15 @@ class Language extends Command {
 		}
 
 		let languageToSet = (
-			args.entries[0] || ctx.interaction?.options.getString("language")
-		)
-			?.split(/ +/g)[0]
-			.toLowerCase();
+			args.entries.join(" ") || ctx.interaction?.options.getString("language")
+		)?.toLowerCase();
 
 		if (!languageToSet) {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t(`interactions.${this.name}.messages.missing_argument`, {
+							i18next.t(`commands.${this.name}.messages.missing_argument`, {
 								lng: args.language,
 							}),
 						)
@@ -131,20 +200,24 @@ class Language extends Command {
 		}
 
 		switch (languageToSet) {
-			case "en":
+			case "vn":
+				languageToSet = "vi";
+				break;
 			case "us":
 			case "en-us": {
-				languageToSet = "en-US";
+				languageToSet = "en";
 				break;
 			}
 		}
 
-		if (!i18next.store.data[languageToSet]) {
+		const languageCode = iso6391.getCode(languageToSet) || languageToSet;
+
+		if (!i18next.store.data[languageCode]) {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t(`interactions.${this.name}.messages.unsupported_language`, {
+							i18next.t(`commands.${this.name}.messages.unsupported_language`, {
 								lng: args.language,
 							}),
 						)
@@ -156,14 +229,17 @@ class Language extends Command {
 			return;
 		}
 
-		await guilds.update(ctx.guild.id, { language: languageToSet });
+		await guilds.update(ctx.guild.id, { language: languageCode });
 
 		await ctx.send({
 			embeds: [
 				new EmbedBuilder()
-					.setAuthor({ name: ctx.guild.name, iconURL: ctx.guild.iconURL({ forceStatic: true })! })
+					.setAuthor({
+						name: ctx.guild.name,
+						iconURL: ctx.guild.iconURL({ forceStatic: true })!,
+					})
 					.setDescription(
-						i18next.t(`interactions.${this.name}.messages.set_language`, {
+						i18next.t(`commands.${this.name}.messages.set_language`, {
 							lng: languageToSet,
 						}),
 					)

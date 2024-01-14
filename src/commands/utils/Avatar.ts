@@ -41,9 +41,7 @@ class Avatar extends Command {
 							option
 								.setName("user")
 								.setDescription("Choose a user.")
-								.setDescriptionLocalizations(
-									data.options.user.options.user.descriptions,
-								),
+								.setDescriptionLocalizations(data.options.user.options.user.descriptions),
 						),
 				)
 				.addSubcommand((subcommand) =>
@@ -55,9 +53,7 @@ class Avatar extends Command {
 							option
 								.setName("member")
 								.setDescription("Choose a member.")
-								.setDescriptionLocalizations(
-									data.options.member.options.member.descriptions,
-								),
+								.setDescriptionLocalizations(data.options.member.options.member.descriptions),
 						),
 				)
 				.toJSON(),
@@ -73,16 +69,14 @@ class Avatar extends Command {
 			targetId = this.client.utils.parseId(args.entries[0]) || targetId;
 		}
 
-		const user = await this.client.users
-			.fetch(targetId, { force: true })
-			.catch(() => null);
+		const user = await this.client.users.fetch(targetId, { force: true }).catch(() => null);
 
 		if (!user) {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t(`interactions.${this.name}.messages.invalid_user`, {
+							i18next.t(`commands.${this.name}.messages.invalid_user`, {
 								lng: args.language,
 							}),
 						)
@@ -99,7 +93,7 @@ class Avatar extends Command {
 				new EmbedBuilder()
 					.setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() })
 					.setTitle(
-						i18next.t(`interactions.${this.name}.messages.user_avatar`, {
+						i18next.t(`commands.${this.name}.messages.user_avatar`, {
 							lng: args.language,
 						}),
 					)
@@ -128,7 +122,7 @@ class Avatar extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t(`interactions.${this.name}.messages.invalid_member`, {
+							i18next.t(`commands.${this.name}.messages.invalid_member`, {
 								lng: args.language,
 							}),
 						)
@@ -148,7 +142,7 @@ class Avatar extends Command {
 						iconURL: member.user.displayAvatarURL(),
 					})
 					.setTitle(
-						i18next.t(`interactions.${this.name}.messages.member_avatar`, {
+						i18next.t(`commands.${this.name}.messages.member_avatar`, {
 							lng: args.language,
 						}),
 					)

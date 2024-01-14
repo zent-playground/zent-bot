@@ -1,5 +1,6 @@
 import {
 	ChatInputCommandInteraction,
+	Client,
 	Guild,
 	GuildMember,
 	GuildTextBasedChannel,
@@ -16,15 +17,15 @@ export class BasedHybridContext {
 	public member: GuildMember;
 	public channel: GuildTextBasedChannel;
 	public createdTimestamp: number;
+	public client: Client<true>;
 
-	public constructor(
-		public context: ChatInputCommandInteraction | Message<true>,
-	) {
+	public constructor(public context: ChatInputCommandInteraction | Message<true>) {
 		this.author = "author" in context ? context.author : context.user;
 		this.member = context.member as GuildMember;
 		this.guild = context.guild as Guild;
 		this.channel = context.channel as GuildTextBasedChannel;
 		this.createdTimestamp = context.createdTimestamp;
+		this.client = context.client;
 	}
 
 	public get message(): Message | undefined {
@@ -32,9 +33,7 @@ export class BasedHybridContext {
 	}
 
 	public get interaction(): ChatInputCommandInteraction | undefined {
-		return this.isInteraction()
-			? (this.context as ChatInputCommandInteraction)
-			: void 0;
+		return this.isInteraction() ? (this.context as ChatInputCommandInteraction) : void 0;
 	}
 
 	public isMessage(): this is HybridContextMessage {

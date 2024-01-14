@@ -1,4 +1,9 @@
-import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	EmbedBuilder,
+	SlashCommandBuilder,
+} from "discord.js";
 import Command from "../Command.js";
 import i18next from "i18next";
 import { ButtonStyle, PermissionFlagsBits } from "discord-api-types/v10";
@@ -9,6 +14,11 @@ class Prefix extends Command {
 		super({
 			name: "prefix",
 			subcommands: [
+				{
+					name: "help",
+					default: true,
+					hybrid: "help",
+				},
 				{
 					name: "show",
 					hybrid: "show",
@@ -53,6 +63,20 @@ class Prefix extends Command {
 		);
 	}
 
+	public async help(ctx: Command.HybridContext, args: Command.Args) {
+		const { language, prefix } = args;
+
+		await ctx.send({
+			embeds: [
+				ctx.client.utils.createHelpEmbed(this, {
+					language,
+					usage: [`${prefix} prefix show`, `${prefix} prefix set <prefix>`].join("\n"),
+					example: `${prefix} prefix set zent`,
+				}),
+			],
+		});
+	}
+
 	public async show(ctx: Command.HybridContext, args: Command.Args) {
 		const { guilds } = this.client.managers;
 		const { prefix } = (await guilds.get(ctx.guild.id))!;
@@ -60,9 +84,12 @@ class Prefix extends Command {
 		await ctx.send({
 			embeds: [
 				new EmbedBuilder()
-					.setAuthor({ name: ctx.guild.name, iconURL: ctx.guild.iconURL({ forceStatic: true })! })
+					.setAuthor({
+						name: ctx.guild.name,
+						iconURL: ctx.guild.iconURL({ forceStatic: true })!,
+					})
 					.setDescription(
-						i18next.t(`interactions.${this.name}.messages.current_prefix`, {
+						i18next.t(`commands.${this.name}.messages.current_prefix`, {
 							prefix: prefix,
 							lng: args.language,
 						}),
@@ -72,11 +99,15 @@ class Prefix extends Command {
 			components: [
 				new ActionRowBuilder<ButtonBuilder>().addComponents([
 					new ButtonBuilder()
-						.setLabel(i18next.t(`interactions.${this.name}.components.set_prefix`, { lng: args.language }))
+						.setLabel(
+							i18next.t(`commands.${this.name}.components.set_prefix`, {
+								lng: args.language,
+							}),
+						)
 						.setStyle(ButtonStyle.Secondary)
-						.setCustomId("prefix")
-				])
-			]
+						.setCustomId("prefix"),
+				]),
+			],
 		});
 
 		return;
@@ -85,9 +116,7 @@ class Prefix extends Command {
 	public async set(ctx: Command.HybridContext, args: Command.Args) {
 		const { guilds } = this.client.managers;
 
-		const prefixToSet = (
-			args.entries[0] || ctx.interaction?.options.getString("prefix")
-		)
+		const prefixToSet = (args.entries[0] || ctx.interaction?.options.getString("prefix"))
 			?.split(/ +/g)[0]
 			.toLowerCase();
 
@@ -96,7 +125,7 @@ class Prefix extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t(`interactions.${this.name}.messages.missing_argument`, {
+							i18next.t(`commands.${this.name}.messages.missing_argument`, {
 								lng: args.language,
 							}),
 						)
@@ -112,7 +141,7 @@ class Prefix extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							i18next.t("interactions.insufficient_permission", {
+							i18next.t("commands.insufficient_permission", {
 								lng: args.language,
 							}),
 						)
@@ -128,9 +157,12 @@ class Prefix extends Command {
 		await ctx.send({
 			embeds: [
 				new EmbedBuilder()
-					.setAuthor({ name: ctx.guild.name, iconURL: ctx.guild.iconURL({ forceStatic: true })! })
+					.setAuthor({
+						name: ctx.guild.name,
+						iconURL: ctx.guild.iconURL({ forceStatic: true })!,
+					})
 					.setDescription(
-						i18next.t(`interactions.${this.name}.messages.set_prefix`, {
+						i18next.t(`commands.${this.name}.messages.set_prefix`, {
 							prefix: prefixToSet,
 							lng: args.language,
 						}),

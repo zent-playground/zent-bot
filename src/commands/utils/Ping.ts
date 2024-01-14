@@ -24,9 +24,7 @@ class Ping extends Command {
 	public async executeHybrid(ctx: Command.HybridContext) {
 		const message = await ctx.send({
 			embeds: [
-				new EmbedBuilder()
-					.setTitle("Pinging...")
-					.setColor(this.client.config.colors.default),
+				new EmbedBuilder().setTitle("Pinging...").setColor(this.client.config.colors.default),
 			],
 		});
 
@@ -35,9 +33,7 @@ class Ping extends Command {
 				new EmbedBuilder()
 					.setTitle("Pong!")
 					.setDescription(
-						`API: \`${
-							message.createdTimestamp - ctx.createdTimestamp
-						}\`ms\nHeartbeat: \`${
+						`API: \`${message.createdTimestamp - ctx.createdTimestamp}\`ms\nHeartbeat: \`${
 							this.client.ws.ping
 						}\`ms\nDatabase: \`${await this.client.mysql.ping()}\`ms`,
 					)

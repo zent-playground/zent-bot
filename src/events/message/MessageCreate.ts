@@ -1,10 +1,7 @@
 import { Events, Message } from "discord.js";
 
 import Listener from "../Listener.js";
-import {
-	BasedHybridContext,
-	HybridContext,
-} from "../../commands/HybridContext.js";
+import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
 import Args from "../../commands/Args.js";
 import Command from "../../commands/Command.js";
 
@@ -20,20 +17,15 @@ class MessageCreate extends Listener {
 
 		const prefixes: string[] = [this.client.user.toString()];
 
-		if (process.env.NODE_ENV !== "DEVELOPMENT") {
+		if (process.env.NODE_ENV !== "development") {
 			prefixes.push(guild.prefix);
 		}
 
-		const prefix = prefixes.find((p) =>
-			message.content.toLowerCase().startsWith(p),
-		);
+		const prefix = prefixes.find((p) => message.content.toLowerCase().startsWith(p));
 
 		if (!prefix) return;
 
-		const [name, ...content] = message.content
-			.slice(prefix.length)
-			.trim()
-			.split(/ +/g);
+		const [name, ...content] = message.content.slice(prefix.length).trim().split(/ +/g);
 
 		let command: Command | undefined;
 
@@ -50,20 +42,14 @@ class MessageCreate extends Listener {
 		const args = new Args(content);
 
 		args.language = guild.language;
+		args.prefix = guild.prefix;
 
 		command.executeMessage?.(message, args);
-		command.executeHybrid?.(
-			new BasedHybridContext(message) as HybridContext,
-			args,
-		);
+		command.executeHybrid?.(new BasedHybridContext(message) as HybridContext, args);
 		this.handleSubcommand(message, command, args);
 	}
 
-	public async handleSubcommand(
-		message: Message<true>,
-		command: Command,
-		args: Args,
-	) {
+	public async handleSubcommand(message: Message<true>, command: Command, args: Args) {
 		let [first, second] = args.entries;
 
 		first = first?.toLowerCase();
@@ -73,15 +59,14 @@ class MessageCreate extends Listener {
 			this.client.utils.parseSubcommand(command, args, {
 				subcommandGroup: first,
 				subcommand: second,
-			}) ||
-			this.client.utils.parseSubcommand(command, args, { subcommand: first });
+			}) || this.client.utils.parseSubcommand(command, args, { subcommand: first });
 
 		if (!parsed) {
 			return;
 		}
 
 		const { entry } = parsed;
-		
+
 		if (entry.message) {
 			const func = command[
 				entry.message as keyof typeof command
@@ -95,10 +80,7 @@ class MessageCreate extends Listener {
 				entry.hybrid as keyof typeof command
 			] as typeof command.executeHybrid;
 
-			await func?.bind(command)(
-				new BasedHybridContext(message) as HybridContext,
-				args,
-			);
+			await func?.bind(command)(new BasedHybridContext(message) as HybridContext, args);
 		}
 	}
 }

@@ -1,5 +1,8 @@
 {
-	"interactions": {
+	"emoji": "🇺🇸",
+	"commands": {
+		"example": "Example",
+		"usage": "Usage",
 		"insufficient_permission": "You are not authorized to execute this command!",
 		"avatar": {
 			"data": {
@@ -49,6 +52,9 @@
 					},
 					"show": {
 						"description": "Show the current language of this server."
+					},
+					"list": {
+						"description": "Get a list of supported languages."
 					}
 				}
 			},

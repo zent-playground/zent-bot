@@ -17,14 +17,9 @@ export const loadEvents = async (client: Client) => {
 	const files = await glob(`${path}/*/**/*.js`);
 
 	for (const file of files) {
-		const listener = new (
-			await import(`${pathToFileURL(file)}`)
-		).default() as Listener;
+		const listener = new (await import(`${pathToFileURL(file)}`)).default() as Listener;
 		listener.client = client as Client<true>;
-		client[listener.once ? "once" : "on"](
-			listener.name,
-			listener.execute!.bind(listener),
-		);
+		client[listener.once ? "once" : "on"](listener.name, listener.execute!.bind(listener));
 	}
 };
 
@@ -34,29 +29,25 @@ export const loadCommands = async (client: Client) => {
 	const files = await glob(`${path}/*/**/*.js`);
 
 	for (const file of files) {
-		const command = new (
-			await import(`${pathToFileURL(file)}`)
-		).default() as Command;
+		const command = new (await import(`${pathToFileURL(file)}`)).default() as Command;
 		command.client = client as Client<true>;
 		await command.initialize?.();
 		client.commands.set(command.name, command);
 	}
 };
 
-export const loadComponents = async  (client: Client)=> {
+export const loadComponents = async (client: Client) => {
 	const path = join(_dirname, "..", "components").replace(/\\/g, "/");
 
 	const files = await glob(`${path}/*/**/*.js`);
 
 	for (const file of files) {
 		const dirs = file.split(sep);
-		const component = new (
-			await import(`${pathToFileURL(file)}`)
-		).default() as Component;
+		const component = new (await import(`${pathToFileURL(file)}`)).default() as Component;
 		component.client = client as Client<true>;
 		client.components[dirs[dirs.length - 3] as keyof ClientComponents].set(
 			component.preCustomId,
-			component
+			component,
 		);
 	}
 };

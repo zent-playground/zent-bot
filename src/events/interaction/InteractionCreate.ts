@@ -1,10 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, Events, Interaction } from "discord.js";
 
 import Listener from "../Listener.js";
-import {
-	BasedHybridContext,
-	HybridContext,
-} from "../../commands/HybridContext.js";
+import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
 
 import Command from "../../commands/Command.js";
 import CommandArgs from "../../commands/Args.js";
@@ -20,9 +17,7 @@ class InteractionCreate extends Listener {
 	public async execute(interaction: Interaction) {
 		if (interaction.isCommand() || interaction.isAutocomplete()) {
 			const command = this.client.commands.find((command) =>
-				command.applicationCommands.some(
-					(data) => data.name === interaction.commandName,
-				),
+				command.applicationCommands.some((data) => data.name === interaction.commandName),
 			);
 
 			if (!command) return;
@@ -33,7 +28,7 @@ class InteractionCreate extends Listener {
 						embeds: [
 							new EmbedBuilder()
 								.setDescription("You can only use my commands in the server.")
-								.setColor(this.client.config.colors.error)
+								.setColor(this.client.config.colors.error),
 						],
 						ephemeral: true,
 					});
@@ -41,20 +36,16 @@ class InteractionCreate extends Listener {
 					return;
 				}
 
-				const guild = (await this.client.managers.guilds.get(
-					interaction.guild.id,
-				))!;
+				const guild = (await this.client.managers.guilds.get(interaction.guild.id))!;
 
 				const args = new CommandArgs();
 
 				args.language = guild.language;
+				args.prefix = guild.prefix;
 
 				if (interaction.isChatInputCommand()) {
 					command.executeChatInput?.(interaction);
-					command.executeHybrid?.(
-						new BasedHybridContext(interaction) as HybridContext,
-						args,
-					);
+					command.executeHybrid?.(new BasedHybridContext(interaction) as HybridContext, args);
 					this.handleSubcommand(interaction, command, args);
 				}
 
@@ -94,9 +85,7 @@ class InteractionCreate extends Listener {
 
 			if (!component) return;
 
-			const guild = (await this.client.managers.guilds.get(
-				interaction.guild!.id,
-			))!;
+			const guild = (await this.client.managers.guilds.get(interaction.guild!.id))!;
 
 			const args = new ComponentArgs();
 
@@ -105,7 +94,7 @@ class InteractionCreate extends Listener {
 
 			const embed = new EmbedBuilder()
 				.setDescription(
-					i18next.t("interactions.insufficient_permission", { lng: args.language })
+					i18next.t("interactions.insufficient_permission", { lng: args.language }),
 				)
 				.setColor(this.client.config.colors.error);
 
@@ -148,8 +137,7 @@ class InteractionCreate extends Listener {
 		args: CommandArgs,
 	) {
 		const subcommand = interaction.options.getSubcommand(false) || undefined;
-		const subcommandGroup =
-			interaction.options.getSubcommandGroup(false) || undefined;
+		const subcommandGroup = interaction.options.getSubcommandGroup(false) || undefined;
 
 		const parsed = this.client.utils.parseSubcommand(command, args, {
 			subcommand,
@@ -173,10 +161,7 @@ class InteractionCreate extends Listener {
 			const func = command[
 				entry.hybrid as keyof typeof command
 			] as typeof command.executeHybrid;
-			await func?.bind(command)(
-				new BasedHybridContext(interaction) as HybridContext,
-				args,
-			);
+			await func?.bind(command)(new BasedHybridContext(interaction) as HybridContext, args);
 		}
 	}
 }

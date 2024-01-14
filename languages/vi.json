@@ -1,12 +1,15 @@
 {
-	"interactions": {
+	"emoji": "🇻🇳",
+	"commands": {
+		"example": "Ví dụ",
+		"usage": "Cách dùng",
 		"insufficient_permission": "Cậu không có quyền để dùng lệnh này!",
 		"avatar": {
 			"data": {
 				"description": "Xem ảnh đại diện người dùng/thành viên.",
 				"options": {
 					"user": {
-						"description": "Xme ảnh đại diện người dùng.",
+						"description": "Xem ảnh đại diện người dùng.",
 						"options": {
 							"user": {
 								"description": "Chọn một người dùng."
@@ -49,6 +52,9 @@
 					},
 					"show": {
 						"description": "Xem ngôn ngữ hiện tại của server này."
+					},
+					"list": {
+						"description": "Xem danh sách những ngôn ngữ được bot hỗ trợ."
 					}
 				}
 			},
@@ -57,10 +63,10 @@
 				"unsupported_language": "Ngôn ngữ này không được hỗ trợ!",
 				"set_language": "Đã đặt ngôn ngữ thành `Tiếng Việt (Vietnamese)`.",
 				"current_language": "Ngôn ngữ hiện tại là `Tiếng Việt (Vietnamese)`.",
-				"edit_language": "Please choose a new language."
+				"edit_language": "Vui lòng chọn một ngôn ngữ mới."
 			},
 			"components": {
-				"set_language": "Edit Language"
+				"set_language": "Đổi ngôn ngữ"
 			}
 		},
 		"ping": {
@@ -91,8 +97,8 @@
 				"missing_argument": "Cậu phải cung cấp một prefix mới để đặt!"
 			},
 			"components": {
-				"label_prefix": "New Prefix",
-				"set_prefix": "Edit Prefix"
+				"label_prefix": "Prefix mới",
+				"set_prefix": "Đổi prefix"
 			}
 		}
 	}
