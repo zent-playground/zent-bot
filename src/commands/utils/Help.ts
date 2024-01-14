@@ -10,13 +10,13 @@ class Help extends Command {
 	}
 
 	public initialize() {
-		const data = localizations.get(this.name)!;
+		const { description, descriptions } = localizations.get(this.name)!;
 
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
 				.setName(this.name)
-				.setDescription(data.descriptions["en-US"])
-				.setDescriptionLocalizations(data.descriptions)
+				.setDescription(description)
+				.setDescriptionLocalizations(descriptions)
 				.toJSON(),
 		);
 	}

@@ -10,12 +10,12 @@ class Ping extends Command {
 	}
 
 	public initialize() {
-		const { descriptions } = localizations.get(this.name)!;
+		const { description, descriptions } = localizations.get(this.name)!;
 
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
 				.setName(this.name)
-				.setDescription(descriptions["en-US"])
+				.setDescription(description)
 				.setDescriptionLocalizations(descriptions)
 				.toJSON(),
 		);

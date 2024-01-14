@@ -25,35 +25,36 @@ class Avatar extends Command {
 	}
 
 	public initialize() {
-		const data = localizations.get(this.name)!;
+		const { description, descriptions, options } = localizations.get(this.name)!;
+		const { user, member } = options;
 
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
 				.setName(this.name)
-				.setDescription(data.descriptions["en-US"])
-				.setDescriptionLocalizations(data.descriptions)
+				.setDescription(description)
+				.setDescriptionLocalizations(descriptions)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("user")
-						.setDescription("Displays user avatar.")
-						.setDescriptionLocalizations(data.options.user.descriptions)
+						.setDescription(user.description)
+						.setDescriptionLocalizations(options.user.descriptions)
 						.addUserOption((option) =>
 							option
 								.setName("user")
 								.setDescription("Choose a user.")
-								.setDescriptionLocalizations(data.options.user.options.user.descriptions),
+								.setDescriptionLocalizations(user.options.user.descriptions),
 						),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("member")
-						.setDescription("Displays member avatar.")
-						.setDescriptionLocalizations(data.options.member.descriptions)
+						.setDescription(member.description)
+						.setDescriptionLocalizations(member.descriptions)
 						.addUserOption((option) =>
 							option
 								.setName("member")
 								.setDescription("Choose a member.")
-								.setDescriptionLocalizations(data.options.member.options.member.descriptions),
+								.setDescriptionLocalizations(member.options.member.descriptions),
 						),
 				)
 				.toJSON(),
