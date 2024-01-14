@@ -13,18 +13,26 @@ export default class extends Component {
 	public override async execute(interaction: Component.Button, args: Component.Args) {
 		await interaction.showModal(
 			new ModalBuilder()
-				.setTitle(i18next.t(`interactions.${this.preCustomId}.components.set_prefix`, { lng: args.language }))
+				.setTitle(
+					i18next.t(`commands.${this.preCustomId}.components.set_prefix`, {
+						lng: args.language,
+					}),
+				)
 				.addComponents(
 					new ActionRowBuilder<TextInputBuilder>().addComponents(
 						new TextInputBuilder()
-							.setLabel(i18next.t(`interactions.${this.preCustomId}.components.label_prefix`, { lng: args.language }))
+							.setLabel(
+								i18next.t(`commands.${this.preCustomId}.components.label_prefix`, {
+									lng: args.language,
+								}),
+							)
 							.setMaxLength(5)
 							.setStyle(TextInputStyle.Short)
 							.setRequired(true)
-							.setCustomId("prefix")
-					)
+							.setCustomId("prefix"),
+					),
 				)
-				.setCustomId(this.preCustomId)
+				.setCustomId(this.preCustomId),
 		);
 	}
 }

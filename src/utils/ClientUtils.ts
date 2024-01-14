@@ -1,7 +1,9 @@
-import { Client } from "discord.js";
+import { Client, EmbedBuilder, codeBlock } from "discord.js";
 import Command from "../commands/Command.js";
 import Args from "../commands/Args.js";
 import { Subcommand, SubcommandBody } from "../types/subcommand.js";
+import { localizations } from "./localizations.js";
+import i18next from "i18next";
 
 class ClientUtils {
 	public constructor(public client: Client) {}
@@ -76,6 +78,45 @@ class ClientUtils {
 			parent,
 			command,
 		};
+	}
+
+	public createHelpEmbed(
+		command: Command,
+		options: {
+			language: string;
+			usage?: string;
+			example?: string;
+		},
+	) {
+		const { descriptions } = localizations.get(command.name)!;
+
+		const embed = new EmbedBuilder()
+			.setTitle(command.name)
+			.setDescription(descriptions[options.language])
+			.setColor(this.client.config.colors.default);
+
+		if (command.aliases.length) {
+			embed.addFields({
+				name: "Aliases:",
+				value: command.aliases.map((x) => `\`${x}\``).join(", "),
+			});
+		}
+
+		if (options.usage) {
+			embed.addFields({
+				name: `${i18next.t("commands.usage", { lng: options.language })}:`,
+				value: codeBlock(options.usage),
+			});
+		}
+
+		if (options.example) {
+			embed.addFields({
+				name: `${i18next.t("commands.example", { lng: options.language })}:`,
+				value: codeBlock(options.example),
+			});
+		}
+
+		return embed;
 	}
 }
 

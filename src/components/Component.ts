@@ -28,11 +28,14 @@ class Component {
 	public client!: Client<true>;
 	public subCustomId!: string;
 
-	public constructor(public preCustomId: string, public options?: ComponentOptions) {}
+	public constructor(
+		public preCustomId: string,
+		public options?: ComponentOptions,
+	) {}
 
 	public execute?(
 		interaction: Component.Button | Component.Modal | Component.SelectMenu,
-		args: Component.Args
+		args: Component.Args,
 	): Awaitable<void>;
 }
 
