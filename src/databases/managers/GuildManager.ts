@@ -1,6 +1,8 @@
 import { Guild } from "../../types/database.js";
 import BaseManager from "../BaseManager.js";
 
+type Options = BaseManager.Optional<Guild, "id">;
+
 class GuildManager extends BaseManager<Guild> {
 	public constructor(mysql: BaseManager.MySql, redis: BaseManager.Redis) {
 		super(mysql, redis, "guilds");
@@ -17,13 +19,13 @@ class GuildManager extends BaseManager<Guild> {
 		return data || null;
 	}
 
-	public async set(guildId: string, values: Partial<Guild>) {
+	public async set(guildId: string, values: Options) {
 		values = Object.assign(values, { id: guildId });
 		await super.insert(values);
 		await this.cache.set(guildId, (await super.select(`id = '${guildId}'`))[0]);
 	}
 
-	public override async update(guildId: string, values: Partial<Guild>) {
+	public override async update(guildId: string, values: Options) {
 		await super.update(`id = '${guildId}'`, values);
 		await this.cache.update(guildId, values);
 	}

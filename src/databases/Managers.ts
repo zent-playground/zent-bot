@@ -1,15 +1,15 @@
 import GuildManager from "./managers/GuildManager.js";
 import MySql from "./mysql/MySql.js";
 import Redis from "./redis/Redis.js";
-import VoiceManager from "./managers/VoiceManager";
+import TempVoiceChannelManager from "./managers/TempVoice/TempVoiceChannelManager.js";
 
 class Managers {
 	public guilds: GuildManager;
-	public voices: VoiceManager;
+	public tempVoiceChannels: TempVoiceChannelManager;
 
 	public constructor(mysql: MySql, redis: Redis) {
 		this.guilds = new GuildManager(mysql, redis);
-		this.voices = new VoiceManager(mysql, redis);
+		this.tempVoiceChannels = new TempVoiceChannelManager(mysql, redis);
 	}
 }
 

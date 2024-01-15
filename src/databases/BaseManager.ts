@@ -4,6 +4,7 @@ import RedisManager from "./redis/RedisManager.js";
 namespace BaseManager {
 	export type MySql = import("./mysql/MySql.js").default;
 	export type Redis = import("./redis/Redis.js").default;
+	export type Optional<T, K extends string = string> = Omit<Partial<T>, K>;
 }
 
 class BaseManager<T> extends MySqlManager<T> {
