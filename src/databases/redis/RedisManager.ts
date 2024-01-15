@@ -10,27 +10,27 @@ class RedisManager<T> {
 		this.prefix = prefix;
 	}
 
-	private getId(key: string): string {
-		return this.prefix + key;
+	private getId(key: string | number): string {
+		return this.prefix + String(key);
 	}
 
-	async set(key: string, values: T): Promise<void> {
+	async set(key: string | number, values: T): Promise<void> {
 		if (!values) return;
 		const serializedValues = JSON.stringify(values);
 		await this.client.set(this.getId(key), serializedValues);
 	}
 
-	async delete(key: string): Promise<void> {
+	async delete(key: string | number): Promise<void> {
 		await this.client.del(this.getId(key));
 	}
 
-	async get(key: string): Promise<T | null> {
+	async get(key: string | number): Promise<T | null> {
 		const result = await this.client.get(this.getId(key));
 		if (!result) return null;
 		return JSON.parse(result) as T;
 	}
 
-	async update(key: string, values: Partial<T>): Promise<void> {
+	async update(key: string | number, values: Partial<T>): Promise<void> {
 		const existingValue = await this.get(this.getId(key));
 
 		if (!existingValue) {

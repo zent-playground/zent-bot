@@ -22,7 +22,7 @@ class MySqlManager<T> {
 		);
 	}
 
-	public async delete(condition?: string) {
+	public async delete(condition: string) {
 		await this.db.query(`DELETE FROM ${this.table} ${condition ? `WHERE ${condition}` : ""}`);
 	}
 

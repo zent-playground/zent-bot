@@ -94,7 +94,7 @@ class InteractionCreate extends Listener {
 
 			const embed = new EmbedBuilder()
 				.setDescription(
-					i18next.t("interactions.insufficient_permission", { lng: args.language }),
+					i18next.t("commands.insufficient_permission", { lng: args.language }),
 				)
 				.setColor(this.client.config.colors.error);
 

@@ -6,31 +6,31 @@ class GuildManager extends BaseManager<Guild> {
 		super(mysql, redis, "guilds");
 	}
 
-	public async get(id: string): Promise<Guild | null> {
-		let data = await this.cache.get(id);
+	public async get(guildId: string): Promise<Guild | null> {
+		let data = await this.cache.get(guildId);
 
 		if (!data) {
-			data = (await super.select(`id = '${id}'`))[0];
-			await this.cache.set(id, data);
+			data = (await super.select(`id = '${guildId}'`))[0];
+			await this.cache.set(guildId, data);
 		}
 
 		return data || null;
 	}
 
-	public async set(id: string, values: Partial<Guild>) {
-		values = Object.assign(values, { id });
+	public async set(guildId: string, values: Partial<Guild>) {
+		values = Object.assign(values, { id: guildId });
 		await super.insert(values);
-		await this.cache.set(id, (await super.select(`id = '${id}'`))[0]);
+		await this.cache.set(guildId, (await super.select(`id = '${guildId}'`))[0]);
 	}
 
-	public override async update(id: string, values: Partial<Guild>) {
-		await super.update(`id = '${id}'`, values);
-		await this.cache.set(id, Object.assign((await this.get(id))!, values));
+	public override async update(guildId: string, values: Partial<Guild>) {
+		await super.update(`id = '${guildId}'`, values);
+		await this.cache.update(guildId, values);
 	}
 
-	public override async delete(id: string) {
-		await super.delete(`id = '${id}'`);
-		await this.cache.delete(id);
+	public override async delete(guildId: string) {
+		await super.delete(`id = '${guildId}'`);
+		await this.cache.delete(guildId);
 	}
 }
 
