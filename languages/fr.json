@@ -1,7 +1,7 @@
 {
 	"emoji": "🇫🇷",
 	"commands": {
-		"example": "Example",
+		"example": "Exemple",
 		"usage": "Usage",
 		"insufficient_permission": "Vous n'êtes pas autorisé à exécuter cette commande !",
 		"avatar": {
