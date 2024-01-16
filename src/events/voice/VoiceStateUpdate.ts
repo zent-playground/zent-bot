@@ -1,5 +1,5 @@
-import { Events, VoiceState } from "discord.js";
-import Listener from "../Listener";
+import { ChannelType, Events, VoiceState } from "discord.js";
+import Listener from "../Listener.js";
 
 class VoiceStateUpdate extends Listener {
 	public constructor() {
@@ -9,15 +9,25 @@ class VoiceStateUpdate extends Listener {
 	public async execute(oldState: VoiceState, newState: VoiceState) {
 		const { tempVoiceChannels } = this.client.managers;
 
-		if (oldState.channelId === newState.channelId) {
-			const { channel } = newState;
+		if (newState.channelId) {
+			const { channel, guild, member } = newState;
 
-			if (!channel) {
+			if (!channel || !member) {
 				return;
 			}
 
-			if (await tempVoiceChannels.creators.get(channel.id)) {
-				// Create temp vc
+			if (channel.id === "1196811228652240956") {
+				const tempVoiceChannel = await guild.channels.create({
+					name: member.user.tag,
+					type: ChannelType.GuildVoice,
+					parent: channel.parent,
+				});
+
+				//await tempVoiceChannels.set(tempVoiceChannel.id, {
+				//	author_id: member.user.id,
+				//});
+
+				await member.voice.setChannel(tempVoiceChannel.id);
 			} else {
 				const tempVoice = await tempVoiceChannels.get(channel.id);
 

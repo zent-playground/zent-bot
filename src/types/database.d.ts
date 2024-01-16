@@ -8,11 +8,9 @@ export interface Guild {
 
 export interface TempVoiceChannel {
 	readonly id: string;
-	readonly guild_id: string;
 	readonly author_id: string;
 }
 
 export interface CreatorVoiceChannel {
 	readonly id: number;
-	readonly guild_id: string;
 }

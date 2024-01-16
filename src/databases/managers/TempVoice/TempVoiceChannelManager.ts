@@ -1,5 +1,5 @@
-import BaseManager from "../../BaseManager";
-import { TempVoiceChannel } from "../../../types/database";
+import BaseManager from "../../BaseManager.js";
+import { TempVoiceChannel } from "../../../types/database.js";
 import CreatorVoiceChannelManager from "./CreatorVoiceChannelManager.js";
 
 type Options = BaseManager.Optional<TempVoiceChannel, "id">;
