@@ -12,7 +12,7 @@ class BaseManager<T> extends MySqlManager<T> {
 
 	public constructor(mysql: BaseManager.MySql, redis: BaseManager.Redis, table: string) {
 		super(mysql, table);
-		this.cache = new RedisManager(redis.client, redis.prefix);
+		this.cache = new RedisManager(redis.client, `${redis.prefix}${table}:`);
 	}
 }
 

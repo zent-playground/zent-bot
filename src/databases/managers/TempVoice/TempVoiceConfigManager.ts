@@ -1,20 +1,20 @@
-import BaseManager from "../BaseManager.js";
+import BaseManager from "../../BaseManager.js";
 
-import { Guild } from "../../types/database.js";
+import { TempVoiceConfig } from "../../../types/database.js";
 
-type Options = BaseManager.Optional<Guild, "id">;
+type Options = BaseManager.Optional<TempVoiceConfig, "guild_id">
 
-class GuildManager extends BaseManager<Guild> {
+class TempVoiceConfigManager extends BaseManager<TempVoiceConfig> {
 	public constructor(mysql: BaseManager.MySql, redis: BaseManager.Redis) {
-		super(mysql, redis, "guilds");
+		super(mysql, redis, "temp_voice_configs");
 	}
 
-	public async get(guildId: string, force?: boolean): Promise<Guild | null> {
+	public async get(guildId: string, force?: boolean): Promise<TempVoiceConfig | null> {
 		const data = await this.cache.get(guildId);
 
 		if (!data || force) {
 			const results = await this.select({
-				where: `id = '${guildId}'`,
+				where: `guild_id = '${guildId}'`,
 				selectFields: ["*"]
 			});
 
@@ -28,20 +28,20 @@ class GuildManager extends BaseManager<Guild> {
 	}
 
 	public async set(guildId: string, values: Options): Promise<void> {
-		values = Object.assign(values, { id: guildId });
+		values = Object.assign(values, { guild_id: guildId });
 		await this.insert(values);
 		await this.cache.set(guildId, (await this.get(guildId, true))!);
 	}
 
 	public override async update(guildId: string, values: Options): Promise<void> {
-		await super.update(`id = '${guildId}'`, values);
+		await super.update(`guild_id = '${guildId}'`, values);
 		await this.cache.update(guildId, values);
 	}
 
 	public override async delete(guildId: string): Promise<void> {
-		await super.delete(`id = '${guildId}'`);
+		await super.delete(`guild_id = '${guildId}'`);
 		await this.cache.delete(guildId);
 	}
 }
 
-export default GuildManager;
+export default TempVoiceConfigManager;
