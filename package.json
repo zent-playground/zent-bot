@@ -1,6 +1,6 @@
 {
 	"name": "zent",
-	"description": "A powerful cute Discord bot.",
+	"description": "A cute, powerful Discord bot.",
 	"main": "dist/index.js",
 	"type": "module",
 	"scripts": {
