@@ -152,7 +152,7 @@ class Prefix extends Command {
 			return;
 		}
 
-		await guilds.update(ctx.guild.id, { prefix: prefixToSet });
+		await guilds.edit(ctx.guild.id, { prefix: prefixToSet });
 
 		await ctx.send({
 			embeds: [

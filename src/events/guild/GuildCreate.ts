@@ -1,6 +1,7 @@
 import { Events, Guild } from "discord.js";
-import Listener from "../Listener.js";
 import i18next from "i18next";
+
+import Listener from "../Listener.js";
 
 class GuildCreate extends Listener {
 	public constructor() {

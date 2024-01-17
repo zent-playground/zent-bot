@@ -1,7 +1,6 @@
 import { Client, Collection, GatewayIntentBits } from "discord.js";
 
 import { loadCommands, loadComponents, loadEvents } from "./utils/loader.js";
-import config from "./config.js";
 import ClientUtils from "./utils/ClientUtils.js";
 import Logger from "./utils/Logger.js";
 import "./utils/i18next.js";
@@ -10,12 +9,15 @@ import Managers from "./databases/Managers.js";
 import MySql from "./databases/mysql/MySql.js";
 import Redis from "./databases/redis/Redis.js";
 
+import config from "./config.js";
+
 const client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.MessageContent,
 		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.GuildVoiceStates,
 	],
 	allowedMentions: {
 		repliedUser: false,
@@ -45,7 +47,7 @@ client.mysql
 
 client.redis
 	.connect()
-	//.then(() => client.redis.client.flushAll())
+	.then(() => client.redis.client.flushAll())
 	.catch((err) => {
 		Logger.Error("Unable to connect to Redis:\t");
 		console.error(err);

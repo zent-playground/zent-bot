@@ -1,9 +1,12 @@
 import { Client, EmbedBuilder, codeBlock } from "discord.js";
+import i18next from "i18next";
+
 import Command from "../commands/Command.js";
 import Args from "../commands/Args.js";
-import { Subcommand, SubcommandBody } from "../types/subcommand.js";
+
 import { localizations } from "./localizations.js";
-import i18next from "i18next";
+
+import { Subcommand, SubcommandBody } from "../types/subcommand.js";
 
 class ClientUtils {
 	public constructor(public client: Client) {}

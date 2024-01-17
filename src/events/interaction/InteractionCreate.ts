@@ -1,13 +1,14 @@
 import { ChatInputCommandInteraction, EmbedBuilder, Events, Interaction } from "discord.js";
+import i18next from "i18next";
 
 import Listener from "../Listener.js";
-import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
 
-import Command from "../../commands/Command.js";
+import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
+import Command from "../../commands/Command";
 import CommandArgs from "../../commands/Args.js";
+
 import Component from "../../components/Component.js";
 import ComponentArgs from "../../components/Args.js";
-import i18next from "i18next";
 
 class InteractionCreate extends Listener {
 	public constructor() {
@@ -94,7 +95,7 @@ class InteractionCreate extends Listener {
 
 			const embed = new EmbedBuilder()
 				.setDescription(
-					i18next.t("interactions.insufficient_permission", { lng: args.language }),
+					i18next.t("commands.insufficient_permission", { lng: args.language }),
 				)
 				.setColor(this.client.config.colors.error);
 

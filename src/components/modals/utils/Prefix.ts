@@ -16,7 +16,7 @@ export default class extends Component {
 		const { guilds } = this.client.managers;
 		const { user } = interaction;
 
-		await guilds.update(interaction.guildId!, { prefix });
+		await guilds.edit(interaction.guildId!, { prefix });
 
 		await interaction.reply({
 			embeds: [

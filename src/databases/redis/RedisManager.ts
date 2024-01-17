@@ -1,4 +1,5 @@
 import { RedisClientType } from "redis";
+
 import Logger from "../../utils/Logger.js";
 
 class RedisManager<T> {
@@ -10,36 +11,71 @@ class RedisManager<T> {
 		this.prefix = prefix;
 	}
 
-	private getId(key: string): string {
-		return this.prefix + key;
-	}
-
-	async set(key: string, values: T): Promise<void> {
-		if (!values) return;
-		const serializedValues = JSON.stringify(values);
-		await this.client.set(this.getId(key), serializedValues);
-	}
-
-	async delete(key: string): Promise<void> {
-		await this.client.del(this.getId(key));
-	}
-
-	async get(key: string): Promise<T | null> {
-		const result = await this.client.get(this.getId(key));
-		if (!result) return null;
-		return JSON.parse(result) as T;
-	}
-
-	async update(key: string, values: Partial<T>): Promise<void> {
-		const existingValue = await this.get(this.getId(key));
-
-		if (!existingValue) {
-			Logger.Warn(`No record found for id ${key}`);
-			return;
+	private getId(key: string | number): string | null {
+		if (!key) {
+			Logger.Warn("Invalid or empty key provided in RedisManager.getId");
+			return null;
 		}
 
-		const updatedValue = { ...existingValue, ...values };
-		await this.set(this.getId(key), updatedValue as T);
+		return this.prefix + String(key);
+	}
+
+	async set(key: string | number, values: T, ttl?: number): Promise<void> {
+		try {
+			if (!values) {
+				Logger.Warn(`No values provided to set for key: ${key}`);
+				return;
+			}
+
+			const serializedValues = JSON.stringify(values);
+			const id = this.getId(key);
+			if (!id) return;
+
+			const setOptions = ttl ? { EX: ttl } : undefined;
+			await this.client.set(id, serializedValues, setOptions);
+		} catch (error) {
+			Logger.Error(`Error setting key ${key} with values ${JSON.stringify(values)}`, `${error}`);
+		}
+	}
+
+	async clear(key: string | number): Promise<void> {
+		try {
+			const id = this.getId(key);
+			if (!id) return;
+
+			await this.client.del(id);
+		} catch (error) {
+			Logger.Error(`Error deleting key ${key}`, `${error}`);
+		}
+	}
+
+	async get(key: string | number): Promise<T | null> {
+		try {
+			const id = this.getId(key);
+			if (!id) return null;
+
+			const result = await this.client.get(id);
+			return result ? JSON.parse(result) as T : null;
+		} catch (error) {
+			Logger.Error(`Error retrieving key ${key}`, `${error}`);
+			return null;
+		}
+	}
+
+	async edit(key: string | number, values: Partial<T>): Promise<void> {
+		try {
+			const existingValue = await this.get(key);
+
+			if (!existingValue) {
+				Logger.Warn(`No record found for updating key ${key}`);
+				return;
+			}
+
+			const updatedValue = { ...existingValue, ...values };
+			await this.set(key, updatedValue as T);
+		} catch (error) {
+			Logger.Error(`Error updating key ${key} with values ${JSON.stringify(values)}`, `${error}`);
+		}
 	}
 }
 

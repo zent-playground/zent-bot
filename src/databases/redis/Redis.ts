@@ -1,4 +1,5 @@
 import { createClient, RedisClientType } from "redis";
+
 import Logger from "../../utils/Logger.js";
 
 interface RedisConfig {
