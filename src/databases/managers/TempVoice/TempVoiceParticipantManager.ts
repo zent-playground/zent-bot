@@ -16,7 +16,7 @@ class TempVoiceParticipantManager extends BaseManager<TempVoiceParticipant> {
 			conditions += ` AND member_id = '${memberId}'`;
 		}
 
-		const results = await this.select({
+		const results = await super.select({
 			where: conditions,
 			selectFields: ["*"],
 		});
@@ -33,12 +33,12 @@ class TempVoiceParticipantManager extends BaseManager<TempVoiceParticipant> {
 		await super.insert(values);
 	}
 
-	public override async update(channelId: string, values: Options): Promise<void> {
-		return super.update(`id = ${channelId}`, values);
+	public async edit(channelId: string, memberId: string, values: Options): Promise<void> {
+		return super.update(`id = ${channelId} AND member_id = ${memberId}`, values);
 	}
 
-	public override async delete(channelId: string): Promise<void> {
-		return super.delete(`id = ${channelId}`);
+	public async clear(channelId: string, memberId: string): Promise<void> {
+		return super.delete(`id = ${channelId} AND member_id = ${memberId}`);
 	}
 }
 
