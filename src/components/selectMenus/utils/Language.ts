@@ -17,7 +17,7 @@ export default class extends Component {
 		const [language] = interaction.values;
 		const { guilds } = this.client.managers;
 
-		await guilds.update(interaction.guildId!, { language });
+		await guilds.edit(interaction.guildId!, { language });
 
 		await interaction.reply({
 			embeds: [

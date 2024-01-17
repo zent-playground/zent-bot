@@ -229,7 +229,7 @@ class Language extends Command {
 			return;
 		}
 
-		await guilds.update(ctx.guild.id, { language: languageCode });
+		await guilds.edit(ctx.guild.id, { language: languageCode });
 
 		await ctx.send({
 			embeds: [
