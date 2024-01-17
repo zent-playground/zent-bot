@@ -26,7 +26,7 @@ class MySqlManager<T> {
 		this.table = table;
 	}
 
-	public async insert(values: Partial<T>): Promise<void> {
+	protected async insert(values: Partial<T>): Promise<void> {
 		const builder = new QueryBuilder().insert(this.table, values);
 		try {
 			const query = builder.build();
@@ -36,7 +36,7 @@ class MySqlManager<T> {
 		}
 	}
 
-	public async delete(condition: string): Promise<void> {
+	protected async delete(condition: string): Promise<void> {
 		if (!condition) {
 			Logger.Warn("Attempted to delete with empty condition in MySqlManager.delete");
 			return;
@@ -51,7 +51,7 @@ class MySqlManager<T> {
 		}
 	}
 
-	public async select(options?: QueryOptions<T>): Promise<T[]> {
+	protected async select(options?: QueryOptions<T>): Promise<T[]> {
 		const builder = new QueryBuilder().select(this.table, options?.selectFields);
 
 		options?.joins?.forEach(join => {
@@ -84,7 +84,7 @@ class MySqlManager<T> {
 		}
 	}
 
-	public async update(condition: string, values: Partial<T>): Promise<void> {
+	protected async update(condition: string, values: Partial<T>): Promise<void> {
 		if (!condition) {
 			Logger.Warn("Attempted to update with invalid condition in MySqlManager.update");
 			return;

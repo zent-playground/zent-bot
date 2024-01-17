@@ -28,7 +28,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 			conditions += ` AND author_id = '${authorId}'`;
 		}
 
-		const results = await this.select({
+		const results = await super.select({
 			where: conditions,
 			selectFields: ["*"]
 		});
@@ -42,14 +42,14 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 
 	public async set(channelId: string, values: Options): Promise<void> {
 		values = Object.assign(values, { id: channelId });
-		await this.insert(values);
+		await super.insert(values);
 	}
 
-	public override async update(channelId: string, values: Options): Promise<void> {
+	public async edit(channelId: string, values: Options): Promise<void> {
 		await super.update(`id = '${channelId}'`, values);
 	}
 
-	public override async delete(channelId: string): Promise<void> {
+	public async clear(channelId: string): Promise<void> {
 		await super.delete(`id = '${channelId}'`);
 	}
 }

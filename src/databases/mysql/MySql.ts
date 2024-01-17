@@ -27,13 +27,8 @@ class MySql {
 	}
 
 	public async query(sql: string, params?: never[]): Promise<any> {
-		try {
-			const [rows] = await this.pool.query(sql, params);
-			return rows;
-		} catch (error) {
-			Logger.Error("MySql Query Error:\t");
-			console.error(error);
-		}
+		const [rows] = await this.pool.query(sql, params);
+		return rows;
 	}
 
 	public async ping(): Promise<number> {

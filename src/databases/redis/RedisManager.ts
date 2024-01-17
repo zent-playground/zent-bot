@@ -38,7 +38,7 @@ class RedisManager<T> {
 		}
 	}
 
-	async delete(key: string | number): Promise<void> {
+	async clear(key: string | number): Promise<void> {
 		try {
 			const id = this.getId(key);
 			if (!id) return;
@@ -62,7 +62,7 @@ class RedisManager<T> {
 		}
 	}
 
-	async update(key: string | number, values: Partial<T>): Promise<void> {
+	async edit(key: string | number, values: Partial<T>): Promise<void> {
 		try {
 			const existingValue = await this.get(key);
 

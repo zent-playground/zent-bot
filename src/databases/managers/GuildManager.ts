@@ -13,7 +13,7 @@ class GuildManager extends BaseManager<Guild> {
 		const data = await this.cache.get(guildId);
 
 		if (!data || force) {
-			const results = await this.select({
+			const results = await super.select({
 				where: `id = '${guildId}'`,
 				selectFields: ["*"]
 			});
@@ -29,18 +29,18 @@ class GuildManager extends BaseManager<Guild> {
 
 	public async set(guildId: string, values: Options): Promise<void> {
 		values = Object.assign(values, { id: guildId });
-		await this.insert(values);
+		await super.insert(values);
 		await this.cache.set(guildId, (await this.get(guildId, true))!);
 	}
 
-	public override async update(guildId: string, values: Options): Promise<void> {
+	public async edit(guildId: string, values: Options): Promise<void> {
 		await super.update(`id = '${guildId}'`, values);
-		await this.cache.update(guildId, values);
+		await this.cache.edit(guildId, values);
 	}
 
-	public override async delete(guildId: string): Promise<void> {
+	public async clear(guildId: string): Promise<void> {
 		await super.delete(`id = '${guildId}'`);
-		await this.cache.delete(guildId);
+		await this.cache.clear(guildId);
 	}
 }
 

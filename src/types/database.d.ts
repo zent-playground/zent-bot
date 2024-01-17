@@ -18,6 +18,7 @@ export interface TempVoice {
 export interface TempVoiceConfig {
 	id: string; // Refer to channel id
 	readonly guild_id: string; // Guild(id)
+	affix: string | null;
 }
 
 export interface TempVoiceParticipant {

@@ -20,8 +20,9 @@ CREATE TABLE temp_voice (
 CREATE TABLE temp_voice_configs (
     id VARCHAR(36) NOT NULL PRIMARY KEY,
     guild_id VARCHAR(36) NOT NULL,
+    affix VARCHAR(255) NULL,
     FOREIGN KEY (guild_id) REFERENCES guilds(id) ON DELETE CASCADE,
-    INDEX (id)
+    INDEX (guild_id)
 );
 
 CREATE TABLE temp_voice_participants (
