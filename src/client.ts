@@ -39,9 +39,9 @@ client.managers = new Managers(client.mysql, client.redis);
 
 client.mysql
 	.connect()
-	.then(() => Logger.Info("Mysql connected."))
+	.then(() => Logger.info("Mysql connected."))
 	.catch((err) => {
-		Logger.Error("Unable to connect to MySql:\t", err);
+		Logger.error("Unable to connect to MySql:\t", err);
 		process.exit(1);
 	});
 
@@ -49,7 +49,7 @@ client.redis
 	.connect()
 	.then(() => client.redis.client.flushAll())
 	.catch((err) => {
-		Logger.Error("Unable to connect to Redis:\t");
+		Logger.error("Unable to connect to Redis:\t");
 		console.error(err);
 		process.exit(1);
 	});

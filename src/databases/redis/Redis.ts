@@ -24,9 +24,9 @@ class Redis {
 	}
 
 	private setupEventHandlers(): void {
-		this.client.on("error", (err) => Logger.Error("Redis Client Error.\t", err));
-		this.client.on("connect", () => Logger.Info("Redis connected."));
-		this.client.on("end", () => Logger.Info("Redis disconnected."));
+		this.client.on("error", (err) => Logger.error("Redis Client Error.\t", err));
+		this.client.on("connect", () => Logger.info("Redis connected."));
+		this.client.on("end", () => Logger.info("Redis disconnected."));
 	}
 
 	public async connect(): Promise<void> {

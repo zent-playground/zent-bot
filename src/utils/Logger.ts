@@ -1,9 +1,9 @@
 import chalk from "chalk";
 
 enum LogLevel {
-	INFO,
-	WARN,
-	ERROR,
+	Info,
+	Warn,
+	Error,
 }
 
 abstract class Logger {
@@ -12,11 +12,11 @@ abstract class Logger {
 
 		const formattedLevel = (() => {
 			switch (level) {
-				case LogLevel.INFO:
+				case LogLevel.Info:
 					return chalk.blue("[INFO]");
-				case LogLevel.WARN:
+				case LogLevel.Warn:
 					return chalk.yellow("[WARN]");
-				case LogLevel.ERROR:
+				case LogLevel.Error:
 					return chalk.red("[ERROR]");
 				default:
 					return "";
@@ -31,16 +31,16 @@ abstract class Logger {
 		console.log(Logger.formatMessage(level, messages));
 	}
 
-	public static Info(...messages: string[]): void {
-		Logger.log(LogLevel.INFO, ...messages);
+	public static info(...messages: string[]): void {
+		Logger.log(LogLevel.Info, ...messages);
 	}
 
-	public static Warn(...messages: string[]): void {
-		Logger.log(LogLevel.WARN, ...messages);
+	public static warn(...messages: string[]): void {
+		Logger.log(LogLevel.Warn, ...messages);
 	}
 
-	public static Error(...messages: string[]): void {
-		Logger.log(LogLevel.ERROR, ...messages);
+	public static error(...messages: string[]): void {
+		Logger.log(LogLevel.Error, ...messages);
 	}
 }
 

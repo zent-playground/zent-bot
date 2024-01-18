@@ -5,7 +5,7 @@
 </div>
 
 # Contributings
-Feel free to make a pull request. All your contributions are welcome! If you have any questions about the project, feel free to ask us on [Discord](https://discord.gg/mk7QrzZaPh). Always check to see if one already exists before creating an issue or pull request.
+Feel free to make a pull request. All of your contributions are welcome! If you have any questions about the project, feel free to ask us on [Discord](https://discord.gg/mk7QrzZaPh). Always check to see if one already exists before creating an issue or pull request.
 <div align="center">
   <br />
   <p>Thanks to these contributors who contributed to us</p>
