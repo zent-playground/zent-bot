@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 
 COPY scripts/ scripts/
 COPY src/ src/
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml* tsconfig.json ./
 
 RUN pnpm install
 RUN pnpm build
