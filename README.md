@@ -8,7 +8,7 @@
 </div>
 
 # About
-Zent is a cute, poweful bot powered by [discord.js]("https://discord.js.org"). Has many features and is completely free to use.
+Zent is a cute, poweful bot powered by [discord.js](https://discord.js.org). Has many features and is completely free to use.
 
 # Contributings
 Feel free to make a pull request. All of your contributions are welcome! If you have any questions about the project, feel free to ask us on [Discord](https://discord.gg/mk7QrzZaPh). Always check to see if one already exists before creating an issue or pull request.
