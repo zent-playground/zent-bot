@@ -45,12 +45,6 @@ jobs:
           echo REDIS_PASSWORD=${{ secrets.PROD_REDIS_PASSWORD }} >> .env
           echo REDIS_PREFIX=prod: >> .env
 
-      - name: Install Dependencies and Build
-        run: |
-          npm install esbuild
-          node scripts/build.js
-          rm -rf node_modules
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
