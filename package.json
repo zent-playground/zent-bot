@@ -11,7 +11,7 @@
 		"format": "prettier ./**/*.{ts,json} --write"
 	},
 	"author": "Zent Playground",
-	"license": "CC-BY-NC-4.0",
+	"license": "CC-BY-NC-SA-4.0",
 	"homepage": "https://github.com/zent-playground/zent-bot#readme",
 	"bugs": {
 		"email": "contact@zent.lol",
