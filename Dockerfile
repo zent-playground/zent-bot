@@ -14,7 +14,6 @@ RUN pnpm install
 RUN pnpm build
 
 COPY languages/ languages/
-COPY dist/ dist/
 
 EXPOSE 3000
 
