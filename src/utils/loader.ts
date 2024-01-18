@@ -53,3 +53,18 @@ export const loadComponents = async (client: Client) => {
 		);
 	}
 };
+
+export const loadControllers = async (): Promise<any[]> => {
+	const path = join(_dirname, "..", "server", "controllers").replace(/\\/g, "/");
+
+	const Controllers: any[] = [];
+
+	const files = await glob(`${path}/**/*.js`);
+
+	for (const file of files) {
+		const Controller = (await import(`${pathToFileURL(file)}`)).default;
+		Controllers.push(Controller);
+	}
+
+	return Controllers;
+};

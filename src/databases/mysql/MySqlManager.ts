@@ -32,13 +32,13 @@ class MySqlManager<T> {
 			const query = builder.build();
 			await this.db.query(query);
 		} catch (error) {
-			Logger.Error(`Error in MySqlManager.insert: ${error}`, `Query: ${builder.build()}`);
+			Logger.error(`Error in MySqlManager.insert: ${error}`, `Query: ${builder.build()}`);
 		}
 	}
 
 	protected async delete(condition: string): Promise<void> {
 		if (!condition) {
-			Logger.Warn("Attempted to delete with empty condition in MySqlManager.delete");
+			Logger.warn("Attempted to delete with empty condition in MySqlManager.delete");
 			return;
 		}
 
@@ -47,7 +47,7 @@ class MySqlManager<T> {
 			const query = builder.build();
 			await this.db.query(query);
 		} catch (error) {
-			Logger.Error(`Error in MySqlManager.delete: ${error}`, `Condition: ${condition}`);
+			Logger.error(`Error in MySqlManager.delete: ${error}`, `Condition: ${condition}`);
 		}
 	}
 
@@ -79,14 +79,14 @@ class MySqlManager<T> {
 			const query = builder.build();
 			return await this.db.query(query);
 		} catch (error) {
-			Logger.Error(`Error in MySqlManager.select: ${error}`, `Options: ${JSON.stringify(options)}`);
+			Logger.error(`Error in MySqlManager.select: ${error}`, `Options: ${JSON.stringify(options)}`);
 			return [];
 		}
 	}
 
 	protected async update(condition: string, values: Partial<T>): Promise<void> {
 		if (!condition) {
-			Logger.Warn("Attempted to update with invalid condition in MySqlManager.update");
+			Logger.warn("Attempted to update with invalid condition in MySqlManager.update");
 			return;
 		}
 
@@ -95,7 +95,7 @@ class MySqlManager<T> {
 			const query = builder.build();
 			await this.db.query(query);
 		} catch (error) {
-			Logger.Error(`Error in MySqlManager.update: ${error}`, `Condition: ${condition}`, `Values: ${JSON.stringify(values)}`);
+			Logger.error(`Error in MySqlManager.update: ${error}`, `Condition: ${condition}`, `Values: ${JSON.stringify(values)}`);
 		}
 	}
 }
