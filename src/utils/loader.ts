@@ -13,7 +13,7 @@ import { ClientComponents } from "../types/index.js";
 
 const _dirname = dirname(fileURLToPath(import.meta.url));
 
-export const loadEvents = async (client: Client) => {
+export const loadEvents = async (client: Client): Promise<void> => {
 	const path = join(_dirname, "..", "events").replace(/\\/g, "/");
 
 	const files = await glob(`${path}/*/**/*.js`);
@@ -25,7 +25,7 @@ export const loadEvents = async (client: Client) => {
 	}
 };
 
-export const loadCommands = async (client: Client) => {
+export const loadCommands = async (client: Client): Promise<void> => {
 	const path = join(_dirname, "..", "commands").replace(/\\/g, "/");
 
 	const files = await glob(`${path}/*/**/*.js`);
@@ -38,7 +38,7 @@ export const loadCommands = async (client: Client) => {
 	}
 };
 
-export const loadComponents = async (client: Client) => {
+export const loadComponents = async (client: Client): Promise<void> => {
 	const path = join(_dirname, "..", "components").replace(/\\/g, "/");
 
 	const files = await glob(`${path}/*/**/*.js`);
@@ -55,7 +55,7 @@ export const loadComponents = async (client: Client) => {
 };
 
 export const loadControllers = async (): Promise<any[]> => {
-	const path = join(_dirname, "..", "server", "controllers").replace(/\\/g, "/");
+	const path = join(_dirname, "..", "api", "controllers").replace(/\\/g, "/");
 
 	const Controllers: any[] = [];
 

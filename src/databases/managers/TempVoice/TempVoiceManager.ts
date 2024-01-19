@@ -4,17 +4,20 @@ import TempVoiceParticipantManager from "./TempVoiceParticipantManager.js";
 import TempVoiceConfigManager from "./TempVoiceConfigManager.js";
 
 import { TempVoice } from "../../../types/database.js";
+import RedisManager from "../../redis/RedisManager.js";
 
 type Options = BaseManager.Optional<TempVoice, "id">
 
 class TempVoiceManager extends BaseManager<TempVoice> {
 	public readonly configurations: TempVoiceConfigManager;
 	public readonly participants: TempVoiceParticipantManager;
+	public readonly cooldowns: RedisManager<boolean>;
 
 	public constructor(mysql: BaseManager.MySql, redis: BaseManager.Redis) {
 		super(mysql, redis, "temp_voice");
 		this.participants = new TempVoiceParticipantManager(mysql, redis);
 		this.configurations = new TempVoiceConfigManager(mysql, redis);
+		this.cooldowns = new RedisManager<boolean>(redis.client, `${redis.prefix}temp_voice_cooldowns`);
 	}
 
 	public async get(channelId?: string, guildId?: string, authorId?: string): Promise<TempVoice[] | null> {

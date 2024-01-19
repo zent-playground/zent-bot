@@ -52,3 +52,6 @@ RELEASE.md
 __fixtures__/custom-modules-dir/**/fake_modules/
 __fixtures__/custom-modules-dir/cache/
 __fixtures__/custom-modules-dir/patches/
+
+## Mac OS
+.DS_Store

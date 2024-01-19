@@ -1,9 +1,13 @@
-import { ChannelType, Events, VoiceState, PermissionFlagsBits, Collection } from "discord.js";
+import {
+	ChannelType,
+	Events,
+	VoiceState,
+	PermissionFlagsBits,
+	EmbedBuilder,
+} from "discord.js";
 
 import Listener from "../Listener.js";
 import { formatTimestamp } from "../../utils/index.js";
-
-const cooldowns = new Collection<string, boolean>();
 
 class VoiceStateUpdate extends Listener {
 	public constructor() {
@@ -23,7 +27,30 @@ class VoiceStateUpdate extends Listener {
 			const configChannel = await voices.configurations.get(channel.id);
 
 			if (configChannel) {
-				if (cooldowns.has(member.id)) {
+				const cooldown = await voices.cooldowns.get(member.id);
+
+				if (cooldown !== null) {
+					if (!cooldown) {
+						await member.user.send({
+							embeds: [
+								new EmbedBuilder()
+									.setDescription(
+										"Hey! You can only a create temporary voice channel every 10 seconds.",
+									)
+									.setColor("Red"),
+							],
+						});
+
+						await voices.cooldowns.edit(member.id, true).catch(() => 0);
+					}
+
+					await member.voice.setChannel(null);
+
+					return;
+				}
+
+				if (member.user.bot) {
+					await member.voice.setChannel(null);
 					return;
 				}
 
@@ -42,27 +69,13 @@ class VoiceStateUpdate extends Listener {
 
 				await member.voice.setChannel(newVoiceChannel.id);
 
-				await channel.edit({
-					permissionOverwrites: [
-						{
-							deny: [PermissionFlagsBits.Connect],
-							id: member.id,
-						},
-					],
-				});
-
 				await voices.set(newVoiceChannel.id, {
 					guild_id: guild.id,
 					author_id: member.id,
 					name: newVoiceChannel.name,
 				});
 
-				cooldowns.set(member.id, false);
-
-				setTimeout(() => {
-					cooldowns.delete(member.id);
-					channel.permissionOverwrites.delete(member.id).catch(() => null);
-				}, 10000);
+				await voices.cooldowns.set(member.id, false, { EX: 10 });
 			}
 
 			const target = await voices.get(channel.id);
