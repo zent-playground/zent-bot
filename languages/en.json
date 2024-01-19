@@ -100,6 +100,20 @@
 				"label_prefix": "New Prefix",
 				"set_prefix": "Edit Prefix"
 			}
+		},
+		"temp-voice": {
+			"data": {
+				"description": "Temp voice module.",
+				"options": {
+					"setup": {
+						"description": "Setup a channel creator."
+					}
+				}
+			},
+			"messages": {
+				"created_channel": "Created <#{{channelId}}>.",
+				"join_to_create": "Join to create"
+			}
 		}
 	}
 }

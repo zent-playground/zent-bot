@@ -100,6 +100,20 @@
 				"label_prefix": "Nouveau Préfixe",
 				"set_prefix": "Changez le Préfixe"
 			}
+		},
+		"temp-voice": {
+			"data": {
+				"description": "Module vocal temporaire.",
+				"options": {
+					"setup": {
+						"description": "Configurer un créateur de chaîne."
+					}
+				}
+			},
+			"messages": {
+				"created_channel": "Créé <#{{channelId}}>.",
+				"join_to_create": "Rejoindre pour créer"
+			}
 		}
 	}
 }

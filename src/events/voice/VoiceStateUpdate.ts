@@ -1,11 +1,9 @@
-import {
-	ChannelType,
-	Events,
-	VoiceState,
-	PermissionFlagsBits
-} from "discord.js";
+import { ChannelType, Events, VoiceState, PermissionFlagsBits, Collection } from "discord.js";
 
 import Listener from "../Listener.js";
+import { formatTimestamp } from "../../utils/index.js";
+
+const cooldowns = new Collection<string, boolean>();
 
 class VoiceStateUpdate extends Listener {
 	public constructor() {
@@ -22,9 +20,13 @@ class VoiceStateUpdate extends Listener {
 				return;
 			}
 
-			const configChannel = await voices.configurations.get(guild.id);
+			const configChannel = await voices.configurations.get(channel.id);
 
-			if (configChannel && channel.id === configChannel.id) {
+			if (configChannel) {
+				if (cooldowns.has(member.id)) {
+					return;
+				}
+
 				const newVoiceChannel = await guild.channels.create({
 					name: member.user.tag,
 					type: ChannelType.GuildVoice,
@@ -40,11 +42,27 @@ class VoiceStateUpdate extends Listener {
 
 				await member.voice.setChannel(newVoiceChannel.id);
 
+				await channel.edit({
+					permissionOverwrites: [
+						{
+							deny: [PermissionFlagsBits.Connect],
+							id: member.id,
+						},
+					],
+				});
+
 				await voices.set(newVoiceChannel.id, {
 					guild_id: guild.id,
 					author_id: member.id,
 					name: newVoiceChannel.name,
 				});
+
+				cooldowns.set(member.id, false);
+
+				setTimeout(() => {
+					cooldowns.delete(member.id);
+					channel.permissionOverwrites.delete(member.id).catch(() => null);
+				}, 10000);
 			}
 
 			const target = await voices.get(channel.id);
@@ -69,13 +87,13 @@ class VoiceStateUpdate extends Listener {
 				if (channel.members.size === 0) {
 					await channel.delete();
 					await voices.edit(channel.id, {
-						deleted_at: new Date().toISOString().slice(0, 19).replace("T", " "),
+						deleted_at: formatTimestamp(),
 					});
 				}
 
 				if (member.id != target[0].author_id) {
 					await voices.participants.edit(channel.id, member.id, {
-						left_at: new Date().toISOString().slice(0, 19).replace("T", " "),
+						left_at: formatTimestamp(),
 					});
 				}
 			}
@@ -83,11 +101,11 @@ class VoiceStateUpdate extends Listener {
 
 		if (oldState.channelId !== newState.channelId) {
 			if (newState.channelId) {
-				await handleChannelCreation();
+				handleChannelCreation();
 			}
 
 			if (oldState.channelId) {
-				await handleChannelDeletion();
+				handleChannelDeletion();
 			}
 		}
 	}

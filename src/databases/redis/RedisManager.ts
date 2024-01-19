@@ -13,7 +13,7 @@ class RedisManager<T> {
 
 	private getId(key: string | number): string | null {
 		if (!key) {
-			Logger.Warn("Invalid or empty key provided in RedisManager.getId");
+			Logger.warn("Invalid or empty key provided in RedisManager.getId");
 			return null;
 		}
 
@@ -23,7 +23,7 @@ class RedisManager<T> {
 	async set(key: string | number, values: T, ttl?: number): Promise<void> {
 		try {
 			if (!values) {
-				Logger.Warn(`No values provided to set for key: ${key}`);
+				Logger.warn(`No values provided to set for key: ${key}`);
 				return;
 			}
 
@@ -34,7 +34,7 @@ class RedisManager<T> {
 			const setOptions = ttl ? { EX: ttl } : undefined;
 			await this.client.set(id, serializedValues, setOptions);
 		} catch (error) {
-			Logger.Error(`Error setting key ${key} with values ${JSON.stringify(values)}`, `${error}`);
+			Logger.error(`Error setting key ${key} with values ${JSON.stringify(values)}`, `${error}`);
 		}
 	}
 
@@ -45,7 +45,7 @@ class RedisManager<T> {
 
 			await this.client.del(id);
 		} catch (error) {
-			Logger.Error(`Error deleting key ${key}`, `${error}`);
+			Logger.error(`Error deleting key ${key}`, `${error}`);
 		}
 	}
 
@@ -57,7 +57,7 @@ class RedisManager<T> {
 			const result = await this.client.get(id);
 			return result ? JSON.parse(result) as T : null;
 		} catch (error) {
-			Logger.Error(`Error retrieving key ${key}`, `${error}`);
+			Logger.error(`Error retrieving key ${key}`, `${error}`);
 			return null;
 		}
 	}
@@ -67,14 +67,14 @@ class RedisManager<T> {
 			const existingValue = await this.get(key);
 
 			if (!existingValue) {
-				Logger.Warn(`No record found for updating key ${key}`);
+				Logger.warn(`No record found for updating key ${key}`);
 				return;
 			}
 
 			const updatedValue = { ...existingValue, ...values };
 			await this.set(key, updatedValue as T);
 		} catch (error) {
-			Logger.Error(`Error updating key ${key} with values ${JSON.stringify(values)}`, `${error}`);
+			Logger.error(`Error updating key ${key} with values ${JSON.stringify(values)}`, `${error}`);
 		}
 	}
 }

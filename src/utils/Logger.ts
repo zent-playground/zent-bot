@@ -1,5 +1,7 @@
 import chalk from "chalk";
 
+import { formatTimestamp } from "./index.js";
+
 enum LogLevel {
 	Info,
 	Warn,
@@ -8,8 +10,6 @@ enum LogLevel {
 
 abstract class Logger {
 	private static formatMessage(level: LogLevel, messages: string[]): string {
-		const timestamp = new Date().toISOString();
-
 		const formattedLevel = (() => {
 			switch (level) {
 				case LogLevel.Info:
@@ -24,7 +24,7 @@ abstract class Logger {
 		})();
 
 		const formattedMessages = messages.join("\n");
-		return `[${timestamp}] ${formattedLevel}: ${formattedMessages}`;
+		return `[${formatTimestamp()}] ${formattedLevel}: ${formattedMessages}`;
 	}
 
 	private static log(level: LogLevel, ...messages: string[]): void {
