@@ -18,14 +18,7 @@ class Client {
 			}
 		}
 
-		const guildInfo = {
-			id: guild.id,
-			name: guild.name,
-			memberCount: guild.memberCount,
-			// maybe other information
-		};
-
-		return res.status(HttpStatus.OK).json(guildInfo);
+		return res.status(HttpStatus.OK).json(guild.toJSON());
 	}
 }
 

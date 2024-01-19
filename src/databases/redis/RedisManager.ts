@@ -1,4 +1,4 @@
-import { RedisClientType } from "redis";
+import { RedisClientType, SetOptions } from "redis";
 
 import Logger from "../../utils/Logger.js";
 
@@ -20,9 +20,9 @@ class RedisManager<T> {
 		return this.prefix + String(key);
 	}
 
-	async set(key: string | number, values: T, ttl?: number): Promise<void> {
+	async set(key: string | number, values: T, options: SetOptions = {}): Promise<void> {
 		try {
-			if (!values) {
+			if (values === undefined) {
 				Logger.warn(`No values provided to set for key: ${key}`);
 				return;
 			}
@@ -31,10 +31,12 @@ class RedisManager<T> {
 			const id = this.getId(key);
 			if (!id) return;
 
-			const setOptions = ttl ? { EX: ttl } : undefined;
-			await this.client.set(id, serializedValues, setOptions);
+			await this.client.set(id, serializedValues, options);
 		} catch (error) {
-			Logger.error(`Error setting key ${key} with values ${JSON.stringify(values)}`, `${error}`);
+			Logger.error(
+				`Error setting key ${key} with values ${JSON.stringify(values)}`,
+				`${error}`,
+			);
 		}
 	}
 
@@ -55,7 +57,7 @@ class RedisManager<T> {
 			if (!id) return null;
 
 			const result = await this.client.get(id);
-			return result ? JSON.parse(result) as T : null;
+			return result ? (JSON.parse(result) as T) : null;
 		} catch (error) {
 			Logger.error(`Error retrieving key ${key}`, `${error}`);
 			return null;
@@ -63,19 +65,14 @@ class RedisManager<T> {
 	}
 
 	async edit(key: string | number, values: Partial<T>): Promise<void> {
-		try {
-			const existingValue = await this.get(key);
+		const existingValue = await this.get(key);
 
-			if (!existingValue) {
-				Logger.warn(`No record found for updating key ${key}`);
-				return;
-			}
-
-			const updatedValue = { ...existingValue, ...values };
-			await this.set(key, updatedValue as T);
-		} catch (error) {
-			Logger.error(`Error updating key ${key} with values ${JSON.stringify(values)}`, `${error}`);
+		if (!existingValue) {
+			throw new Error(`No record found for updating key '${key}'.`);
 		}
+
+		const updatedValue = { ...existingValue, ...values };
+		await this.set(key, updatedValue as T, { KEEPTTL: true });
 	}
 }
 

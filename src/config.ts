@@ -19,6 +19,7 @@ const config = {
 		prefix: process.env.REDIS_PREFIX!,
 	},
 	token: process.env.BOT_TOKEN!,
+	sessionSecret: process.env.SESSION_SECRET!,
 };
 
 export default config;

@@ -44,7 +44,7 @@ class TempVoice extends Command {
 	public async setup(ctx: Command.HybridContext, args: Command.Args) {
 		const { voices } = ctx.client.managers;
 
-		if (!ctx.member.permissions.has("ManageGuild")) {
+		if (!ctx.member.permissions.has("ManageChannels")) {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()

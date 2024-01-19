@@ -12,13 +12,7 @@ class Client {
 			throw new HttpException("Client user information is not available.", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		return res.json({
-			id: this.client.user.id,
-			tag: this.client.user.tag,
-			username: this.client.user.username,
-			avatar: this.client.user.avatar,
-			flags: this.client.user.flags
-		});
+		return res.json(this.client.user.toJSON());
 	}
 
 	@Get("status")

@@ -2,6 +2,9 @@ import { DynamicModule, Module } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { Client } from "discord.js";
 
+import session from "express-session";
+import helmet from "helmet";
+
 import Logger from "../utils/Logger.js";
 import { loadControllers } from "../utils/loader.js";
 
@@ -24,6 +27,19 @@ export class AppModule {
 export const startApp = async (client: Client<true>): Promise<void> => {
 	const appModule = await AppModule.forRoot(client);
 	const app = await NestFactory.create(appModule, { logger: false });
+
+	app.use(
+		session({
+			secret: client.config.sessionSecret || "zent",
+			resave: false,
+			saveUninitialized: true,
+			cookie: {
+				maxAge: 60_000,
+			},
+		}),
+	);
+
+	app.use(helmet());
 
 	app.setGlobalPrefix("api/v1");
 
