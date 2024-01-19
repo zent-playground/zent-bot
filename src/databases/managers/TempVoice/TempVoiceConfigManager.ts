@@ -2,7 +2,7 @@ import BaseManager from "../../BaseManager.js";
 
 import { TempVoiceConfig } from "../../../types/database.js";
 
-type Options = BaseManager.Optional<TempVoiceConfig, "guild_id">
+type Options = BaseManager.Optional<TempVoiceConfig, "id">
 
 class TempVoiceConfigManager extends BaseManager<TempVoiceConfig> {
 	public constructor(mysql: BaseManager.MySql, redis: BaseManager.Redis) {
@@ -14,7 +14,7 @@ class TempVoiceConfigManager extends BaseManager<TempVoiceConfig> {
 
 		if (!data || force) {
 			const results = await super.select({
-				where: `guild_id = '${guildId}'`,
+				where: `id = '${guildId}'`,
 				selectFields: ["*"]
 			});
 
@@ -27,20 +27,20 @@ class TempVoiceConfigManager extends BaseManager<TempVoiceConfig> {
 		return data || null;
 	}
 
-	public async set(guildId: string, values: Options): Promise<void> {
-		values = Object.assign(values, { guild_id: guildId });
+	public async set(id: string, values: Options): Promise<void> {
+		values = Object.assign(values, { id });
 		await super.insert(values);
-		await this.cache.set(guildId, (await this.get(guildId, true))!);
+		await this.cache.set(id, (await this.get(id, true))!);
 	}
 
-	public async edit(guildId: string, values: Options): Promise<void> {
-		await super.update(`guild_id = '${guildId}'`, values);
-		await this.cache.edit(guildId, values);
+	public async edit(id: string, values: Options): Promise<void> {
+		await super.update(`id = '${id}'`, values);
+		await this.cache.edit(id, values);
 	}
 
-	public async clear(guildId: string): Promise<void> {
-		await super.delete(`guild_id = '${guildId}'`);
-		await this.cache.clear(guildId);
+	public async clear(id: string): Promise<void> {
+		await super.delete(`id = '${id}'`);
+		await this.cache.clear(id);
 	}
 }
 

@@ -4,6 +4,7 @@ import { loadCommands, loadComponents, loadEvents } from "./utils/loader.js";
 import ClientUtils from "./utils/ClientUtils.js";
 import Logger from "./utils/Logger.js";
 import "./utils/i18next.js";
+import "./utils/error.js";
 
 import Managers from "./databases/Managers.js";
 import MySql from "./databases/mysql/MySql.js";
@@ -47,7 +48,11 @@ client.mysql
 
 client.redis
 	.connect()
-	.then(() => client.redis.client.flushAll())
+	.then(() => {
+		if (process.env.NODE_ENV !== "development") {
+			client.redis.client.flushAll();
+		}
+	})
 	.catch((err) => {
 		Logger.error("Unable to connect to Redis:\t");
 		console.error(err);

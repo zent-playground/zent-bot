@@ -34,23 +34,6 @@ export default class extends Component {
 								lng: args.language,
 							}),
 						)
-						//.setOptions([
-						//	{
-						//		label: "English",
-						//		value: "en-US",
-						//		emoji: "🇺🇸",
-						//	},
-						//	{
-						//		label: "Français",
-						//		value: "fr",
-						//		emoji: "🇫🇷",
-						//	},
-						//	{
-						//		label: "Tiếng Việt",
-						//		value: "vi",
-						//		emoji: "🇻🇳",
-						//	},
-						//])
 						.setOptions(
 							Object.keys(i18next.store.data).map((lang) => ({
 								label: iso6391.getName(lang),

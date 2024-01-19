@@ -33,7 +33,7 @@ class MessageCreate extends Listener {
 		if (name) {
 			command =
 				this.client.commands.get(name.toLowerCase()) ||
-				this.client.commands.find((command) => command.aliases.includes(name));
+				this.client.commands.find((command) => command.aliases.includes(name.toLowerCase()));
 		} else if (message.content === this.client.user.toString()) {
 			command = this.client.commands.get("help");
 		}

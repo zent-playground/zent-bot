@@ -12,6 +12,6 @@ class AppModule {}
 
 export const createApp = async (): Promise<void> => {
 	const app = await NestFactory.create(AppModule, { logger: false });
-	await app.listen(3000);
+	await app.listen(Number(process.env.PORT));
 	Logger.info("Started Nest server.");
 };

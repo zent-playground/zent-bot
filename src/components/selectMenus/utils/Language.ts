@@ -12,7 +12,6 @@ export default class extends Component {
 
 	public override async execute(
 		interaction: Component.StringSelectMenu,
-		// args: Component.Args,
 	) {
 		const [language] = interaction.values;
 		const { guilds } = this.client.managers;
