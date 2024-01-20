@@ -1,6 +1,6 @@
 import BaseManager from "../../BaseManager.js";
 
-import { TempVoiceConfig } from "../../../types/database.js";
+import { TempVoiceConfig } from "@/types/database.js";
 
 type Options = BaseManager.Optional<TempVoiceConfig, "id">
 

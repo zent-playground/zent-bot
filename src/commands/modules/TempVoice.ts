@@ -1,7 +1,7 @@
 import { ChannelType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import Command from "../Command.js";
 import i18next from "i18next";
-import { localizations } from "../../utils/localizations.js";
+import { localizations } from "@/utils/localizations.js";
 
 class TempVoice extends Command {
 	public constructor() {
@@ -32,6 +32,17 @@ class TempVoice extends Command {
 				.setDescription(description)
 				.addSubcommand((subcommand) =>
 					subcommand.setName("setup").setDescription(setup.description),
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName("name")
+						.setDescription("Change channel name.")
+						.addStringOption((option) =>
+							option
+								.setName("name")
+								.setDescription("Name to change.")
+								.setRequired(true),
+						),
 				)
 				.toJSON(),
 		);

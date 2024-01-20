@@ -2,8 +2,8 @@ import { Client, Events } from "discord.js";
 
 import Listener from "../Listener.js";
 
-import Logger from "../../utils/Logger.js";
-import { startApp } from "../../api/app.js";
+import Logger from "@/utils/Logger.js";
+import { startApp } from "@/api/app.js";
 
 class Ready extends Listener {
 	public constructor() {

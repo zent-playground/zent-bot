@@ -7,7 +7,7 @@ import {
 } from "discord.js";
 
 import Listener from "../Listener.js";
-import { formatTimestamp } from "../../utils/index.js";
+import { formatTimestamp } from "@/utils/index.js";
 
 class VoiceStateUpdate extends Listener {
 	public constructor() {

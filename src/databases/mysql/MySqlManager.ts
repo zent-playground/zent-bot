@@ -1,7 +1,7 @@
 import MySql from "../mysql/MySql.js";
 import QueryBuilder from "../mysql/QueryBuilder.js";
 
-import Logger from "../../utils/Logger.js";
+import Logger from "@/utils/Logger.js";
 
 interface QueryOptions<T> {
 	selectFields?: string[];

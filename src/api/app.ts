@@ -35,6 +35,7 @@ export const startApp = async (client: Client<true>): Promise<void> => {
 			saveUninitialized: true,
 			cookie: {
 				maxAge: 60_000,
+				secure: process.env.NODE_ENV === "development" ? false : true,
 			},
 		}),
 	);

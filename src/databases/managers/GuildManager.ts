@@ -1,6 +1,6 @@
 import BaseManager from "../BaseManager.js";
 
-import { Guild } from "../../types/database.js";
+import { Guild } from "@/types/database.js";
 
 type Options = BaseManager.Optional<Guild, "id">;
 

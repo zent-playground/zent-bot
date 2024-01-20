@@ -1,10 +1,10 @@
 import BaseManager from "../../BaseManager.js";
-
-import TempVoiceParticipantManager from "./TempVoiceParticipantManager.js";
-import TempVoiceConfigManager from "./TempVoiceConfigManager.js";
-
-import { TempVoice } from "../../../types/database.js";
 import RedisManager from "../../redis/RedisManager.js";
+
+import TempVoiceConfigManager from "./TempVoiceConfigManager.js";
+import TempVoiceParticipantManager from "./TempVoiceParticipantManager.js";
+
+import { TempVoice } from "@/types/database.js";
 
 type Options = BaseManager.Optional<TempVoice, "id">
 

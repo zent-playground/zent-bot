@@ -1,6 +1,6 @@
 import { RedisClientType, SetOptions } from "redis";
 
-import Logger from "../../utils/Logger.js";
+import Logger from "@/utils/Logger.js";
 
 class RedisManager<T> {
 	private client: RedisClientType;
