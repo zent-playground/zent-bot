@@ -7,15 +7,10 @@ RUN corepack enable
 
 WORKDIR /usr/src/app
 
-COPY scripts/ scripts/
-COPY src/ src/
-COPY package.json pnpm-lock.yaml* tsconfig.json ./
+COPY . ./
 
 RUN pnpm install
 RUN pnpm build
-
-COPY languages/ languages/
-COPY dist/ dist/
 
 EXPOSE 3000
 
