@@ -1,5 +1,4 @@
 import { build } from "esbuild";
-import { replaceTscAliasPaths } from "tsc-alias";
 import { rm } from "fs/promises";
 
 await rm("dist", { recursive: true, force: false }).catch(() => void 0);
@@ -10,8 +9,4 @@ await build({
 	minify: process.env.NODE_ENV !== "development",
 	format: "esm",
 	sourcemap: false,
-});
-
-await replaceTscAliasPaths({
-	outDir: "dist"
 });

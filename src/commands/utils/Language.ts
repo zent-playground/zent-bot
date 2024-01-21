@@ -13,7 +13,7 @@ import iso6391 from "iso-639-1";
 import { table } from "table";
 
 import Command from "../Command.js";
-import { localizations } from "@/utils/localizations.js";
+import { localizations } from "../../utils/localizations.js";
 
 class Language extends Command {
 	public constructor() {

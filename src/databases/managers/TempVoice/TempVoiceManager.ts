@@ -1,7 +1,7 @@
-import BaseManager from "@/databases/BaseManager.js";
-import RedisManager from "@/databases/redis/RedisManager.js";
+import BaseManager from "../../BaseManager.js";
+import RedisManager from "../../redis/RedisManager.js";
 
-import { TempVoice } from "@/types/database.js";
+import { TempVoice } from "../../../types/database.js";
 import TempVoiceCreatorManager from "./TempVoiceCreatorManager.js";
 
 class TempVoiceManager extends BaseManager<TempVoice> {
