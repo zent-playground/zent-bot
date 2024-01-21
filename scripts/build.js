@@ -13,6 +13,5 @@ await build({
 });
 
 await replaceTscAliasPaths({
-	outDir: "dist",
-	declarationDir: "dist",
+	outDir: "dist"
 });

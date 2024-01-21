@@ -12,7 +12,8 @@
 		"lib": ["ES2023", "ES2023.Array", "ES2023.Collection"],
 		"paths": {
 			"@/*": ["./src/*"]
-		}
+		},
+		"traceResolution": true
 	},
 	"include": ["src/**/*.ts", "*.js"]
 }
