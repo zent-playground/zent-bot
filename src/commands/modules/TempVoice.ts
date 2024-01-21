@@ -18,6 +18,10 @@ class TempVoice extends Command {
 					name: "setup",
 					hybrid: "setup",
 				},
+				{
+					name: "name",
+					hybrid: "setName",
+				},
 			],
 		});
 	}
@@ -38,29 +42,23 @@ class TempVoice extends Command {
 						.setName("name")
 						.setDescription("Change channel name.")
 						.addStringOption((option) =>
-							option
-								.setName("name")
-								.setDescription("Name to change.")
-								.setRequired(true),
+							option.setName("name").setDescription("Name to change.").setRequired(true),
 						),
 				)
 				.toJSON(),
 		);
 	}
 
-	public async help() {
-		//console.log("hello");
-	}
-
 	public async setup(ctx: Command.HybridContext, args: Command.Args) {
-		const { voices } = ctx.client.managers;
+		const { managers, config } = ctx.client;
+		const { voices } = managers;
 
 		if (!ctx.member.permissions.has("ManageChannels")) {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(i18next.t("insufficient_permission", { lng: args.language }))
-						.setColor(ctx.client.config.colors.error),
+						.setColor(config.colors.error),
 				],
 				ephemeral: true,
 			});
@@ -75,7 +73,7 @@ class TempVoice extends Command {
 			type: ChannelType.GuildVoice,
 		});
 
-		await voices.configurations.set(channel.id, { guild_id: ctx.guild.id });
+		await voices.creators.set(channel.id, { guild_id: ctx.guild.id });
 
 		await ctx.send({
 			embeds: [
@@ -86,7 +84,35 @@ class TempVoice extends Command {
 							channelId: channel.id,
 						}),
 					)
-					.setColor(ctx.client.config.colors.success),
+					.setColor(config.colors.success),
+			],
+		});
+	}
+
+	public async setName(ctx: Command.HybridContext, args: Command.Args) {
+		const { managers, config } = ctx.client;
+		const { voices, users } = managers;
+		const { channel } = ctx.member.voice;
+
+		const data = await voices.get(`${channel?.id}`);
+		const name = args.entries.join(" ") || ctx.interaction?.options.getString("name");
+
+		if (!name) {
+			return;
+		}
+
+		if (data) {
+			await voices.edit(data.id, { name });
+			await ctx.member.voice.channel!.setName(name);
+		}
+
+		await users.edit(ctx.author.id, { voice_name: name });
+
+		await ctx.send({
+			embeds: [
+				new EmbedBuilder()
+					.setDescription(`Set your temp voice channel name to \`${name}\``)
+					.setColor(config.colors.success),
 			],
 		});
 	}

@@ -1,29 +1,26 @@
 export interface Guild {
-	readonly id: string; // Refer to guild id
+	id: string;
 	prefix: string;
 	language: string;
-	active: boolean; // If bot is in this guild
-	readonly created_at: string;
+	active: boolean;
+	created_at: string;
+}
+
+export interface User {
+	id: string;
+	voice_name: string | null;
+	created_at: string;
 }
 
 export interface TempVoice {
-	readonly id: string; // Refer to channel id
-	readonly guild_id: string; // Guild(id)
-	readonly author_id: string;
+	id: string;
+	guild_id: string;
+	author_id: string;
 	name: string;
-	readonly created_at: string;
-	deleted_at: string | null;
+	created_at: string;
 }
 
-export interface TempVoiceConfig {
-	id: string; // Refer to channel id
-	readonly guild_id: string; // Guild(id)
-	affix: string | null;
-}
-
-export interface TempVoiceParticipant {
-	readonly id: string; // TempVoice(id)
-	readonly member_id: string;
-	readonly joined_at: string;
-	left_at: string | null;
+export interface TempVoiceCreator {
+	id: string;
+	guild_id: string;
 }

@@ -3,7 +3,7 @@ import QueryBuilder from "../mysql/QueryBuilder.js";
 
 import Logger from "@/utils/Logger.js";
 
-interface QueryOptions<T> {
+export interface QueryOptions<T> {
 	selectFields?: string[];
 	joins?: JoinClause[];
 	where?: string;
@@ -85,18 +85,10 @@ class MySqlManager<T> {
 	}
 
 	protected async update(condition: string, values: Partial<T>): Promise<void> {
-		if (!condition) {
-			Logger.warn("Attempted to update with invalid condition in MySqlManager.update");
-			return;
-		}
-
 		const builder = new QueryBuilder().update(this.table, values, condition);
-		try {
-			const query = builder.build();
-			await this.db.query(query);
-		} catch (error) {
-			Logger.error(`Error in MySqlManager.update: ${error}`, `Condition: ${condition}`, `Values: ${JSON.stringify(values)}`);
-		}
+		const query = builder.build();
+		console.log(query);
+		await this.db.query(query);
 	}
 }
 
