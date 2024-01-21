@@ -1,4 +1,4 @@
-import { User } from "@/types/database.js";
+import { User } from "../../types/database.js";
 import BaseManager from "../BaseManager.js";
 
 class UserManager extends BaseManager<User> {

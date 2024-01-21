@@ -7,7 +7,7 @@ import {
 import Command from "../Command.js";
 import i18next from "i18next";
 import { ButtonStyle, PermissionFlagsBits } from "discord-api-types/v10";
-import { localizations } from "@/utils/localizations.js";
+import { localizations } from "../../utils/localizations.js";
 
 class Prefix extends Command {
 	public constructor() {

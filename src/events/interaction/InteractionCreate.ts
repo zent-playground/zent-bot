@@ -3,12 +3,12 @@ import i18next from "i18next";
 
 import Listener from "../Listener.js";
 
-import { BasedHybridContext, HybridContext } from "@/commands/HybridContext.js";
-import Command from "@/commands/Command";
-import CommandArgs from "@/commands/Args.js";
+import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
+import Command from "../../commands/Command";
+import CommandArgs from "../../commands/Args.js";
 
-import Component from "@/components/Component.js";
-import ComponentArgs from "@/components/Args.js";
+import Component from "../../components/Component.js";
+import ComponentArgs from "../../components/Args.js";
 
 class InteractionCreate extends Listener {
 	public constructor() {
