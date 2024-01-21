@@ -1,4 +1,4 @@
-import { Client, Events } from "discord.js";
+import { ActivityType, Client, Events } from "discord.js";
 
 import Listener from "../Listener.js";
 
@@ -11,13 +11,23 @@ class Ready extends Listener {
 	}
 
 	public async execute(client: Client<true>) {
+		startApp(client);
+
 		Logger.info(`Successfully logged as '${client.user.tag}'.`);
 
-		await client.application.commands.set(
+		client.application.commands.set(
 			client.commands.map((command) => command.applicationCommands).flat(),
 		);
 
-		await startApp(client);
+		client.user.setPresence({
+			status: "online",
+			activities: [
+				{
+					name: "bot.zent.lol - /help",
+					type: ActivityType.Custom,
+				},
+			],
+		});
 	}
 }
 

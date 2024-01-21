@@ -62,15 +62,16 @@ class Avatar extends Command {
 	}
 
 	public async user(ctx: Command.HybridContext, args: Command.Args) {
-		let targetId = ctx.author.id;
+		const { parseId } = this.client.utils;
 
-		if (ctx.isInteraction()) {
-			targetId = ctx.context.options.getUser("user")?.id || targetId;
-		} else {
-			targetId = this.client.utils.parseId(args.entries[0]) || targetId;
-		}
-
-		const user = await this.client.users.fetch(targetId, { force: true }).catch(() => null);
+		const user = await this.client.users
+			.fetch(
+				parseId(args.entries[0]) ||
+					ctx.interaction?.options.getUser("user")?.id ||
+					ctx.author.id,
+				{ force: true },
+			)
+			.catch(() => null);
 
 		if (!user) {
 			await ctx.send({
@@ -99,23 +100,23 @@ class Avatar extends Command {
 						}),
 					)
 					.setImage(user.displayAvatarURL({ size: 4096 }))
-					.setColor(user.hexAccentColor || this.client.config.colors.default)
+					.setColor(user.hexAccentColor!)
 					.setTimestamp(),
 			],
 		});
 	}
 
 	public async member(ctx: Command.HybridContext, args: Command.Args) {
-		let targetId = ctx.author.id;
-
-		if (ctx.isInteraction()) {
-			targetId = ctx.context.options.getUser("member")?.id || targetId;
-		} else {
-			targetId = this.client.utils.parseId(args.entries[0]) || targetId;
-		}
+		const { parseId } = this.client.utils;
 
 		const member = await ctx.guild.members
-			.fetch({ user: targetId, force: true })
+			.fetch({
+				user:
+					parseId(args.entries[0]) ||
+					ctx.interaction?.options.getUser("member") ||
+					ctx.author.id,
+				force: true,
+			})
 			.catch(() => null);
 
 		if (!member) {
@@ -148,7 +149,7 @@ class Avatar extends Command {
 						}),
 					)
 					.setImage(member.displayAvatarURL({ size: 4096 }))
-					.setColor(member.user.hexAccentColor || null)
+					.setColor(member.user.hexAccentColor!)
 					.setTimestamp(),
 			],
 		});
