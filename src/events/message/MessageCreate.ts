@@ -2,9 +2,9 @@ import { Events, Message } from "discord.js";
 
 import Listener from "../Listener.js";
 
-import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
-import Args from "../../commands/Args.js";
-import Command from "../../commands/Command.js";
+import { BasedHybridContext, HybridContext } from "@/commands/HybridContext.js";
+import Args from "@/commands/Args.js";
+import Command from "@/commands/Command.js";
 
 class MessageCreate extends Listener {
 	public constructor() {
@@ -14,7 +14,9 @@ class MessageCreate extends Listener {
 	public async execute(message: Message<true>) {
 		if (message.author.bot || !message.guild) return;
 
-		const guild = (await this.client.managers.guilds.get(message.guildId))!;
+		const { guilds, users } = this.client.managers;
+
+		const guild = (await guilds.get(message.guildId))!;
 
 		const prefixes: string[] = [this.client.user.toString()];
 
@@ -44,6 +46,10 @@ class MessageCreate extends Listener {
 
 		args.language = guild.language;
 		args.prefix = guild.prefix;
+
+		if (!(await users.get(message.author.id))) {
+			await users.set(message.author.id, {}, { overwrite: true });
+		}
 
 		command.executeMessage?.(message, args);
 		command.executeHybrid?.(new BasedHybridContext(message) as HybridContext, args);

@@ -3,12 +3,12 @@ import i18next from "i18next";
 
 import Listener from "../Listener.js";
 
-import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
-import Command from "../../commands/Command";
-import CommandArgs from "../../commands/Args.js";
+import { BasedHybridContext, HybridContext } from "@/commands/HybridContext.js";
+import Command from "@/commands/Command";
+import CommandArgs from "@/commands/Args.js";
 
-import Component from "../../components/Component.js";
-import ComponentArgs from "../../components/Args.js";
+import Component from "@/components/Component.js";
+import ComponentArgs from "@/components/Args.js";
 
 class InteractionCreate extends Listener {
 	public constructor() {
@@ -16,6 +16,9 @@ class InteractionCreate extends Listener {
 	}
 
 	public async execute(interaction: Interaction) {
+		const { managers } = this.client;
+		const { guilds, users } = managers;
+
 		if (interaction.isCommand() || interaction.isAutocomplete()) {
 			const command = this.client.commands.find((command) =>
 				command.applicationCommands.some((data) => data.name === interaction.commandName),
@@ -37,12 +40,16 @@ class InteractionCreate extends Listener {
 					return;
 				}
 
-				const guild = (await this.client.managers.guilds.get(interaction.guild.id))!;
+				const guild = (await guilds.get(interaction.guild.id))!;
 
 				const args = new CommandArgs();
 
 				args.language = guild.language;
 				args.prefix = guild.prefix;
+
+				if (!(await users.get(interaction.user.id))) {
+					await users.set(interaction.user.id, {}, { overwrite: true });
+				}
 
 				if (interaction.isChatInputCommand()) {
 					command.executeChatInput?.(interaction);

@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import Command from "../Command.js";
-import { localizations } from "../../utils/localizations.js";
+import { localizations } from "@/utils/localizations.js";
 
 class Help extends Command {
 	public constructor() {

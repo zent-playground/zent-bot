@@ -1,13 +1,18 @@
 import { build } from "esbuild";
+import { replaceTscAliasPaths } from "tsc-alias";
 import { rm } from "fs/promises";
 
-const buildOptions = {
+await rm("dist", { recursive: true, force: false }).catch(() => void 0);
+
+await build({
 	entryPoints: ["src/**/*.ts"],
 	outdir: "dist",
 	minify: process.env.NODE_ENV !== "development",
 	format: "esm",
 	sourcemap: false,
-};
+});
 
-await rm("dist", { recursive: true, force: false }).catch(() => void 0);
-await build(buildOptions);
+await replaceTscAliasPaths({
+	outDir: "dist",
+	declarationDir: "dist",
+});

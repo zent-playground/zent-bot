@@ -1,6 +1,6 @@
 import { Collection } from "discord.js";
 
-import Component from "../components/Component.js";
+import Component from "@/components/Component.js";
 
 export type ClientComponents = {
 	buttons: Collection<string, Component>;

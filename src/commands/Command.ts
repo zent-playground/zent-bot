@@ -9,7 +9,7 @@ import {
 	RESTPostAPIApplicationCommandsJSONBody,
 	UserContextMenuCommandInteraction,
 } from "discord.js";
-import { Subcommand } from "../types/subcommand.js";
+import { Subcommand } from "@/types/subcommand.js";
 import Arguments from "./Args.js";
 
 namespace Command {

@@ -4,12 +4,12 @@ import { glob } from "glob";
 import { dirname, join, sep } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 
-import Command from "../commands/Command.js";
-import Component from "../components/Component.js";
+import Command from "@/commands/Command.js";
+import Component from "@/components/Component.js";
 
-import Listener from "../events/Listener.js";
+import Listener from "@/events/Listener.js";
 
-import { ClientComponents } from "../types/index.js";
+import { ClientComponents } from "@/types/index.js";
 
 const _dirname = dirname(fileURLToPath(import.meta.url));
 

@@ -8,11 +8,65 @@ namespace BaseManager {
 }
 
 class BaseManager<T> extends MySqlManager<T> {
-	public cache: RedisManager<T>;
+	public cache!: RedisManager<T>;
 
-	public constructor(mysql: BaseManager.MySql, redis: BaseManager.Redis, table: string) {
+	public constructor(table: string, mysql: BaseManager.MySql, redis?: BaseManager.Redis) {
 		super(mysql, table);
-		this.cache = new RedisManager(redis.client, `${redis.prefix}${table}:`);
+
+		if (redis) {
+			this.cache = new RedisManager(redis.client, `${redis.prefix}${table}:`);
+		}
+	}
+
+	public async get(id: string, force = false): Promise<T | null> {
+		let data: T | null = force ? null : await this.cache?.get(id);
+
+		if (!data || force) {
+			data = (
+				await this.select({
+					where: `id = '${id}'`,
+				})
+			)?.[0];
+
+			if (data) {
+				await this.cache.set(id, data);
+			}
+		}
+
+		return data;
+	}
+
+	public async set(
+		id: string,
+		values: Partial<T>,
+		options: {
+			overwrite?: boolean;
+			ttl?: number;
+		} = {},
+	): Promise<void> {
+		values = Object.assign(values, { id });
+
+		if (options?.overwrite) {
+			if (await this.get(id)) {
+				await this.update(`id = '${id}'`, values);
+			} else {
+				await this.insert(values);
+			}
+		} else {
+			await this.insert(values);
+		}
+
+		await this.cache.set(id, await this.get(id, true) as T, { EX: options.ttl || 10 * 60 });
+	}
+
+	public async edit(id: string, values: Partial<T>): Promise<void> {
+		await super.update(`id = '${id}'`, values);
+		await this.cache.set(id, await this.get(id, true) as T);
+	}
+
+	public async delete(id: string): Promise<void> {
+		await super.delete(`id = '${id}'`);
+		await this.cache.clear(id);
 	}
 }
 
