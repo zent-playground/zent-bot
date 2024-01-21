@@ -43,7 +43,8 @@ class Help extends Command {
 								"> - Bot dashboard: https://bot.zent.lol/dashboard",
 							].join("\n"),
 						},
-					),
+					)
+					.setColor(ctx.client.config.colors.default),
 			],
 		});
 	}

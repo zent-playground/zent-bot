@@ -28,6 +28,11 @@ class VoiceStateUpdate extends Listener {
 			const user = await users.get(member.id);
 
 			if (creator) {
+				if (member.user.bot) {
+					await member.voice.setChannel(null).catch(() => 0);
+					return;
+				}
+
 				const cooldown = await voices.cooldowns.get(member.id);
 
 				if (cooldown !== null) {
@@ -84,7 +89,7 @@ class VoiceStateUpdate extends Listener {
 				await channel.delete();
 				await voices.delete(channel.id);
 			}
-		}
+		};
 
 		if (oldState.channelId !== newState.channelId) {
 			handleCreation();
