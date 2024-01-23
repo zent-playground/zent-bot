@@ -8,7 +8,6 @@ CREATE TABLE guilds (
 
 CREATE TABLE users (
     id VARCHAR(36) PRIMARY KEY,
-    voice_name VARCHAR(255) NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -16,15 +15,21 @@ CREATE TABLE temp_voices (
     id VARCHAR(36) PRIMARY KEY,
     guild_id VARCHAR(36) NOT NULL,
     author_id VARCHAR(36) NOT NULL,
-    name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (guild_id) REFERENCES guilds(id) ON DELETE CASCADE,
-    INDEX (guild_id)
+    FOREIGN KEY (guild_id) REFERENCES guilds(id) ON DELETE CASCADE
 );
 
 CREATE TABLE temp_voice_creators (
     id VARCHAR(36) NOT NULL PRIMARY KEY,
     guild_id VARCHAR(36) NOT NULL,
-    FOREIGN KEY (guild_id) REFERENCES guilds(id) ON DELETE CASCADE,
-    INDEX (guild_id)
+    FOREIGN KEY (guild_id) REFERENCES guilds(id) ON DELETE CASCADE
+);
+
+CREATE TABLE temp_voice_configs (
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    name VARCHAR(255) NULL,
+    nsfw BOOLEAN NOT NULL DEFAULT false,
+    blacklisted_ids JSON,
+    target INT NOT NULL DEFAULT 0,
+    FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
 );

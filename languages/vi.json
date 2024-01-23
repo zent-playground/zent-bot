@@ -101,7 +101,7 @@
 				"set_prefix": "Đổi prefix"
 			}
 		},
-		"temp-voice": {
+		"voice": {
 			"data": {
 				"description": "Hệ thóng kênh thoại tạm thời.",
 				"options": {

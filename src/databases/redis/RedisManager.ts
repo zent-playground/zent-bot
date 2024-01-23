@@ -51,18 +51,6 @@ class RedisManager<T> {
 
 		return result ? (JSON.parse(result) as T) : null;
 	}
-
-	async edit(key: string | number, values: Partial<T>): Promise<void> {
-		const existingValue = await this.get(key);
-
-		if (existingValue !== null) {
-			return;
-		}
-
-		const updatedValue = { ...existingValue, ...values };
-
-		await this.set(key, updatedValue as T, { KEEPTTL: true });
-	}
 }
 
 export default RedisManager;

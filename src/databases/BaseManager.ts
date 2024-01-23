@@ -25,6 +25,7 @@ class BaseManager<T> extends MySqlManager<T> {
 			data = (
 				await this.select({
 					where: `id = '${id}'`,
+					selectFields: ["*"]
 				})
 			)?.[0];
 
@@ -57,11 +58,6 @@ class BaseManager<T> extends MySqlManager<T> {
 		}
 
 		await this.cache.set(id, await this.get(id, true) as T, { EX: options.ttl || 10 * 60 });
-	}
-
-	public async edit(id: string, values: Partial<T>): Promise<void> {
-		await super.update(`id = '${id}'`, values);
-		await this.cache.set(id, await this.get(id, true) as T);
 	}
 
 	public async delete(id: string): Promise<void> {

@@ -1,4 +1,13 @@
-import { ChannelType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	ChannelType,
+	EmbedBuilder,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+	UserSelectMenuBuilder,
+} from "discord.js";
 import Command from "../Command.js";
 import i18next from "i18next";
 import { localizations } from "../../utils/localizations.js";
@@ -6,8 +15,8 @@ import { localizations } from "../../utils/localizations.js";
 class TempVoice extends Command {
 	public constructor() {
 		super({
-			name: "temp-voice",
-			aliases: ["tempvoice", "tv"],
+			name: "voice",
+			aliases: ["tempvoice", "vc"],
 			subcommands: [
 				{
 					name: "help",
@@ -21,6 +30,10 @@ class TempVoice extends Command {
 				{
 					name: "name",
 					hybrid: "setName",
+				},
+				{
+					name: "blacklist",
+					hybrid: "setBlacklist",
 				},
 			],
 		});
@@ -40,10 +53,15 @@ class TempVoice extends Command {
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("name")
-						.setDescription("Change channel name.")
+						.setDescription("Change your voice channel name.")
 						.addStringOption((option) =>
 							option.setName("name").setDescription("Name to change.").setRequired(true),
 						),
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName("blacklist")
+						.setDescription("Blacklist members from your voice channels."),
 				)
 				.toJSON(),
 		);
@@ -67,7 +85,7 @@ class TempVoice extends Command {
 		}
 
 		const channel = await ctx.guild.channels.create({
-			name: `➕ ${i18next.t("commands.temp-voice.messages.join_to_create", {
+			name: `➕ ${i18next.t("commands.voice.messages.join_to_create", {
 				lng: args.language,
 			})}`,
 			type: ChannelType.GuildVoice,
@@ -79,7 +97,7 @@ class TempVoice extends Command {
 			embeds: [
 				new EmbedBuilder()
 					.setDescription(
-						i18next.t("commands.temp-voice.messages.created_channel", {
+						i18next.t("commands.voice.messages.created_channel", {
 							lng: args.language,
 							channelId: channel.id,
 						}),
@@ -91,7 +109,7 @@ class TempVoice extends Command {
 
 	public async setName(ctx: Command.HybridContext, args: Command.Args) {
 		const { managers, config } = ctx.client;
-		const { voices, users } = managers;
+		const { voices } = managers;
 		const { channel } = ctx.member.voice;
 
 		const data = await voices.get(`${channel?.id}`);
@@ -101,12 +119,21 @@ class TempVoice extends Command {
 			return;
 		}
 
-		if (data) {
-			await voices.edit(data.id, { name });
-			await ctx.member.voice.channel!.setName(name);
-		}
+		if (data && channel) {
+			await voices.configs.set(data.author_id, { name }, { overwrite: true });
+			await channel.setName(name);
+		} else {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription("You must in a temp voice channel to use this command.")
+						.setColor(config.colors.error),
+				],
+				ephemeral: true,
+			});
 
-		await users.edit(ctx.author.id, { voice_name: name });
+			return;
+		}
 
 		await ctx.send({
 			embeds: [
@@ -115,6 +142,125 @@ class TempVoice extends Command {
 					.setColor(config.colors.success),
 			],
 		});
+	}
+
+	public async setBlacklist(ctx: Command.HybridContext) {
+		const { managers, config } = ctx.client;
+		const { voices } = managers;
+		const { channel } = ctx.member.voice;
+
+		const data = await voices.get(`${channel?.id}`);
+
+		const getRows = async (disabled = false) => {
+			return [
+				new ActionRowBuilder<UserSelectMenuBuilder>().setComponents(
+					new UserSelectMenuBuilder()
+						.setCustomId("members")
+						.setPlaceholder("Choose members to blacklist")
+						.setDefaultUsers(
+							await(async () => {
+								const config = await voices.configs.get(data!.author_id);
+
+								if (!config) {
+									return [];
+								}
+
+								return config.blacklisted_ids;
+							})(),
+						)
+						.setMinValues(0)
+						.setMaxValues(25)
+						.setDisabled(disabled),
+				),
+				new ActionRowBuilder<ButtonBuilder>().setComponents(
+					new ButtonBuilder()
+						.setCustomId("clear")
+						.setLabel("Clear")
+						.setStyle(ButtonStyle.Primary)
+						.setDisabled(disabled),
+				),
+			];
+		};
+
+		if (data && channel) {
+			const message = await ctx.send({
+				components: await getRows(),
+				ephemeral: true,
+				fetchReply: true,
+			});
+
+			const collector = message.createMessageComponentCollector({
+				filter: (i) => i.user.id === ctx.author.id,
+				time: 60000,
+			});
+
+			collector
+				.on("collect", async (i) => {
+					let ids: string[] = [];
+
+					if (i.isUserSelectMenu()) {
+						ids = i.members.map((member) => {
+							if ("voice" in member && member.voice.channelId === data.id) {
+								member.voice.setChannel(null).catch(() => null);
+							}
+
+							return member.user!.id;
+						});
+					}
+
+					await voices.configs.set(
+						i.user.id,
+						{ blacklisted_ids: JSON.stringify(ids) as any },
+						{ overwrite: true },
+					);
+
+					await channel.edit({
+						permissionOverwrites: ids.map((id) => {
+							return {
+								id,
+								deny: [PermissionFlagsBits.Connect],
+							};
+						}),
+					});
+
+					await i
+						.update({
+							components: await getRows(),
+						})
+						.catch(() => null);
+				})
+				.on("ignore", (i) => {
+					i.reply({
+						embeds: [
+							new EmbedBuilder()
+								.setDescription("You can't use this interaction!")
+								.setColor(config.colors.error),
+						],
+					});
+				})
+				.on("end", async () => {
+					if (ctx.isMessage()) {
+						ctx.message
+							.edit({
+								components: await getRows(true),
+							})
+							.catch(() => 0);
+					} else {
+						ctx.interaction.deleteReply().catch(() => 0);
+					}
+				});
+		} else {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription("You must in a temp voice channel to use this command.")
+						.setColor(config.colors.error),
+				],
+				ephemeral: true,
+			});
+
+			return;
+		}
 	}
 }
 
