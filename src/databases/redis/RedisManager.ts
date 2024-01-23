@@ -25,7 +25,9 @@ class RedisManager<T> {
 			return;
 		}
 
-		options.EX = options.EX || 30 * 60;
+		if (!options.KEEPTTL) {
+			options.EX = options.EX || 30 * 60;
+		}
 
 		await this.client.set(id, serializedValues, options);
 	}

@@ -48,11 +48,7 @@ client.mysql
 
 client.redis
 	.connect()
-	.then(() => {
-		if (process.env.NODE_ENV !== "development") {
-			client.redis.client.flushAll();
-		}
-	})
+	.then(() => client.redis.client.flushAll())
 	.catch((err) => {
 		Logger.error("Unable to connect to Redis:\t");
 		console.error(err);
