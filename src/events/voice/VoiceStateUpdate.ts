@@ -15,7 +15,7 @@ class VoiceStateUpdate extends Listener {
 
 	public async execute(oldState: VoiceState, newState: VoiceState) {
 		const { managers, config } = this.client;
-		const { voices, users } = managers;
+		const { voices } = managers;
 
 		const handleCreation = async () => {
 			const { channel, guild, member } = newState;
@@ -25,7 +25,7 @@ class VoiceStateUpdate extends Listener {
 			}
 
 			const creator = await voices.creators.get(channel.id);
-			const user = await users.get(member.id);
+			const userConfig = await voices.configs.get(member.id);
 
 			if (creator) {
 				if (member.user.bot) {
@@ -45,7 +45,7 @@ class VoiceStateUpdate extends Listener {
 							],
 						});
 
-						await voices.cooldowns.edit(member.id, true).catch(() => 0);
+						await voices.cooldowns.set(member.id, true, { KEEPTTL: true }).catch(() => 0);
 					}
 
 					await member.voice.setChannel(null);
@@ -54,7 +54,8 @@ class VoiceStateUpdate extends Listener {
 				}
 
 				const temp = await guild.channels.create({
-					name: user?.voice_name || member.user.tag,
+					name: userConfig?.name || member.user.tag,
+					nsfw: userConfig?.nsfw || false,
 					type: ChannelType.GuildVoice,
 					parent: channel.parent,
 					permissionOverwrites: [
@@ -66,7 +67,6 @@ class VoiceStateUpdate extends Listener {
 				});
 
 				await voices.set(temp.id, {
-					name: temp.name,
 					author_id: member.id,
 					guild_id: guild.id,
 				});

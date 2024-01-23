@@ -101,7 +101,7 @@
 				"set_prefix": "Edit Prefix"
 			}
 		},
-		"temp-voice": {
+		"voice": {
 			"data": {
 				"description": "Temp voice module.",
 				"options": {

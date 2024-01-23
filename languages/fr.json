@@ -101,7 +101,7 @@
 				"set_prefix": "Changez le Préfixe"
 			}
 		},
-		"temp-voice": {
+		"voice": {
 			"data": {
 				"description": "Module vocal temporaire.",
 				"options": {

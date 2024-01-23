@@ -87,7 +87,6 @@ class MySqlManager<T> {
 	protected async update(condition: string, values: Partial<T>): Promise<void> {
 		const builder = new QueryBuilder().update(this.table, values, condition);
 		const query = builder.build();
-		console.log(query);
 		await this.db.query(query);
 	}
 }
