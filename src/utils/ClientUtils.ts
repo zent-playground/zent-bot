@@ -1,10 +1,7 @@
 import { Client, EmbedBuilder, codeBlock } from "discord.js";
-import i18next from "i18next";
 
 import Command from "../commands/Command.js";
 import Args from "../commands/Args.js";
-
-import { localizations } from "./localizations.js";
 
 import { Subcommand, SubcommandBody } from "../types/subcommand.js";
 
@@ -91,11 +88,9 @@ class ClientUtils {
 			example?: string;
 		},
 	) {
-		const { description, descriptions } = localizations.get(command.name)!;
-
 		const embed = new EmbedBuilder()
 			.setTitle(command.name)
-			.setDescription(descriptions[options.language] || description)
+			//.setDescription(command.applicationCommands[0].description)
 			.setColor(this.client.config.colors.default);
 
 		if (command.aliases.length) {
@@ -107,14 +102,14 @@ class ClientUtils {
 
 		if (options.usage) {
 			embed.addFields({
-				name: `${i18next.t("commands.usage", { lng: options.language })}:`,
+				name: "Usage:",
 				value: codeBlock(options.usage),
 			});
 		}
 
 		if (options.example) {
 			embed.addFields({
-				name: `${i18next.t("commands.example", { lng: options.language })}:`,
+				name: "Example:",
 				value: codeBlock(options.example),
 			});
 		}

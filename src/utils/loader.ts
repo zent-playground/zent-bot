@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from "url";
 import Command from "../commands/Command.js";
 import Component from "../components/Component.js";
 
-import Listener from "../events/Listener.js";
+import Listener from "../events/voice/Listener.js";
 
 import { ClientComponents } from "../types/index.js";
 

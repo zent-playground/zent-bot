@@ -1,6 +1,5 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import Command from "../Command.js";
-import { localizations } from "../../utils/localizations.js";
 
 class Help extends Command {
 	public constructor() {
@@ -10,13 +9,10 @@ class Help extends Command {
 	}
 
 	public initialize() {
-		const { description, descriptions } = localizations.get(this.name)!;
-
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
 				.setName(this.name)
-				.setDescription(description)
-				.setDescriptionLocalizations(descriptions)
+				.setDescription("Get some information about me.")
 				.toJSON(),
 		);
 	}

@@ -3,7 +3,6 @@ import { Client, Collection, GatewayIntentBits } from "discord.js";
 import { loadCommands, loadComponents, loadEvents } from "./utils/loader.js";
 import ClientUtils from "./utils/ClientUtils.js";
 
-import "./utils/i18next.js";
 import "./utils/error.js";
 
 import Managers from "./databases/Managers.js";
