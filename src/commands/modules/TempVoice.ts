@@ -8,9 +8,8 @@ import {
 	SlashCommandBuilder,
 	UserSelectMenuBuilder,
 } from "discord.js";
+
 import Command from "../Command.js";
-import i18next from "i18next";
-import { localizations } from "../../utils/localizations.js";
 
 class TempVoice extends Command {
 	public constructor() {
@@ -40,22 +39,31 @@ class TempVoice extends Command {
 	}
 
 	public initialize() {
-		const { description, options } = localizations.get(this.name)!;
-		const { setup } = options;
-
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
 				.setName(this.name)
-				.setDescription(description)
+				.setDescription("Temp voice module.")
 				.addSubcommand((subcommand) =>
-					subcommand.setName("setup").setDescription(setup.description),
+					subcommand
+						.setName("setup")
+						.setDescription("Setup a voice channel creator.")
+						.addChannelOption((option) =>
+							option
+								.setName("category")
+								.setDescription("The category that the bot will setup in it.")
+								.addChannelTypes(ChannelType.GuildCategory),
+						),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("name")
 						.setDescription("Change your voice channel name.")
 						.addStringOption((option) =>
-							option.setName("name").setDescription("Name to change.").setRequired(true),
+							option
+								.setName("name")
+								.setDescription("Name to change.")
+								.setMaxLength(255)
+								.setRequired(true),
 						),
 				)
 				.addSubcommand((subcommand) =>
@@ -67,7 +75,7 @@ class TempVoice extends Command {
 		);
 	}
 
-	public async setup(ctx: Command.HybridContext, args: Command.Args) {
+	public async setup(ctx: Command.HybridContext) {
 		const { managers, config } = ctx.client;
 		const { voices } = managers;
 
@@ -75,7 +83,7 @@ class TempVoice extends Command {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
-						.setDescription(i18next.t("insufficient_permission", { lng: args.language }))
+						.setDescription("You don't have permissions to use this command.")
 						.setColor(config.colors.error),
 				],
 				ephemeral: true,
@@ -85,9 +93,7 @@ class TempVoice extends Command {
 		}
 
 		const channel = await ctx.guild.channels.create({
-			name: `➕ ${i18next.t("commands.voice.messages.join_to_create", {
-				lng: args.language,
-			})}`,
+			name: "➕ Join to create",
 			type: ChannelType.GuildVoice,
 		});
 
@@ -96,12 +102,7 @@ class TempVoice extends Command {
 		await ctx.send({
 			embeds: [
 				new EmbedBuilder()
-					.setDescription(
-						i18next.t("commands.voice.messages.created_channel", {
-							lng: args.language,
-							channelId: channel.id,
-						}),
-					)
+					.setDescription(`Created ${channel}.`)
 					.setColor(config.colors.success),
 			],
 		});

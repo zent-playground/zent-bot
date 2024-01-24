@@ -1,13 +1,10 @@
 import {
-	ActionRowBuilder,
-	ButtonBuilder,
 	EmbedBuilder,
 	SlashCommandBuilder,
+	PermissionFlagsBits,
 } from "discord.js";
+
 import Command from "../Command.js";
-import i18next from "i18next";
-import { ButtonStyle, PermissionFlagsBits } from "discord-api-types/v10";
-import { localizations } from "../../utils/localizations.js";
 
 class Prefix extends Command {
 	public constructor() {
@@ -32,31 +29,19 @@ class Prefix extends Command {
 	}
 
 	public initialize() {
-		const { description, descriptions, options } = localizations.get(this.name)!;
-		const { show, set } = options;
-
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
 				.setName(this.name)
-				.setDescription(description)
-				.setDescriptionLocalizations(descriptions)
+				.setDescription("Manage the bot prefix.")
 				.addSubcommand((subcommand) =>
-					subcommand
-						.setName("show")
-						.setDescription(show.description)
-						.setDescriptionLocalizations(show.descriptions),
+					subcommand.setName("show").setDescription("Show the current bot prefix."),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("set")
-						.setDescription(set.description)
-						.setDescriptionLocalizations(set.descriptions)
+						.setDescription("Set another prefix.")
 						.addStringOption((option) =>
-							option
-								.setName("prefix")
-								.setDescription(set.options.prefix.description)
-								.setDescriptionLocalizations(set.options.prefix.descriptions)
-								.setRequired(true),
+							option.setName("prefix").setDescription("Prefix to set.").setRequired(true),
 						),
 				)
 				.toJSON(),
@@ -77,7 +62,7 @@ class Prefix extends Command {
 		});
 	}
 
-	public async show(ctx: Command.HybridContext, args: Command.Args) {
+	public async show(ctx: Command.HybridContext) {
 		const { guilds } = this.client.managers;
 		const { prefix } = (await guilds.get(ctx.guild.id))!;
 
@@ -88,26 +73,9 @@ class Prefix extends Command {
 						name: ctx.guild.name,
 						iconURL: ctx.guild.iconURL({ forceStatic: true })!,
 					})
-					.setDescription(
-						i18next.t(`commands.${this.name}.messages.current_prefix`, {
-							prefix: prefix,
-							lng: args.language,
-						}),
-					)
+					.setDescription(`The current prefix of this server is \`${prefix}\`.`)
 					.setColor(this.client.config.colors.default),
-			],
-			components: [
-				new ActionRowBuilder<ButtonBuilder>().addComponents([
-					new ButtonBuilder()
-						.setLabel(
-							i18next.t(`commands.${this.name}.components.set_prefix`, {
-								lng: args.language,
-							}),
-						)
-						.setStyle(ButtonStyle.Secondary)
-						.setCustomId("prefix"),
-				]),
-			],
+			]
 		});
 
 		return;
@@ -124,11 +92,7 @@ class Prefix extends Command {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
-						.setDescription(
-							i18next.t(`commands.${this.name}.messages.missing_argument`, {
-								lng: args.language,
-							}),
-						)
+						.setDescription("Missing argument `prefix`.")
 						.setColor(this.client.config.colors.error),
 				],
 			});
@@ -140,11 +104,7 @@ class Prefix extends Command {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
-						.setDescription(
-							i18next.t("commands.insufficient_permission", {
-								lng: args.language,
-							}),
-						)
+						.setDescription("You don't have permissions to use this command.")
 						.setColor(this.client.config.colors.error),
 				],
 			});
@@ -161,12 +121,7 @@ class Prefix extends Command {
 						name: ctx.guild.name,
 						iconURL: ctx.guild.iconURL({ forceStatic: true })!,
 					})
-					.setDescription(
-						i18next.t(`commands.${this.name}.messages.set_prefix`, {
-							prefix: prefixToSet,
-							lng: args.language,
-						}),
-					)
+					.setDescription(`Set prefix to \`${prefixToSet}\`.`)
 					.setColor(this.client.config.colors.success),
 			],
 		});

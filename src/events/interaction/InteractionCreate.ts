@@ -1,5 +1,4 @@
 import { ChatInputCommandInteraction, EmbedBuilder, Events, Interaction } from "discord.js";
-import i18next from "i18next";
 
 import Listener from "../Listener.js";
 
@@ -101,9 +100,7 @@ class InteractionCreate extends Listener {
 			args.language = guild.language;
 
 			const embed = new EmbedBuilder()
-				.setDescription(
-					i18next.t("commands.insufficient_permission", { lng: args.language }),
-				)
+				.setDescription("You don't have permissions to use this interaction.")
 				.setColor(this.client.config.colors.error);
 
 			if (

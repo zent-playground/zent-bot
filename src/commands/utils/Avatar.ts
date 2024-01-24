@@ -1,7 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+
 import Command from "../Command.js";
-import i18next from "i18next";
-import { localizations } from "../../utils/localizations.js";
 
 class Avatar extends Command {
 	public constructor() {
@@ -25,36 +24,24 @@ class Avatar extends Command {
 	}
 
 	public initialize() {
-		const { description, descriptions, options } = localizations.get(this.name)!;
-		const { user, member } = options;
-
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
 				.setName(this.name)
-				.setDescription(description)
-				.setDescriptionLocalizations(descriptions)
+				.setDescription("Display a user/member avatar.")
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("user")
-						.setDescription(user.description)
-						.setDescriptionLocalizations(options.user.descriptions)
+						.setDescription("Display a user avatar.")
 						.addUserOption((option) =>
-							option
-								.setName("user")
-								.setDescription("Choose a user.")
-								.setDescriptionLocalizations(user.options.user.descriptions),
+							option.setName("user").setDescription("Choose a user."),
 						),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("member")
-						.setDescription(member.description)
-						.setDescriptionLocalizations(member.descriptions)
+						.setDescription("Display a member avatar")
 						.addUserOption((option) =>
-							option
-								.setName("member")
-								.setDescription("Choose a member.")
-								.setDescriptionLocalizations(member.options.member.descriptions),
+							option.setName("member").setDescription("Choose a member."),
 						),
 				)
 				.toJSON(),
@@ -77,11 +64,7 @@ class Avatar extends Command {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
-						.setDescription(
-							i18next.t(`commands.${this.name}.messages.invalid_user`, {
-								lng: args.language,
-							}),
-						)
+						.setDescription("Invalid user provided!")
 						.setColor(this.client.config.colors.error),
 				],
 				ephemeral: true,
@@ -94,11 +77,7 @@ class Avatar extends Command {
 			embeds: [
 				new EmbedBuilder()
 					.setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() })
-					.setTitle(
-						i18next.t(`commands.${this.name}.messages.user_avatar`, {
-							lng: args.language,
-						}),
-					)
+					.setTitle("User avatar")
 					.setImage(user.displayAvatarURL({ size: 4096 }))
 					.setColor(user.hexAccentColor!)
 					.setTimestamp(),
@@ -123,11 +102,7 @@ class Avatar extends Command {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
-						.setDescription(
-							i18next.t(`commands.${this.name}.messages.invalid_member`, {
-								lng: args.language,
-							}),
-						)
+						.setDescription("Invalid member provided")
 						.setColor(this.client.config.colors.error),
 				],
 				ephemeral: true,
@@ -143,11 +118,7 @@ class Avatar extends Command {
 						name: member.user.tag,
 						iconURL: member.user.displayAvatarURL(),
 					})
-					.setTitle(
-						i18next.t(`commands.${this.name}.messages.member_avatar`, {
-							lng: args.language,
-						}),
-					)
+					.setTitle("Member avatar")
 					.setImage(member.displayAvatarURL({ size: 4096 }))
 					.setColor(member.user.hexAccentColor!)
 					.setTimestamp(),

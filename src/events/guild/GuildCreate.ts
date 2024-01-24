@@ -1,5 +1,4 @@
 import { Events, Guild } from "discord.js";
-import i18next from "i18next";
 
 import Listener from "../Listener.js";
 
@@ -12,11 +11,7 @@ class GuildCreate extends Listener {
 		const { guilds } = this.client.managers;
 
 		if (!(await guilds.get(guild.id))) {
-			await guilds.set(guild.id, {
-				language: i18next.store.data[guild.preferredLocale]
-					? guild.preferredLocale
-					: i18next.language,
-			});
+			await guilds.set(guild.id, {});
 		}
 	}
 }

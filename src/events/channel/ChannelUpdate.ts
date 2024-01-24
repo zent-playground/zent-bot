@@ -1,4 +1,5 @@
 import { AuditLogEvent, NonThreadGuildBasedChannel } from "discord.js";
+
 import Listener from "../Listener.js";
 
 class ChannelUpdate extends Listener {
@@ -26,7 +27,7 @@ class ChannelUpdate extends Listener {
 			const data = await voices.get(newChannel.id);
 
 			if (data) {
-				if (!await users.get(data.author_id)) {
+				if (!(await users.get(data.author_id))) {
 					await users.set(data.author_id, {});
 				}
 
