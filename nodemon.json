@@ -2,7 +2,7 @@
 	"watch": ["src"],
 	"ext": "ts",
 	"exec": "pnpm build && pnpm start",
-	"delay": 1000,
+	"delay": 2000,
 	"env": {
 		"REDIS_PREFIX": "dev:",
 		"NODE_ENV": "development"

@@ -11,7 +11,7 @@ class QueryBuilder {
 		} else if (typeof value === "string") {
 			return `'${value.replace(/'/g, "''")}'`;
 		} else {
-			return value.toString();
+			return JSON.stringify(value);
 		}
 	}
 

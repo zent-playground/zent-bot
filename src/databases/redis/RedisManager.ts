@@ -15,7 +15,7 @@ class RedisManager<T> {
 
 	async set(key: string | number, values: T, options: SetOptions = {}): Promise<void> {
 		if (values === undefined) {
-			throw new Error(`No values provided to set for key: ${key}`);
+			throw new Error(`No values provided to set for key: '${key}'.`);
 		}
 
 		const serializedValues = JSON.stringify(values);
@@ -25,14 +25,10 @@ class RedisManager<T> {
 			return;
 		}
 
-		if (!options.KEEPTTL) {
-			options.EX = options.EX || 30 * 60;
-		}
-
 		await this.client.set(id, serializedValues, options);
 	}
 
-	async clear(key: string | number): Promise<void> {
+	async delete(key: string | number): Promise<void> {
 		const id = this.getId(key);
 
 		if (!id) {
