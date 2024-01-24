@@ -1,13 +1,10 @@
 import {
-	ChannelType,
 	Events,
 	VoiceState,
-	PermissionFlagsBits,
 	EmbedBuilder,
 } from "discord.js";
 
 import Listener from "../Listener.js";
-import { TempVoiceTargets } from "../../databases/managers/TempVoice/TempVoiceManager.js";
 
 class VoiceStateUpdate extends Listener {
 	public constructor() {
@@ -26,7 +23,6 @@ class VoiceStateUpdate extends Listener {
 			}
 
 			const creator = await voices.creators.get(channel.id);
-			const userConfig = await voices.configs.get(member.id);
 
 			if (creator) {
 				if (member.user.bot) {
@@ -54,25 +50,12 @@ class VoiceStateUpdate extends Listener {
 					return;
 				}
 
-				const temp = await guild.channels.create({
-					name: userConfig?.name || member.user.tag,
-					nsfw: userConfig?.nsfw || false,
-					type: ChannelType.GuildVoice,
-					parent: channel.parent,
-					permissionOverwrites: [
-						{
-							id: member.id,
-							allow: [PermissionFlagsBits.ManageChannels],
-						},
-						{
-							id: guild.id,
-							deny:
-								userConfig?.target === TempVoiceTargets.Whitelist
-									? [PermissionFlagsBits.Connect]
-									: [],
-						},
-					],
-				});
+				const temp = await guild.channels.create(
+					(await voices.createOptions(this.client, {
+						userId: member.id,
+						guildId: guild.id,
+					}))!,
+				);
 
 				await voices.set(temp.id, {
 					author_id: member.id,

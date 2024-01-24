@@ -30,6 +30,7 @@ CREATE TABLE temp_voice_configs (
     name VARCHAR(255) NULL,
     nsfw BOOLEAN NOT NULL DEFAULT false,
     blacklisted_ids JSON,
+    whitelisted_ids JSON,
     target INT NOT NULL DEFAULT 0,
     FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
 );
