@@ -158,7 +158,7 @@ class TempVoice extends Command {
 						.setCustomId("members")
 						.setPlaceholder("Choose members to blacklist")
 						.setDefaultUsers(
-							await(async () => {
+							await (async () => {
 								const config = await voices.configs.get(data!.author_id);
 
 								if (!config) {
@@ -215,12 +215,18 @@ class TempVoice extends Command {
 					);
 
 					await channel.edit({
-						permissionOverwrites: ids.map((id) => {
-							return {
-								id,
-								deny: [PermissionFlagsBits.Connect],
-							};
-						}),
+						permissionOverwrites: [
+							{
+								id: i.user.id,
+								allow: [PermissionFlagsBits.ManageChannels],
+							},
+							...ids.map((id) => {
+								return {
+									id,
+									deny: [PermissionFlagsBits.Connect],
+								};
+							}),
+						],
 					});
 
 					await i

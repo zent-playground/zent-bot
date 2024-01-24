@@ -7,6 +7,7 @@ import {
 } from "discord.js";
 
 import Listener from "../Listener.js";
+import { TempVoiceTargets } from "../../databases/managers/TempVoice/TempVoiceManager.js";
 
 class VoiceStateUpdate extends Listener {
 	public constructor() {
@@ -62,6 +63,13 @@ class VoiceStateUpdate extends Listener {
 						{
 							id: member.id,
 							allow: [PermissionFlagsBits.ManageChannels],
+						},
+						{
+							id: guild.id,
+							deny:
+								userConfig?.target === TempVoiceTargets.Whitelist
+									? [PermissionFlagsBits.Connect]
+									: [],
 						},
 					],
 				});

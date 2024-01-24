@@ -1,7 +1,5 @@
 import chalk from "chalk";
 
-import { formatTimestamp } from "./index.js";
-
 enum LogLevel {
 	Info,
 	Warn,
@@ -9,7 +7,7 @@ enum LogLevel {
 }
 
 abstract class Logger {
-	private static formatMessage(level: LogLevel, messages: string[]): string {
+	private static log(level: LogLevel, ...args: any[]): void {
 		const formattedLevel = (() => {
 			switch (level) {
 				case LogLevel.Info:
@@ -23,24 +21,21 @@ abstract class Logger {
 			}
 		})();
 
-		const formattedMessages = messages.join("\n");
-		return `[${formatTimestamp()}] ${formattedLevel}: ${formattedMessages}`;
+		const formattedTimestamp = chalk.cyanBright(`[${new Date().toISOString()}]`);
+		
+		console.log(`${formattedTimestamp} ${formattedLevel}`, ...args);
 	}
 
-	private static log(level: LogLevel, ...messages: string[]): void {
-		console.log(Logger.formatMessage(level, messages));
+	public static info(...args: any[]): void {
+		Logger.log(LogLevel.Info, ...args);
 	}
 
-	public static info(...messages: string[]): void {
-		Logger.log(LogLevel.Info, ...messages);
+	public static warn(...args: any[]): void {
+		Logger.log(LogLevel.Warn, ...args);
 	}
 
-	public static warn(...messages: string[]): void {
-		Logger.log(LogLevel.Warn, ...messages);
-	}
-
-	public static error(...messages: string[]): void {
-		Logger.log(LogLevel.Error, ...messages);
+	public static error(...args: any[]): void {
+		Logger.log(LogLevel.Error, ...args);
 	}
 }
 

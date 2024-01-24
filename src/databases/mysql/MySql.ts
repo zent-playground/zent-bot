@@ -1,4 +1,5 @@
 import { createPool, Pool } from "mysql2/promise";
+import Logger from "../../utils/Logger.js";
 
 interface MySqlConfig {
 	host: string;
@@ -9,7 +10,7 @@ interface MySqlConfig {
 }
 
 class MySql {
-	private pool: Pool;
+	public pool: Pool;
 
 	constructor(config: MySqlConfig) {
 		this.pool = createPool({
@@ -24,6 +25,13 @@ class MySql {
 		});
 	}
 
+	public async init(): Promise<void> {
+		const connection = await this.pool.getConnection();
+		connection.release();
+
+		Logger.info("Connected to MySql server.");
+	}
+
 	public async query(sql: string, params?: never[]): Promise<any> {
 		const [rows] = await this.pool.query(sql, params);
 		return rows;
@@ -32,12 +40,7 @@ class MySql {
 	public async ping(): Promise<number> {
 		const start = Date.now();
 		await this.query("SELECT 1");
-
 		return Date.now() - start;
-	}
-
-	public async connect(): Promise<void> {
-		await this.pool.getConnection();
 	}
 
 	public async close(): Promise<void> {

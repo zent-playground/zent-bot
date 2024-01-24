@@ -1,3 +1,4 @@
+import { SetOptions } from "redis";
 import MySqlManager from "./mysql/MySqlManager.js";
 import RedisManager from "./redis/RedisManager.js";
 
@@ -25,16 +26,17 @@ class BaseManager<T> extends MySqlManager<T> {
 			data = (
 				await this.select({
 					where: `id = '${id}'`,
-					selectFields: ["*"]
+					selectFields: ["*"],
 				})
 			)?.[0];
-
-			if (data) {
-				await this.cache.set(id, data);
-			}
 		}
 
-		return data;
+		if (data) {
+			await this.cache.set(id, data);
+			return data;
+		} else {
+			return null;
+		}
 	}
 
 	public async set(
@@ -42,12 +44,11 @@ class BaseManager<T> extends MySqlManager<T> {
 		values: Partial<T>,
 		options: {
 			overwrite?: boolean;
-			ttl?: number;
-		} = {},
+		} & SetOptions = {},
 	): Promise<void> {
 		values = Object.assign(values, { id });
 
-		if (options?.overwrite) {
+		if (options.overwrite) {
 			if (await this.get(id)) {
 				await this.update(`id = '${id}'`, values);
 			} else {
@@ -57,12 +58,12 @@ class BaseManager<T> extends MySqlManager<T> {
 			await this.insert(values);
 		}
 
-		await this.cache.set(id, await this.get(id, true) as T, { EX: options.ttl || 10 * 60 });
+		await this.cache.set(id, (await this.get(id, true)) as T, options);
 	}
 
 	public async delete(id: string): Promise<void> {
 		await super.delete(`id = '${id}'`);
-		await this.cache.clear(id);
+		await this.cache.delete(id);
 	}
 }
 

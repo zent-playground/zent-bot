@@ -1,3 +1,5 @@
+import { TempVoiceTargets } from "../databases/managers/TempVoice/TempVoiceManager.js";
+
 export interface Guild {
 	id: string;
 	prefix: string;
@@ -27,5 +29,6 @@ export interface TempVoiceConfig {
 	id: string;
 	name: string | null,
 	nsfw: boolean,
+	target: TempVoiceTargets,
 	blacklisted_ids: string[];
 }
