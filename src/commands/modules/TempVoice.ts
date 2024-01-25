@@ -33,7 +33,7 @@ class TempVoice extends Command {
 				{
 					name: "blacklist",
 					hybrid: "setBlacklist",
-				},
+				}
 			],
 		});
 	}
@@ -62,14 +62,14 @@ class TempVoice extends Command {
 							option
 								.setName("name")
 								.setDescription("Name to change.")
-								.setMaxLength(255)
+								.setMinLength(1)
 								.setRequired(true),
 						),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("blacklist")
-						.setDescription("Blacklist members from your voice channels."),
+						.setDescription("Blacklist members from your voice channel."),
 				)
 				.toJSON(),
 		);
@@ -114,7 +114,7 @@ class TempVoice extends Command {
 		const { channel } = ctx.member.voice;
 
 		const data = await voices.get(`${channel?.id}`);
-		const name = args.entries.join(" ") || ctx.interaction?.options.getString("name");
+		const name = args.join(" ") || ctx.interaction?.options.getString("name");
 
 		if (!name) {
 			return;
@@ -184,7 +184,7 @@ class TempVoice extends Command {
 									return [];
 								}
 
-								return config.blacklisted_ids;
+								return config.blacklisted_ids || [];
 							})(),
 						)
 						.setMinValues(0)

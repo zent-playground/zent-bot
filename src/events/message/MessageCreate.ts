@@ -42,7 +42,7 @@ class MessageCreate extends Listener {
 
 		if (!command) return;
 
-		const args = new Args(content);
+		const args = new Args(...content);
 
 		args.language = guild.language;
 		args.prefix = guild.prefix;
@@ -57,7 +57,7 @@ class MessageCreate extends Listener {
 	}
 
 	public async handleSubcommand(message: Message<true>, command: Command, args: Args) {
-		let [first, second] = args.entries;
+		let [first, second] = args;
 
 		first = first?.toLowerCase();
 		second = second?.toLowerCase();
