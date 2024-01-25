@@ -4,7 +4,7 @@ import {
 	ButtonStyle,
 	ChannelType,
 	EmbedBuilder,
-	PermissionFlagsBits,
+	GuildEditOptions,
 	SlashCommandBuilder,
 	UserSelectMenuBuilder,
 } from "discord.js";
@@ -33,7 +33,7 @@ class TempVoice extends Command {
 				{
 					name: "blacklist",
 					hybrid: "setBlacklist",
-				},
+				}
 			],
 		});
 	}
@@ -62,14 +62,14 @@ class TempVoice extends Command {
 							option
 								.setName("name")
 								.setDescription("Name to change.")
-								.setMaxLength(255)
+								.setMinLength(1)
 								.setRequired(true),
 						),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("blacklist")
-						.setDescription("Blacklist members from your voice channels."),
+						.setDescription("Blacklist members from your voice channel."),
 				)
 				.toJSON(),
 		);
@@ -114,7 +114,7 @@ class TempVoice extends Command {
 		const { channel } = ctx.member.voice;
 
 		const data = await voices.get(`${channel?.id}`);
-		const name = args.entries.join(" ") || ctx.interaction?.options.getString("name");
+		const name = args.join(" ") || ctx.interaction?.options.getString("name");
 
 		if (!name) {
 			return;
@@ -122,7 +122,12 @@ class TempVoice extends Command {
 
 		if (data && channel) {
 			await voices.configs.set(data.author_id, { name }, { overwrite: true });
-			await channel.setName(name);
+			await channel.edit(
+				(await voices.createOptions(this.client, {
+					userId: data.author_id,
+					guildId: ctx.guild.id,
+				})) as GuildEditOptions,
+			);
 		} else {
 			await ctx.send({
 				embeds: [
@@ -152,6 +157,19 @@ class TempVoice extends Command {
 
 		const data = await voices.get(`${channel?.id}`);
 
+		if (!data || !channel) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription("You must in a temp voice channel to use this command.")
+						.setColor(config.colors.error),
+				],
+				ephemeral: true,
+			});
+
+			return;
+		}
+
 		const getRows = async (disabled = false) => {
 			return [
 				new ActionRowBuilder<UserSelectMenuBuilder>().setComponents(
@@ -166,7 +184,7 @@ class TempVoice extends Command {
 									return [];
 								}
 
-								return config.blacklisted_ids;
+								return config.blacklisted_ids || [];
 							})(),
 						)
 						.setMinValues(0)
@@ -183,91 +201,62 @@ class TempVoice extends Command {
 			];
 		};
 
-		if (data && channel) {
-			const message = await ctx.send({
-				components: await getRows(),
-				ephemeral: true,
-				fetchReply: true,
-			});
+		const message = await ctx.send({
+			components: await getRows(),
+			ephemeral: true,
+			fetchReply: true,
+		});
 
-			const collector = message.createMessageComponentCollector({
-				filter: (i) => i.user.id === ctx.author.id,
-				time: 60000,
-			});
+		const collector = message.createMessageComponentCollector({
+			filter: (i) => i.user.id === ctx.author.id,
+			time: 60000,
+		});
 
-			collector
-				.on("collect", async (i) => {
-					let ids: string[] = [];
+		collector
+			.on("collect", async (i) => {
+				let ids: string[] = [];
 
-					if (i.isUserSelectMenu()) {
-						ids = i.members.map((member) => {
-							if ("voice" in member && member.voice.channelId === data.id) {
-								member.voice.setChannel(null).catch(() => null);
-							}
-
-							return member.user!.id;
-						});
-					}
-
-					await voices.configs.set(
-						i.user.id,
-						{ blacklisted_ids: JSON.stringify(ids) as any },
-						{ overwrite: true },
-					);
-
-					await channel.edit({
-						permissionOverwrites: [
-							{
-								id: i.user.id,
-								allow: [PermissionFlagsBits.ManageChannels],
-							},
-							...ids.map((id) => {
-								return {
-									id,
-									deny: [PermissionFlagsBits.Connect],
-								};
-							}),
-						],
+				if (i.isUserSelectMenu()) {
+					ids = i.members.map((member) => {
+						return member.user!.id;
 					});
+				}
 
-					await i
-						.update({
-							components: await getRows(),
-						})
-						.catch(() => null);
-				})
-				.on("ignore", (i) => {
-					i.reply({
-						embeds: [
-							new EmbedBuilder()
-								.setDescription("You can't use this interaction!")
-								.setColor(config.colors.error),
-						],
-					});
-				})
-				.on("end", async () => {
-					if (ctx.isMessage()) {
-						ctx.message
-							.edit({
-								components: await getRows(true),
-							})
-							.catch(() => 0);
-					} else {
-						ctx.interaction.deleteReply().catch(() => 0);
-					}
+				await voices.configs.set(i.user.id, { blacklisted_ids: ids }, { overwrite: true });
+
+				await channel.edit(
+					(await voices.createOptions(this.client, {
+						userId: data.author_id,
+						guildId: ctx.guild.id,
+					})) as GuildEditOptions,
+				);
+
+				await i
+					.update({
+						components: await getRows(),
+					})
+					.catch(() => null);
+			})
+			.on("ignore", (i) => {
+				i.reply({
+					embeds: [
+						new EmbedBuilder()
+							.setDescription("You can't use this interaction!")
+							.setColor(config.colors.error),
+					],
 				});
-		} else {
-			await ctx.send({
-				embeds: [
-					new EmbedBuilder()
-						.setDescription("You must in a temp voice channel to use this command.")
-						.setColor(config.colors.error),
-				],
-				ephemeral: true,
+			})
+			.on("end", async () => {
+				if (ctx.isMessage()) {
+					ctx.message
+						.edit({
+							components: await getRows(true),
+						})
+						.catch(() => 0);
+				} else {
+					ctx.interaction.deleteReply().catch(() => 0);
+				}
 			});
-
-			return;
-		}
 	}
 }
 

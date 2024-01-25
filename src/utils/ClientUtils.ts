@@ -63,14 +63,14 @@ class ClientUtils {
 		args.parentSubcommand = parent;
 
 		if (parent.type === "group") {
-			args.entries = args.entries.slice(1);
+			args.splice(0, 1);
 		}
 
 		if (
 			(!entry.type || entry.type === "subcommand") &&
-			args.entries[0]?.toLowerCase() === entry.name
+			args[0]?.toLowerCase() === entry.name
 		) {
-			args.entries = args.entries.slice(1);
+			args.splice(0, 1);
 		}
 
 		return {

@@ -10,8 +10,10 @@ class QueryBuilder {
 			return "NULL";
 		} else if (typeof value === "string") {
 			return `'${value.replace(/'/g, "''")}'`;
+		} else if (typeof value === "boolean") {
+			return `${value}`;
 		} else {
-			return JSON.stringify(value);
+			return `'${JSON.stringify(value)}'`;
 		}
 	}
 

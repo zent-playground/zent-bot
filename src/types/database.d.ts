@@ -31,4 +31,5 @@ export interface TempVoiceConfig {
 	nsfw: boolean,
 	target: TempVoiceTargets,
 	blacklisted_ids: string[];
+	whitelisted_ids: string[];
 }

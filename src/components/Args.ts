@@ -1,7 +1,11 @@
-class Args {
+class Args extends Array {
 	public references?: string[];
 	public language: string = "en";
-	public constructor(public entries: string[] = []) {}
+	
+	public constructor(...entries: string[]) {
+		super();
+		this.push(...entries);
+	}
 }
 
 export default Args;
