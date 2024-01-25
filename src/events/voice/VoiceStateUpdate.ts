@@ -1,8 +1,4 @@
-import {
-	Events,
-	VoiceState,
-	EmbedBuilder,
-} from "discord.js";
+import { Events, VoiceState, EmbedBuilder } from "discord.js";
 
 import Listener from "../Listener.js";
 
@@ -51,10 +47,15 @@ class VoiceStateUpdate extends Listener {
 				}
 
 				const temp = await guild.channels.create(
-					(await voices.createOptions(this.client, {
-						userId: member.id,
-						guildId: guild.id,
-					}))!,
+					Object.assign(
+						{
+							parent: channel.parent,
+						},
+						await voices.createOptions(this.client, {
+							userId: member.id,
+							guildId: guild.id,
+						}),
+					),
 				);
 
 				await voices.set(temp.id, {
