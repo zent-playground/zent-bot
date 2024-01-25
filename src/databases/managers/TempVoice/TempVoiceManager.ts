@@ -76,7 +76,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 
 				switch (config.target) {
 					case TempVoiceTargets.Everyone: {
-						for (const id of config.blacklisted_ids) {
+						for (const id of config.blacklisted_ids || []) {
 							const member =
 								guild.members.cache.get(id) || (await guild.members.fetch(id).catch(() => 0));
 
@@ -101,7 +101,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 							deny: [PermissionFlagsBits.Connect],
 						});
 
-						for (const id of config.whitelisted_ids) {
+						for (const id of config.whitelisted_ids || []) {
 							const member =
 								guild.members.cache.get(id) || (await guild.members.fetch(id).catch(() => 0));
 
