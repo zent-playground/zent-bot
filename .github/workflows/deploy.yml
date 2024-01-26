@@ -64,8 +64,8 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
           script: |
-            rm -rf /home/zent/* || true
-            rm -rf /home/zent/.* || true
+            rm -rf /home/zent/bot/* || true
+            rm -rf /home/zent/bot/.* || true
 
       - name: Copy Repository to Server
         uses: appleboy/scp-action@master
@@ -75,7 +75,7 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
           source: "."
-          target: "/home/zent"
+          target: "/home/zent/bot"
 
       - name: Deploy Discord Bot
         uses: appleboy/ssh-action@master
@@ -85,7 +85,7 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
           script: |
-            cd /home/zent
+            cd /home/zent/bot
             docker stop discord-bot || true
             docker rm discord-bot || true
             docker rmi discord-bot-image || true
