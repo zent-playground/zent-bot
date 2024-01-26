@@ -10,13 +10,11 @@ class Avatar extends Command {
 			subcommands: [
 				{
 					name: "user",
-					type: "subcommand",
 					hybrid: "user",
 					default: true,
 				},
 				{
 					name: "member",
-					type: "subcommand",
 					hybrid: "member",
 				},
 			],

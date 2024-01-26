@@ -42,6 +42,12 @@ class MessageCreate extends Listener {
 
 		if (!command) return;
 
+		if (command.preconditions) {
+			if (!(await this.client.utils.checkPreconditions(message, command.preconditions))) {
+				return;
+			}
+		}
+
 		const args = new Args(...content);
 
 		args.language = guild.language;
@@ -72,7 +78,19 @@ class MessageCreate extends Listener {
 			return;
 		}
 
-		const { entry } = parsed;
+		const { entry, parent } = parsed;
+
+		if (parent.preconditions) {
+			if (!(await this.client.utils.checkPreconditions(message, parent.preconditions))) {
+				return;
+			}
+		}
+
+		if (!parent["preconditions"] && entry.preconditions) {
+			if (!(await this.client.utils.checkPreconditions(message, entry.preconditions))) {
+				return;
+			}
+		}
 
 		if (entry.message) {
 			const func = command[

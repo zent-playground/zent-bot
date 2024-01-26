@@ -7,9 +7,11 @@ import {
 	GuildEditOptions,
 	SlashCommandBuilder,
 	UserSelectMenuBuilder,
+	codeBlock,
 } from "discord.js";
 
 import Command from "../Command.js";
+import { TempVoiceJoinable } from "../../databases/managers/TempVoice/TempVoiceManager.js";
 
 class TempVoice extends Command {
 	public constructor() {
@@ -29,11 +31,31 @@ class TempVoice extends Command {
 				{
 					name: "name",
 					hybrid: "setName",
+					preconditions: {
+						tempVoiceChannel: true,
+					},
 				},
 				{
 					name: "blacklist",
 					hybrid: "setBlacklist",
-				}
+					preconditions: {
+						tempVoiceChannel: true,
+					},
+				},
+				{
+					name: "whitelist",
+					hybrid: "setWhitelist",
+					preconditions: {
+						tempVoiceChannel: true,
+					},
+				},
+				{
+					name: "joinable",
+					hybrid: "setJoinable",
+					preconditions: {
+						tempVoiceChannel: true,
+					},
+				},
 			],
 		});
 	}
@@ -70,6 +92,27 @@ class TempVoice extends Command {
 					subcommand
 						.setName("blacklist")
 						.setDescription("Blacklist members from your voice channel."),
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName("whitelist")
+						.setDescription("Whitelist members from your voice channel."),
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName("joinable")
+						.setDescription("Set voice channel joinable.")
+						.addIntegerOption((option) =>
+							option
+								.setName("set")
+								.setDescription("Select a choice to set.")
+								.setChoices(
+									{ name: "Everyone", value: TempVoiceJoinable.Everyone },
+									{ name: "Whitelisted users", value: TempVoiceJoinable.WhitelistedUsers },
+									{ name: "Owner", value: TempVoiceJoinable.Owner },
+								)
+								.setRequired(true),
+						),
 				)
 				.toJSON(),
 		);
@@ -113,33 +156,21 @@ class TempVoice extends Command {
 		const { voices } = managers;
 		const { channel } = ctx.member.voice;
 
-		const data = await voices.get(`${channel?.id}`);
+		const data = (await voices.get(`${channel?.id}`))!;
 		const name = args.join(" ") || ctx.interaction?.options.getString("name");
 
 		if (!name) {
 			return;
 		}
 
-		if (data && channel) {
-			await voices.configs.set(data.author_id, { name }, { overwrite: true });
-			await channel.edit(
-				(await voices.createOptions(this.client, {
-					userId: data.author_id,
-					guildId: ctx.guild.id,
-				})) as GuildEditOptions,
-			);
-		} else {
-			await ctx.send({
-				embeds: [
-					new EmbedBuilder()
-						.setDescription("You must in a temp voice channel to use this command.")
-						.setColor(config.colors.error),
-				],
-				ephemeral: true,
-			});
+		await voices.configs.set(data.author_id, { name }, { overwrite: true });
 
-			return;
-		}
+		await channel!.edit(
+			(await voices.createOptions(this.client, {
+				userId: data.author_id,
+				guildId: ctx.guild.id,
+			})) as GuildEditOptions,
+		);
 
 		await ctx.send({
 			embeds: [
@@ -155,20 +186,7 @@ class TempVoice extends Command {
 		const { voices } = managers;
 		const { channel } = ctx.member.voice;
 
-		const data = await voices.get(`${channel?.id}`);
-
-		if (!data || !channel) {
-			await ctx.send({
-				embeds: [
-					new EmbedBuilder()
-						.setDescription("You must in a temp voice channel to use this command.")
-						.setColor(config.colors.error),
-				],
-				ephemeral: true,
-			});
-
-			return;
-		}
+		const data = (await voices.get(`${channel?.id}`))!;
 
 		const getRows = async (disabled = false) => {
 			return [
@@ -179,12 +197,7 @@ class TempVoice extends Command {
 						.setDefaultUsers(
 							await (async () => {
 								const config = await voices.configs.get(data!.author_id);
-
-								if (!config) {
-									return [];
-								}
-
-								return config.blacklisted_ids || [];
+								return config?.blacklisted_ids || [];
 							})(),
 						)
 						.setMinValues(0)
@@ -212,51 +225,176 @@ class TempVoice extends Command {
 			time: 60000,
 		});
 
-		collector
-			.on("collect", async (i) => {
-				let ids: string[] = [];
+		collector.on("collect", async (i) => {
+			let ids: string[] = [];
 
-				if (i.isUserSelectMenu()) {
-					ids = i.members.map((member) => {
-						return member.user!.id;
-					});
-				}
-
-				await voices.configs.set(i.user.id, { blacklisted_ids: ids }, { overwrite: true });
-
-				await channel.edit(
-					(await voices.createOptions(this.client, {
-						userId: data.author_id,
-						guildId: ctx.guild.id,
-					})) as GuildEditOptions,
-				);
-
-				await i
-					.update({
-						components: await getRows(),
-					})
-					.catch(() => null);
-			})
-			.on("ignore", (i) => {
-				i.reply({
-					embeds: [
-						new EmbedBuilder()
-							.setDescription("You can't use this interaction!")
-							.setColor(config.colors.error),
-					],
+			if (i.isUserSelectMenu()) {
+				ids = i.members.map((member) => {
+					return member.user!.id;
 				});
-			})
-			.on("end", async () => {
-				if (ctx.isMessage()) {
-					ctx.message
-						.edit({
-							components: await getRows(true),
-						})
-						.catch(() => 0);
-				} else {
-					ctx.interaction.deleteReply().catch(() => 0);
-				}
+			}
+
+			await voices.configs.set(i.user.id, { blacklisted_ids: ids }, { overwrite: true });
+
+			await channel!.edit(
+				(await voices.createOptions(this.client, {
+					userId: data.author_id,
+					guildId: ctx.guild.id,
+				})) as GuildEditOptions,
+			);
+
+			await i
+				.update({
+					components: await getRows(),
+				})
+				.catch(() => null);
+		});
+
+		collector.on("ignore", (i) => {
+			i.reply({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription("You can't use this interaction!")
+						.setColor(config.colors.error),
+				],
 			});
+		});
+
+		collector.on("end", async () => {
+			if (ctx.isMessage()) {
+				ctx.message
+					.edit({
+						components: await getRows(true),
+					})
+					.catch(() => 0);
+			} else {
+				ctx.interaction.deleteReply().catch(() => 0);
+			}
+		});
+	}
+
+	public async setWhitelist(ctx: Command.HybridContext) {
+		const { managers, config } = ctx.client;
+		const { voices } = managers;
+		const { channel } = ctx.member.voice;
+
+		const data = (await voices.get(`${channel?.id}`))!;
+
+		const getRows = async (disabled = false) => {
+			return [
+				new ActionRowBuilder<UserSelectMenuBuilder>().setComponents(
+					new UserSelectMenuBuilder()
+						.setCustomId("members")
+						.setPlaceholder("Choose members to whitelist")
+						.setDefaultUsers(
+							await (async () => {
+								const config = await voices.configs.get(data!.author_id);
+								return config?.whitelisted_ids || [];
+							})(),
+						)
+						.setMinValues(0)
+						.setMaxValues(25)
+						.setDisabled(disabled),
+				),
+				new ActionRowBuilder<ButtonBuilder>().setComponents(
+					new ButtonBuilder()
+						.setCustomId("clear")
+						.setLabel("Clear")
+						.setStyle(ButtonStyle.Primary)
+						.setDisabled(disabled),
+				),
+			];
+		};
+
+		const message = await ctx.send({
+			components: await getRows(),
+			ephemeral: true,
+			fetchReply: true,
+		});
+
+		const collector = message.createMessageComponentCollector({
+			filter: (i) => i.user.id === ctx.author.id,
+			time: 60000,
+		});
+
+		collector.on("collect", async (i) => {
+			let ids: string[] = [];
+
+			if (i.isUserSelectMenu()) {
+				ids = i.members.map((member) => {
+					return member.user!.id;
+				});
+			}
+
+			await voices.configs.set(i.user.id, { whitelisted_ids: ids }, { overwrite: true });
+
+			await channel!.edit(
+				(await voices.createOptions(this.client, {
+					userId: data.author_id,
+					guildId: ctx.guild.id,
+				})) as GuildEditOptions,
+			);
+
+			await i
+				.update({
+					components: await getRows(),
+				})
+				.catch(() => null);
+		});
+
+		collector.on("ignore", (i) => {
+			i.reply({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription("You can't use this interaction!")
+						.setColor(config.colors.error),
+				],
+			});
+		});
+
+		collector.on("end", async () => {
+			if (ctx.isMessage()) {
+				ctx.message
+					.edit({
+						components: await getRows(true),
+					})
+					.catch(() => 0);
+			} else {
+				ctx.interaction.deleteReply().catch(() => 0);
+			}
+		});
+	}
+
+	public async setJoinable(ctx: Command.HybridContext, args: Command.Args) {
+		const { config, managers } = ctx.client;
+		const { voices } = managers;
+
+		const choice = parseInt(args[0]) || ctx.interaction?.options.getInteger("set");
+
+		if (!choice || !TempVoiceJoinable[choice]) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription(codeBlock("0: Everyone\n1: Whitelisted users only\n2: Owner"))
+						.setColor(config.colors.default),
+				],
+			});
+
+			return;
+		}
+
+		await voices.configs.set(
+			ctx.author.id,
+			{
+				joinable: choice,
+			},
+			{ overwrite: true },
+		);
+
+		await voices.createOptions(ctx.client, {
+			userId: ctx.author.id,
+			guildId: ctx.guild.id,
+		});
 	}
 }
 

@@ -1,14 +1,15 @@
+import { Preconditions } from "../commands/Command.js";
+
 export interface SubcommandBody {
 	name: string;
-	type?: "subcommand";
 	chatInput?: string;
 	hybrid?: string;
 	message?: string;
 	default?: boolean;
+	preconditions?: Preconditions;
 }
 
 export interface SubcommandGroupBody extends Omit<SubcommandBody, "default"> {
-	type: "group";
 	subcommands: SubcommandBody[];
 }
 
