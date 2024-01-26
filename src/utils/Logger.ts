@@ -1,42 +1,26 @@
 import chalk from "chalk";
 
-enum LogLevel {
+enum Level {
 	Info,
 	Warn,
 	Error,
 }
 
-abstract class Logger {
-	private static log(level: LogLevel, ...args: any[]): void {
-		const formattedLevel = (() => {
-			switch (level) {
-				case LogLevel.Info:
-					return chalk.blue("[INFO]");
-				case LogLevel.Warn:
-					return chalk.yellow("[WARN]");
-				case LogLevel.Error:
-					return chalk.red("[ERROR]");
-				default:
-					return "";
-			}
-		})();
+const log = (level: Level, ...args: any[]): void => {
+	const formattedLevel = {
+		[Level.Info]: () => chalk.blue("[INFO]"),
+		[Level.Warn]: () => chalk.yellow("[WARN]"),
+		[Level.Error]: () => chalk.red("[ERROR]"),
+	}[level]();
+	const formattedISO = chalk.cyanBright(`[${new Date().toISOString()}]`);
 
-		const formattedTimestamp = chalk.cyanBright(`[${new Date().toISOString()}]`);
-		
-		console.log(`${formattedTimestamp} ${formattedLevel}`, ...args);
-	}
+	console.log(`${formattedISO}  ${formattedLevel}  `, ...args);
+};
 
-	public static info(...args: any[]): void {
-		Logger.log(LogLevel.Info, ...args);
-	}
-
-	public static warn(...args: any[]): void {
-		Logger.log(LogLevel.Warn, ...args);
-	}
-
-	public static error(...args: any[]): void {
-		Logger.log(LogLevel.Error, ...args);
-	}
+namespace Logger {
+	export const info = (...args: any[]) => log(Level.Info, ...args);
+	export const warn = (...args: any[]) => log(Level.Warn, ...args);
+	export const error = (...args: any[]) => log(Level.Error, ...args);
 }
 
 export default Logger;

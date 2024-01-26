@@ -1,9 +1,16 @@
-import { Client, EmbedBuilder, codeBlock } from "discord.js";
+import {
+	Client,
+	CommandInteraction,
+	EmbedBuilder,
+	Message,
+	codeBlock,
+} from "discord.js";
 
-import Command from "../commands/Command.js";
+import Command, { Preconditions } from "../commands/Command.js";
 import Args from "../commands/Args.js";
 
 import { Subcommand, SubcommandBody } from "../types/subcommand.js";
+import { BasedHybridContext } from "../commands/HybridContext.js";
 
 class ClientUtils {
 	public constructor(public client: Client) {}
@@ -23,18 +30,18 @@ class ClientUtils {
 		let parent: Subcommand | undefined;
 
 		for (const e of command.options.subcommands || []) {
-			if (e.type === "group" && e.name === subcommandGroup) {
-				parent = e;
-				break;
-			}
-
-			if (!e.type || e.type === "subcommand") {
+			if ("subcommands" in e) {
+				if (e.name === subcommandGroup) {
+					parent = e;
+					break;
+				}
+			} else {
 				const target = subcommandGroup || subcommand;
 
 				if (e.name === target) {
 					parent = e;
 					break;
-				} else if (e.default) {
+				} else if (e["default"]) {
 					parent = e;
 				}
 			}
@@ -44,7 +51,7 @@ class ClientUtils {
 
 		let entry: SubcommandBody | undefined;
 
-		if (parent.type === "group") {
+		if ("subcommands" in parent) {
 			for (const sub of parent.subcommands) {
 				if (sub.name === subcommand) {
 					entry = sub;
@@ -53,6 +60,8 @@ class ClientUtils {
 					entry = sub;
 				}
 			}
+
+			args.splice(0, 1);
 		} else {
 			entry = parent;
 		}
@@ -62,14 +71,7 @@ class ClientUtils {
 		args.entrySubcommand = entry;
 		args.parentSubcommand = parent;
 
-		if (parent.type === "group") {
-			args.splice(0, 1);
-		}
-
-		if (
-			(!entry.type || entry.type === "subcommand") &&
-			args[0]?.toLowerCase() === entry.name
-		) {
+		if (!entry["subcommands"] && args[0]?.toLowerCase() === entry.name) {
 			args.splice(0, 1);
 		}
 
@@ -90,7 +92,6 @@ class ClientUtils {
 	) {
 		const embed = new EmbedBuilder()
 			.setTitle(command.name)
-			//.setDescription(command.applicationCommands[0].description)
 			.setColor(this.client.config.colors.default);
 
 		if (command.aliases.length) {
@@ -115,6 +116,48 @@ class ClientUtils {
 		}
 
 		return embed;
+	}
+
+	public async checkPreconditions(
+		context: Command.HybridContext | CommandInteraction | Message,
+		preconditions: Preconditions,
+	) {
+		if (!(context instanceof BasedHybridContext)) {
+			context = new BasedHybridContext(context as any) as Command.HybridContext;
+		}
+
+		const { client, member } = context;
+
+		const { config, managers } = client;
+		const { voices } = managers;
+
+		const { voiceChannel, tempVoiceChannel } = preconditions;
+
+		const embed = new EmbedBuilder().setColor(config.colors.error);
+
+		if (voiceChannel) {
+			if (!member.voice.channel) {
+				await context.send({
+					embeds: [embed.setDescription("You must in a voice channel to use this command.")],
+				});
+
+				return false;
+			}
+		}
+
+		if (tempVoiceChannel) {
+			if (!(await voices.get(member.voice.channelId!))) {
+				await context.send({
+					embeds: [
+						embed.setDescription("You must in a temp voice channel to use this command."),
+					],
+				});
+
+				return;
+			}
+		}
+
+		return true;
 	}
 }
 

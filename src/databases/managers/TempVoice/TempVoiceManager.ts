@@ -13,10 +13,19 @@ import { TempVoice, TempVoiceConfig } from "../../../types/database.js";
 import TempVoiceCreatorManager from "./TempVoiceCreatorManager.js";
 import TempVoiceConfigManager from "./TempVoiceConfigManager.js";
 
-export enum TempVoiceTargets {
+export enum TempVoiceJoinable {
+	/**
+	 * Everyone can join the channel, excluding blacklisted users.
+	 */
 	Everyone,
+	/**
+	 * Only whitelisted users (provided by the owner) can join the channel.
+	 */
 	WhitelistedUsers,
-	Author,
+	/**
+	 * Only channel owner can join the channel.
+	 */
+	Owner,
 }
 
 class TempVoiceManager extends BaseManager<TempVoice> {
@@ -56,7 +65,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 		const config: TempVoiceConfig = (await this.configs.get(userId)) || {
 			id: userId,
 			name: user.tag,
-			target: 0,
+			joinable: TempVoiceJoinable.Everyone,
 			nsfw: false,
 			blacklisted_ids: [],
 			whitelisted_ids: [],
@@ -74,8 +83,8 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 					},
 				];
 
-				switch (config.target) {
-					case TempVoiceTargets.Everyone: {
+				switch (config.joinable) {
+					case TempVoiceJoinable.Everyone: {
 						for (const id of config.blacklisted_ids || []) {
 							const member =
 								guild.members.cache.get(id) || (await guild.members.fetch(id).catch(() => 0));
@@ -95,10 +104,10 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 						break;
 					}
 
-					case TempVoiceTargets.WhitelistedUsers: {
+					case TempVoiceJoinable.WhitelistedUsers: {
 						permissionOverwrites.push({
 							id: guild.id,
-							deny: [PermissionFlagsBits.Connect],
+							deny: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
 						});
 
 						for (const id of config.whitelisted_ids || []) {
@@ -120,10 +129,10 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 						break;
 					}
 
-					case TempVoiceTargets.Author: {
+					case TempVoiceJoinable.Owner: {
 						permissionOverwrites.push({
 							id: guild.id,
-							deny: [PermissionFlagsBits.Connect],
+							deny: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
 						});
 
 						break;

@@ -39,6 +39,14 @@ class InteractionCreate extends Listener {
 					return;
 				}
 
+				if (command.preconditions) {
+					if (
+						!(await this.client.utils.checkPreconditions(interaction, command.preconditions))
+					) {
+						return;
+					}
+				}
+
 				const guild = (await guilds.get(interaction.guild.id))!;
 
 				const args = new CommandArgs();
@@ -153,7 +161,19 @@ class InteractionCreate extends Listener {
 			return;
 		}
 
-		const { entry } = parsed;
+		const { parent, entry } = parsed;
+
+		if (parent.preconditions) {
+			if (!(await this.client.utils.checkPreconditions(interaction, parent.preconditions))) {
+				return;
+			}
+		}
+
+		if (!parent["preconditions"] && entry.preconditions) {
+			if (!(await this.client.utils.checkPreconditions(interaction, entry.preconditions))) {
+				return;
+			}
+		}
 
 		if (entry.chatInput) {
 			const func = command[
