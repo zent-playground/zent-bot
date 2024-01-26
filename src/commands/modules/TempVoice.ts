@@ -52,7 +52,7 @@ class TempVoice extends Command {
 				{
 					name: "joinable",
 					hybrid: "setJoinable",
-					predications: {
+					preconditions: {
 						tempVoiceChannel: true,
 					},
 				},
@@ -156,33 +156,21 @@ class TempVoice extends Command {
 		const { voices } = managers;
 		const { channel } = ctx.member.voice;
 
-		const data = await voices.get(`${channel?.id}`);
+		const data = (await voices.get(`${channel?.id}`))!;
 		const name = args.join(" ") || ctx.interaction?.options.getString("name");
 
 		if (!name) {
 			return;
 		}
 
-		if (data && channel) {
-			await voices.configs.set(data.author_id, { name }, { overwrite: true });
-			await channel.edit(
-				(await voices.createOptions(this.client, {
-					userId: data.author_id,
-					guildId: ctx.guild.id,
-				})) as GuildEditOptions,
-			);
-		} else {
-			await ctx.send({
-				embeds: [
-					new EmbedBuilder()
-						.setDescription("You must in a temp voice channel to use this command.")
-						.setColor(config.colors.error),
-				],
-				ephemeral: true,
-			});
+		await voices.configs.set(data.author_id, { name }, { overwrite: true });
 
-			return;
-		}
+		await channel!.edit(
+			(await voices.createOptions(this.client, {
+				userId: data.author_id,
+				guildId: ctx.guild.id,
+			})) as GuildEditOptions,
+		);
 
 		await ctx.send({
 			embeds: [
@@ -198,20 +186,7 @@ class TempVoice extends Command {
 		const { voices } = managers;
 		const { channel } = ctx.member.voice;
 
-		const data = await voices.get(`${channel?.id}`);
-
-		if (!data || !channel) {
-			await ctx.send({
-				embeds: [
-					new EmbedBuilder()
-						.setDescription("You must in a temp voice channel to use this command.")
-						.setColor(config.colors.error),
-				],
-				ephemeral: true,
-			});
-
-			return;
-		}
+		const data = (await voices.get(`${channel?.id}`))!;
 
 		const getRows = async (disabled = false) => {
 			return [
@@ -261,7 +236,7 @@ class TempVoice extends Command {
 
 			await voices.configs.set(i.user.id, { blacklisted_ids: ids }, { overwrite: true });
 
-			await channel.edit(
+			await channel!.edit(
 				(await voices.createOptions(this.client, {
 					userId: data.author_id,
 					guildId: ctx.guild.id,
@@ -303,20 +278,7 @@ class TempVoice extends Command {
 		const { voices } = managers;
 		const { channel } = ctx.member.voice;
 
-		const data = await voices.get(`${channel?.id}`);
-
-		if (!data || !channel) {
-			await ctx.send({
-				embeds: [
-					new EmbedBuilder()
-						.setDescription("You must in a temp voice channel to use this command.")
-						.setColor(config.colors.error),
-				],
-				ephemeral: true,
-			});
-
-			return;
-		}
+		const data = (await voices.get(`${channel?.id}`))!;
 
 		const getRows = async (disabled = false) => {
 			return [
@@ -366,7 +328,7 @@ class TempVoice extends Command {
 
 			await voices.configs.set(i.user.id, { whitelisted_ids: ids }, { overwrite: true });
 
-			await channel.edit(
+			await channel!.edit(
 				(await voices.createOptions(this.client, {
 					userId: data.author_id,
 					guildId: ctx.guild.id,
