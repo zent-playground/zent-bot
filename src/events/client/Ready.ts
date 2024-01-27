@@ -2,7 +2,7 @@ import { ActivityType, Client, Events } from "discord.js";
 
 import Listener from "../Listener.js";
 
-import Logger from "../../utils/Logger.js";
+import Logger from "../../utils/others/Logger";
 import { startApp } from "../../api/app.js";
 
 class Ready extends Listener {

@@ -1,5 +1,5 @@
 import { createPool, Pool } from "mysql2/promise";
-import Logger from "../../utils/Logger.js";
+import Logger from "../../utils/others/Logger";
 
 interface MySqlConfig {
 	host: string;

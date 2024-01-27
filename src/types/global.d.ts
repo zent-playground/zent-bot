@@ -4,7 +4,7 @@ import config from "../config.js";
 
 import Command from "../commands/Command.js";
 
-import ClientUtils from "../utils/ClientUtils.js";
+import ClientUtils from "../utils/others/ClientUtils";
 
 import Managers from "../databases/Managers.js";
 import MySql from "../databases/mysql/MySql.js";

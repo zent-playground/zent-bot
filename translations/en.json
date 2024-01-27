@@ -1,0 +1,120 @@
+{
+	"updated": "",
+	"emoji": "🇺🇸",
+	"commands": {
+		"example": "Example",
+		"usage": "Usage",
+		"insufficient_permission": "You are not authorized to execute this command!",
+		"avatar": {
+			"data": {
+				"description": "Display user/member avatar.",
+				"options": {
+					"user": {
+						"description": "Display user avatar.",
+						"options": {
+							"user": {
+								"description": "Choose a user."
+							}
+						}
+					},
+					"member": {
+						"description": "Display member avatar.",
+						"options": {
+							"member": {
+								"description": "Choose a member."
+							}
+						}
+					}
+				}
+			},
+			"messages": {
+				"invalid_user": "The specified user is invalid!",
+				"invalid_member": "The specified member is invalid!",
+				"member_avatar": "Member avatar",
+				"user_avatar": "User avatar"
+			}
+		},
+		"help": {
+			"data": {
+				"description": "Get some information about me."
+			}
+		},
+		"language": {
+			"data": {
+				"description": "Show the current language or set another one.",
+				"options": {
+					"set": {
+						"description": "Set another language for this server.",
+						"options": {
+							"language": {
+								"description": "Language to set."
+							}
+						}
+					},
+					"show": {
+						"description": "Show the current language of this server."
+					},
+					"list": {
+						"description": "Get a list of supported languages."
+					}
+				}
+			},
+			"messages": {
+				"missing_argument": "You must specify a language to set!",
+				"unsupported_language": "This language is not supported!",
+				"set_language": "Set language to `English`.",
+				"current_language": "The current language is `English`.",
+				"edit_language": "Please choose a new language."
+			},
+			"components": {
+				"set_language": "Edit Language"
+			}
+		},
+		"ping": {
+			"data": {
+				"description": "Display bot lantency."
+			}
+		},
+		"prefix": {
+			"data": {
+				"description": "Show the current prefix or set another one.",
+				"options": {
+					"set": {
+						"description": "Set another prefix for this server.",
+						"options": {
+							"prefix": {
+								"description": "Prefix to set."
+							}
+						}
+					},
+					"show": {
+						"description": "Show the current prefix of this server."
+					}
+				}
+			},
+			"messages": {
+				"set_prefix": "The new prefix has been set to `{{prefix}}`!",
+				"current_prefix": "The current prefix is `{{prefix}}`!",
+				"missing_argument": "You must specify a prefix to set!"
+			},
+			"components": {
+				"label_prefix": "New Prefix",
+				"set_prefix": "Edit Prefix"
+			}
+		},
+		"voice": {
+			"data": {
+				"description": "Temp voice module.",
+				"options": {
+					"setup": {
+						"description": "Setup a channel creator."
+					}
+				}
+			},
+			"messages": {
+				"created_channel": "Created <#{{channelId}}>.",
+				"join_to_create": "Join to create"
+			}
+		}
+	}
+}

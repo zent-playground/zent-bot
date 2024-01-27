@@ -1,0 +1,120 @@
+{
+	"updated": "",
+	"emoji": "🇻🇳",
+	"commands": {
+		"example": "Ví dụ",
+		"usage": "Cách dùng",
+		"insufficient_permission": "Cậu không có quyền để dùng lệnh này!",
+		"avatar": {
+			"data": {
+				"description": "Xem ảnh đại diện người dùng/thành viên.",
+				"options": {
+					"user": {
+						"description": "Xem ảnh đại diện người dùng.",
+						"options": {
+							"user": {
+								"description": "Chọn một người dùng."
+							}
+						}
+					},
+					"member": {
+						"description": "Xem ảnh đại diện thành viên.",
+						"options": {
+							"member": {
+								"description": "Chọn một thành viên."
+							}
+						}
+					}
+				}
+			},
+			"messages": {
+				"invalid_user": "Người mà cậu cung cấp không hợp lệ!",
+				"invalid_member": "Thành viên mà cậu cung cấp không hợp lệ!",
+				"member_avatar": "Ảnh đại diện thành viên",
+				"user_avatar": "Ảnh đại diện người dùng"
+			}
+		},
+		"help": {
+			"data": {
+				"description": "Xem một số thông tin về tớ."
+			}
+		},
+		"language": {
+			"data": {
+				"description": "Xem ngôn ngữ hiện tại đang dùng hoặc đặt một ngôn ngữ khác.",
+				"options": {
+					"set": {
+						"description": "Đặt một ngôn ngữ khác cho server.",
+						"options": {
+							"language": {
+								"description": "Ngôn ngữ để đặt."
+							}
+						}
+					},
+					"show": {
+						"description": "Xem ngôn ngữ hiện tại của server này."
+					},
+					"list": {
+						"description": "Xem danh sách những ngôn ngữ được bot hỗ trợ."
+					}
+				}
+			},
+			"messages": {
+				"missing_argument": "Cậu phải cung cấp một ngôn ngữ để đặt!",
+				"unsupported_language": "Ngôn ngữ này không được hỗ trợ!",
+				"set_language": "Đã đặt ngôn ngữ thành `Tiếng Việt (Vietnamese)`.",
+				"current_language": "Ngôn ngữ hiện tại là `Tiếng Việt (Vietnamese)`.",
+				"edit_language": "Vui lòng chọn một ngôn ngữ mới."
+			},
+			"components": {
+				"set_language": "Đổi ngôn ngữ"
+			}
+		},
+		"ping": {
+			"data": {
+				"description": "Xem tốc độ phản hồi của bot."
+			}
+		},
+		"prefix": {
+			"data": {
+				"description": "Xem prefix hiện tại đang dùng hoặc đặt một prefix mới.",
+				"options": {
+					"set": {
+						"description": "Đặt một prefix mới cho server.",
+						"options": {
+							"prefix": {
+								"description": "Prefix để đặt."
+							}
+						}
+					},
+					"show": {
+						"description": "Xem prefix hiện tại của server này."
+					}
+				}
+			},
+			"messages": {
+				"set_prefix": "Đã đặt prefix mới thành `{{prefix}}`!",
+				"current_prefix": "Prefix hiện tại là `{{prefix}}`!",
+				"missing_argument": "Cậu phải cung cấp một prefix mới để đặt!"
+			},
+			"components": {
+				"label_prefix": "Prefix mới",
+				"set_prefix": "Đổi prefix"
+			}
+		},
+		"voice": {
+			"data": {
+				"description": "Hệ thóng kênh thoại tạm thời.",
+				"options": {
+					"setup": {
+						"description": "Tạo một kênh dùng để tạo kênh thoại."
+					}
+				}
+			},
+			"messages": {
+				"created_channel": "Đã tạo kênh <#{{channelId}}>.",
+				"join_to_create": "Vào để tạo kênh"
+			}
+		}
+	}
+}

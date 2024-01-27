@@ -1,16 +1,10 @@
-import {
-	Client,
-	CommandInteraction,
-	EmbedBuilder,
-	Message,
-	codeBlock,
-} from "discord.js";
+import { Client, CommandInteraction, EmbedBuilder, Message, codeBlock } from "discord.js";
 
-import Command, { Preconditions } from "../commands/Command.js";
-import Args from "../commands/Args.js";
+import Command, { Preconditions } from "../../commands/Command";
+import Args from "../../commands/Args";
 
-import { Subcommand, SubcommandBody } from "../types/subcommand.js";
-import { BasedHybridContext } from "../commands/HybridContext.js";
+import { Subcommand, SubcommandBody } from "../../types/subcommand";
+import { BasedHybridContext } from "../../commands/HybridContext";
 
 class ClientUtils {
 	public constructor(public client: Client) {}
