@@ -1,12 +1,8 @@
 import {
-	ActionRowBuilder,
-	ButtonBuilder,
-	ButtonStyle,
 	ChannelType,
 	EmbedBuilder,
 	GuildEditOptions,
 	SlashCommandBuilder,
-	UserSelectMenuBuilder,
 	codeBlock,
 } from "discord.js";
 
@@ -91,12 +87,24 @@ class TempVoice extends Command {
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("blacklist")
-						.setDescription("Blacklist members from your voice channel."),
+						.setDescription("Blacklist members from your voice channel.")
+						.addUserOption((option) =>
+							option
+								.setName("member")
+								.setDescription("Choose a member to add/remove.")
+								.setRequired(true),
+						),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName("whitelist")
-						.setDescription("Whitelist members from your voice channel."),
+						.setDescription("Whitelist members from your voice channel.")
+						.addUserOption((option) =>
+							option
+								.setName("member")
+								.setDescription("Choose a member to add/remove.")
+								.setRequired(true),
+						),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
@@ -181,187 +189,135 @@ class TempVoice extends Command {
 		});
 	}
 
-	public async setBlacklist(ctx: Command.HybridContext) {
+	public async setBlacklist(ctx: Command.HybridContext, args: Command.Args) {
 		const { managers, config } = ctx.client;
 		const { voices } = managers;
 		const { channel } = ctx.member.voice;
 
 		const data = (await voices.get(`${channel?.id}`))!;
+		const userConfig = await voices.configs.get(data.author_id);
+		const target = await ctx.client.users
+			.fetch(
+				`${
+					this.client.utils.parseId(args[0]) || ctx.interaction?.options.getUser("member")?.id
+				}`,
+			)
+			.catch(() => null);
 
-		const getRows = async (disabled = false) => {
-			return [
-				new ActionRowBuilder<UserSelectMenuBuilder>().setComponents(
-					new UserSelectMenuBuilder()
-						.setCustomId("members")
-						.setPlaceholder("Choose members to blacklist")
-						.setDefaultUsers(
-							await (async () => {
-								const config = await voices.configs.get(data!.author_id);
-								return config?.blacklisted_ids || [];
-							})(),
-						)
-						.setMinValues(0)
-						.setMaxValues(25)
-						.setDisabled(disabled),
-				),
-				new ActionRowBuilder<ButtonBuilder>().setComponents(
-					new ButtonBuilder()
-						.setCustomId("clear")
-						.setLabel("Clear")
-						.setStyle(ButtonStyle.Primary)
-						.setDisabled(disabled),
-				),
-			];
-		};
-
-		const message = await ctx.send({
-			components: await getRows(),
-			ephemeral: true,
-			fetchReply: true,
-		});
-
-		const collector = message.createMessageComponentCollector({
-			filter: (i) => i.user.id === ctx.author.id,
-			time: 60000,
-		});
-
-		collector.on("collect", async (i) => {
-			let ids: string[] = [];
-
-			if (i.isUserSelectMenu()) {
-				ids = i.members.map((member) => {
-					return member.user!.id;
-				});
-			}
-
-			await voices.configs.set(i.user.id, { blacklisted_ids: ids }, { overwrite: true });
-
-			await channel!.edit(
-				(await voices.createOptions(this.client, {
-					userId: data.author_id,
-					guildId: ctx.guild.id,
-				})) as GuildEditOptions,
-			);
-
-			await i
-				.update({
-					components: await getRows(),
-				})
-				.catch(() => null);
-		});
-
-		collector.on("ignore", (i) => {
-			i.reply({
+		if (!target) {
+			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
-						.setDescription("You can't use this interaction!")
+						.setDescription("You must provide a member to add/remove.")
 						.setColor(config.colors.error),
 				],
 			});
-		});
 
-		collector.on("end", async () => {
-			if (ctx.isMessage()) {
-				ctx.message
-					.edit({
-						components: await getRows(true),
-					})
-					.catch(() => 0);
-			} else {
-				ctx.interaction.deleteReply().catch(() => 0);
-			}
+			return;
+		}
+
+		const blacklistedIds = userConfig?.blacklisted_ids || [];
+		const index = blacklistedIds.indexOf(target.id);
+
+		if (index !== -1) {
+			blacklistedIds.splice(index, 1);
+		} else {
+			blacklistedIds.push(target.id);
+		}
+
+		await voices.configs.set(
+			data.author_id,
+			{
+				blacklisted_ids: blacklistedIds,
+			},
+			{
+				overwrite: true,
+			},
+		);
+
+		await channel!.edit(
+			(await voices.createOptions(this.client, {
+				userId: data.author_id,
+				guildId: ctx.guild.id,
+			})) as GuildEditOptions,
+		);
+
+		await ctx.send({
+			embeds: [
+				new EmbedBuilder()
+					.setDescription(
+						index !== -1
+							? `Removed ${target} from your temp voice channel blacklist.`
+							: `Added ${target} to your temp voice channel blacklist.`,
+					)
+					.setColor(config.colors.success),
+			],
 		});
 	}
 
-	public async setWhitelist(ctx: Command.HybridContext) {
+	public async setWhitelist(ctx: Command.HybridContext, args: Command.Args) {
 		const { managers, config } = ctx.client;
 		const { voices } = managers;
 		const { channel } = ctx.member.voice;
 
 		const data = (await voices.get(`${channel?.id}`))!;
+		const userConfig = await voices.configs.get(data.author_id);
+		const target = await ctx.client.users
+			.fetch(
+				`${
+					this.client.utils.parseId(args[0]) || ctx.interaction?.options.getUser("member")?.id
+				}`,
+			)
+			.catch(() => null);
 
-		const getRows = async (disabled = false) => {
-			return [
-				new ActionRowBuilder<UserSelectMenuBuilder>().setComponents(
-					new UserSelectMenuBuilder()
-						.setCustomId("members")
-						.setPlaceholder("Choose members to whitelist")
-						.setDefaultUsers(
-							await (async () => {
-								const config = await voices.configs.get(data!.author_id);
-								return config?.whitelisted_ids || [];
-							})(),
-						)
-						.setMinValues(0)
-						.setMaxValues(25)
-						.setDisabled(disabled),
-				),
-				new ActionRowBuilder<ButtonBuilder>().setComponents(
-					new ButtonBuilder()
-						.setCustomId("clear")
-						.setLabel("Clear")
-						.setStyle(ButtonStyle.Primary)
-						.setDisabled(disabled),
-				),
-			];
-		};
-
-		const message = await ctx.send({
-			components: await getRows(),
-			ephemeral: true,
-			fetchReply: true,
-		});
-
-		const collector = message.createMessageComponentCollector({
-			filter: (i) => i.user.id === ctx.author.id,
-			time: 60000,
-		});
-
-		collector.on("collect", async (i) => {
-			let ids: string[] = [];
-
-			if (i.isUserSelectMenu()) {
-				ids = i.members.map((member) => {
-					return member.user!.id;
-				});
-			}
-
-			await voices.configs.set(i.user.id, { whitelisted_ids: ids }, { overwrite: true });
-
-			await channel!.edit(
-				(await voices.createOptions(this.client, {
-					userId: data.author_id,
-					guildId: ctx.guild.id,
-				})) as GuildEditOptions,
-			);
-
-			await i
-				.update({
-					components: await getRows(),
-				})
-				.catch(() => null);
-		});
-
-		collector.on("ignore", (i) => {
-			i.reply({
+		if (!target) {
+			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
-						.setDescription("You can't use this interaction!")
+						.setDescription("You must provide a member to add/remove.")
 						.setColor(config.colors.error),
 				],
 			});
-		});
 
-		collector.on("end", async () => {
-			if (ctx.isMessage()) {
-				ctx.message
-					.edit({
-						components: await getRows(true),
-					})
-					.catch(() => 0);
-			} else {
-				ctx.interaction.deleteReply().catch(() => 0);
-			}
+			return;
+		}
+
+		const whitelistedIds = userConfig?.whitelisted_ids || [];
+		const index = whitelistedIds.indexOf(target.id);
+
+		if (index !== -1) {
+			whitelistedIds.splice(index, 1);
+		} else {
+			whitelistedIds.push(target.id);
+		}
+
+		await voices.configs.set(
+			data.author_id,
+			{
+				whitelisted_ids: whitelistedIds,
+			},
+			{
+				overwrite: true,
+			},
+		);
+
+		await channel!.edit(
+			(await voices.createOptions(this.client, {
+				userId: data.author_id,
+				guildId: ctx.guild.id,
+			})) as GuildEditOptions,
+		);
+
+		await ctx.send({
+			embeds: [
+				new EmbedBuilder()
+					.setDescription(
+						index !== -1
+							? `Removed ${target} from your temp voice channel whitelist.`
+							: `Added ${target} to your temp voice channel whitelist.`,
+					)
+					.setColor(config.colors.success),
+			],
 		});
 	}
 
@@ -369,9 +325,13 @@ class TempVoice extends Command {
 		const { config, managers } = ctx.client;
 		const { voices } = managers;
 
-		const choice = parseInt(args[0]) || ctx.interaction?.options.getInteger("set");
+		let choice: number | null | undefined = Number(args[0]);
 
-		if (!choice || !TempVoiceJoinable[choice]) {
+		if (isNaN(choice)) {
+			choice = ctx.interaction?.options.getInteger("set");
+		}
+
+		if (choice === null || choice === undefined || !TempVoiceJoinable[choice!]) {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
@@ -391,9 +351,25 @@ class TempVoice extends Command {
 			{ overwrite: true },
 		);
 
-		await voices.createOptions(ctx.client, {
-			userId: ctx.author.id,
-			guildId: ctx.guild.id,
+		await ctx.member.voice.channel!.edit(
+			(await voices.createOptions(ctx.client, {
+				userId: ctx.author.id,
+				guildId: ctx.guild.id,
+			})) as GuildEditOptions,
+		);
+
+		const formattedChoice = {
+			[TempVoiceJoinable.Everyone]: "Everyone",
+			[TempVoiceJoinable.Owner]: "Owner",
+			[TempVoiceJoinable.WhitelistedUsers]: "Whitelisted users",
+		}[choice];
+
+		await ctx.send({
+			embeds: [
+				new EmbedBuilder()
+					.setDescription(`Set your temp voice channel joinable to \`${formattedChoice}\`.`)
+					.setColor(config.colors.success),
+			],
 		});
 	}
 }
