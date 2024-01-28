@@ -1,5 +1,5 @@
 import { createClient, RedisClientType } from "redis";
-import Logger from "../../utils/Logger.js";
+import Logger from "../../utils/others/Logger.js";
 
 interface RedisConfig {
 	host: string;
@@ -23,7 +23,7 @@ class Redis {
 	public async init(): Promise<void> {
 		await this.client.connect();
 		await this.client.flushAll();
-		
+
 		Logger.info("Connected to Redis server.");
 	}
 }

@@ -1,9 +1,9 @@
 import { Client, Collection, GatewayIntentBits } from "discord.js";
 
 import { loadCommands, loadComponents, loadEvents } from "./utils/loader.js";
-import ClientUtils from "./utils/ClientUtils.js";
+import ClientUtils from "./utils/others/ClientUtils.js";
 
-import {  } from "./utils/Logger.js";
+import {} from "./utils/others/Logger.js";
 
 import "./utils/error.js";
 

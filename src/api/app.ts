@@ -5,7 +5,7 @@ import { Client } from "discord.js";
 import session from "express-session";
 import helmet from "helmet";
 
-import Logger from "../utils/Logger.js";
+import Logger from "../utils/others/Logger.js";
 import { loadControllers } from "../utils/loader.js";
 
 @Module({})
