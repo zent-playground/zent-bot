@@ -219,7 +219,7 @@ class TempVoice extends Command {
 		const blacklistedIds = userConfig?.blacklisted_ids || [];
 		const index = blacklistedIds.indexOf(target.id);
 
-		if (index) {
+		if (index !== -1) {
 			blacklistedIds.splice(index, 1);
 		} else {
 			blacklistedIds.push(target.id);
@@ -246,7 +246,7 @@ class TempVoice extends Command {
 			embeds: [
 				new EmbedBuilder()
 					.setDescription(
-						index
+						index !== -1
 							? `Removed ${target} from your temp voice channel blacklist.`
 							: `Added ${target} to your temp voice channel blacklist.`,
 					)
@@ -285,7 +285,7 @@ class TempVoice extends Command {
 		const whitelistedIds = userConfig?.whitelisted_ids || [];
 		const index = whitelistedIds.indexOf(target.id);
 
-		if (index) {
+		if (index !== -1) {
 			whitelistedIds.splice(index, 1);
 		} else {
 			whitelistedIds.push(target.id);
@@ -312,7 +312,7 @@ class TempVoice extends Command {
 			embeds: [
 				new EmbedBuilder()
 					.setDescription(
-						index
+						index !== -1
 							? `Removed ${target} from your temp voice channel whitelist.`
 							: `Added ${target} to your temp voice channel whitelist.`,
 					)
