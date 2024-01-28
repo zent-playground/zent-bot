@@ -327,7 +327,13 @@ class TempVoice extends Command {
 
 		const choice = parseInt(args[0]) || ctx.interaction?.options.getInteger("set");
 
-		if (choice === undefined || choice === null || !TempVoiceJoinable[choice]) {
+		const formattedChoices = {
+			[TempVoiceJoinable.Everyone]: "Everyone",
+			[TempVoiceJoinable.Owner]: "Owner",
+			[TempVoiceJoinable.WhitelistedUsers]: "Whitelisted users",
+		};
+
+		if (choice === undefined || choice === null || !formattedChoices[choice]) {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
@@ -354,16 +360,10 @@ class TempVoice extends Command {
 			})) as GuildEditOptions,
 		);
 
-		const formattedChoice = {
-			[TempVoiceJoinable.Everyone]: "Everyone",
-			[TempVoiceJoinable.Owner]: "Owner",
-			[TempVoiceJoinable.WhitelistedUsers]: "Whitelisted users",
-		}[choice];
-
 		await ctx.send({
 			embeds: [
 				new EmbedBuilder()
-					.setDescription(`Set your temp voice channel joinable to \`${formattedChoice}\`.`)
+					.setDescription(`Set your temp voice channel joinable to \`${formattedChoices[choice]}\`.`)
 					.setColor(config.colors.success),
 			],
 		});
