@@ -79,7 +79,7 @@ class VoiceStateUpdate extends Listener {
 
 			if (temp && channel.members.size === 0) {
 				await channel.delete();
-				await voices.delete(channel.id);
+				await voices.delete(channel.id).catch(() => null);
 			}
 		};
 
