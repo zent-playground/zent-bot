@@ -225,9 +225,15 @@ class TempVoice extends Command {
 			blacklistedIds.push(target.id);
 		}
 
-		await voices.configs.set(data.author_id, {
-			blacklisted_ids: blacklistedIds,
-		});
+		await voices.configs.set(
+			data.author_id,
+			{
+				blacklisted_ids: blacklistedIds,
+			},
+			{
+				overwrite: true,
+			},
+		);
 
 		await channel!.edit(
 			(await voices.createOptions(this.client, {
@@ -285,9 +291,15 @@ class TempVoice extends Command {
 			whitelistedIds.push(target.id);
 		}
 
-		await voices.configs.set(data.author_id, {
-			whitelisted_ids: whitelistedIds,
-		});
+		await voices.configs.set(
+			data.author_id,
+			{
+				whitelisted_ids: whitelistedIds,
+			},
+			{
+				overwrite: true,
+			},
+		);
 
 		await channel!.edit(
 			(await voices.createOptions(this.client, {
