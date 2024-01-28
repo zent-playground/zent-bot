@@ -325,15 +325,13 @@ class TempVoice extends Command {
 		const { config, managers } = ctx.client;
 		const { voices } = managers;
 
-		const choice = parseInt(args[0]) || ctx.interaction?.options.getInteger("set");
+		let choice: number | null | undefined = Number(args[0]);
 
-		const formattedChoices = {
-			[TempVoiceJoinable.Everyone]: "Everyone",
-			[TempVoiceJoinable.Owner]: "Owner",
-			[TempVoiceJoinable.WhitelistedUsers]: "Whitelisted users",
-		};
+		if (isNaN(choice)) {
+			choice = ctx.interaction?.options.getInteger("set");
+		}
 
-		if (choice === undefined || choice === null || !formattedChoices[choice]) {
+		if (choice === null || choice === undefined || !TempVoiceJoinable[choice!]) {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
@@ -360,10 +358,16 @@ class TempVoice extends Command {
 			})) as GuildEditOptions,
 		);
 
+		const formattedChoice = {
+			[TempVoiceJoinable.Everyone]: "Everyone",
+			[TempVoiceJoinable.Owner]: "Owner",
+			[TempVoiceJoinable.WhitelistedUsers]: "Whitelisted users",
+		}[choice];
+
 		await ctx.send({
 			embeds: [
 				new EmbedBuilder()
-					.setDescription(`Set your temp voice channel joinable to \`${formattedChoices[choice]}\`.`)
+					.setDescription(`Set your temp voice channel joinable to \`${formattedChoice}\`.`)
 					.setColor(config.colors.success),
 			],
 		});
