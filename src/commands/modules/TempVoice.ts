@@ -391,9 +391,25 @@ class TempVoice extends Command {
 			{ overwrite: true },
 		);
 
-		await voices.createOptions(ctx.client, {
-			userId: ctx.author.id,
-			guildId: ctx.guild.id,
+		await ctx.member.voice.channel!.edit(
+			(await voices.createOptions(ctx.client, {
+				userId: ctx.author.id,
+				guildId: ctx.guild.id,
+			})) as GuildEditOptions,
+		);
+
+		const formattedChoice = {
+			[TempVoiceJoinable.Everyone]: "Everyone",
+			[TempVoiceJoinable.Owner]: "Owner",
+			[TempVoiceJoinable.WhitelistedUsers]: "Whitelisted users",
+		}[choice];
+
+		await ctx.send({
+			embeds: [
+				new EmbedBuilder()
+					.setDescription(`Set your temp voice channel joinable to \`${formattedChoice}\`.`)
+					.setColor(config.colors.default),
+			],
 		});
 	}
 }
