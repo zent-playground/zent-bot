@@ -8,8 +8,6 @@
 		"build": "node scripts/build.js",
 		"dev": "nodemon",
 		"lint": "lint-staged",
-		"lang:check": "node scripts/translations/check.js",
-		"lang:merge": "node scripts/translations/merge.js",
 		"prepare": "husky"
 	},
 	"author": "Zent Playground",
@@ -33,10 +31,8 @@
 		"@types/cors": "^2.8.17",
 		"@types/express": "^4.17.21",
 		"@types/express-session": "^1.17.10",
-		"@types/uuid": "^9.0.7",
 		"@typescript-eslint/eslint-plugin": "^6.17.0",
 		"@typescript-eslint/parser": "^6.17.0",
-		"cross-env": "^7.0.3",
 		"dotenv": "^16.3.1",
 		"esbuild": "^0.19.11",
 		"eslint": "^8.56.0",
@@ -46,7 +42,6 @@
 		"lint-staged": "^15.2.0",
 		"nodemon": "^3.0.3",
 		"prettier": "3.1.1",
-		"readline": "^1.3.0",
 		"typescript": "^5.3.3"
 	},
 	"dependencies": {
@@ -57,7 +52,6 @@
 		"cors": "^2.8.5",
 		"discord-api-types": "^0.37.67",
 		"discord.js": "^14.14.1",
-		"esbuild-ts-paths": "^1.1.3",
 		"express": "^4.18.2",
 		"express-session": "^1.17.3",
 		"glob": "^10.3.10",
@@ -66,8 +60,6 @@
 		"i18next-http-backend": "^2.4.2",
 		"iso-639-1": "^3.1.0",
 		"mysql2": "^3.7.0",
-		"redis": "^4.6.12",
-		"table": "^6.8.1",
-		"uuid": "^9.0.1"
+		"redis": "^4.6.12"
 	}
 }

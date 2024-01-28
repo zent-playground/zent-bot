@@ -3,7 +3,7 @@ import { ChatInputCommandInteraction, EmbedBuilder, Events, Interaction } from "
 import Listener from "../Listener.js";
 
 import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
-import Command from "../../commands/Command";
+import Command from "../../commands/Command.js";
 import CommandArgs from "../../commands/Args.js";
 
 import Component from "../../components/Component.js";

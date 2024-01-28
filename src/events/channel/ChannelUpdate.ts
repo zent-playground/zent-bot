@@ -1,10 +1,10 @@
-import { AuditLogEvent, NonThreadGuildBasedChannel } from "discord.js";
+import { AuditLogEvent, Events, NonThreadGuildBasedChannel } from "discord.js";
 
 import Listener from "../Listener.js";
 
 class ChannelUpdate extends Listener {
 	public constructor() {
-		super("channelUpdate");
+		super(Events.ChannelUpdate);
 	}
 
 	public async execute(

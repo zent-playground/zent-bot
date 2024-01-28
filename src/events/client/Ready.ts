@@ -2,7 +2,7 @@ import { ActivityType, Client, Events } from "discord.js";
 
 import Listener from "../Listener.js";
 
-import Logger from "../../utils/others/Logger";
+import Logger from "../../utils/others/Logger.js";
 import { startApp } from "../../api/app.js";
 
 class Ready extends Listener {
@@ -11,7 +11,7 @@ class Ready extends Listener {
 	}
 
 	public async execute(client: Client<true>) {
-		startApp(client);
+		await startApp(client);
 
 		Logger.info(`Successfully logged as '${client.user.tag}'.`);
 

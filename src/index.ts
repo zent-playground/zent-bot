@@ -2,7 +2,7 @@ import "dotenv/config.js";
 import { ShardingManager } from "discord.js";
 
 import config from "./config.js";
-import Logger from "./utils/others/Logger";
+import Logger from "./utils/others/Logger.js";
 
 if (!process.env.PORT) {
 	process.env.PORT = "3000";
