@@ -371,7 +371,7 @@ class TempVoice extends Command {
 
 		const choice = parseInt(args[0]) || ctx.interaction?.options.getInteger("set");
 
-		if (!choice || !TempVoiceJoinable[choice]) {
+		if (choice === undefined || choice === null || !TempVoiceJoinable[choice]) {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
