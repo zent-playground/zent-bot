@@ -391,10 +391,12 @@ class TempVoice extends Command {
 			{ overwrite: true },
 		);
 
-		await voices.createOptions(ctx.client, {
-			userId: ctx.author.id,
-			guildId: ctx.guild.id,
-		});
+		await ctx.member.voice.channel!.edit(
+			(await voices.createOptions(ctx.client, {
+				userId: ctx.author.id,
+				guildId: ctx.guild.id,
+			})) as GuildEditOptions,
+		);
 	}
 }
 
