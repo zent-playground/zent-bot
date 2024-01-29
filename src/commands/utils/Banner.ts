@@ -47,7 +47,7 @@ class Banner extends Command {
 				name: user.tag,
 				iconURL: user.displayAvatarURL(),
 			})
-			.setTitle("Member avatar")
+			.setTitle("Member banner")
 			.setColor(user.hexAccentColor!)
 			.setTimestamp();
 
