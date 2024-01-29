@@ -169,23 +169,19 @@ class InteractionCreate extends Listener {
 			}
 		}
 
-		if (!parent["preconditions"] && entry.preconditions) {
+		if (parent["subcommands"] && entry.preconditions) {
 			if (!(await this.client.utils.checkPreconditions(interaction, entry.preconditions))) {
 				return;
 			}
 		}
 
 		if (entry.chatInput) {
-			const func = command[
-				entry.chatInput as keyof typeof command
-			] as typeof command.executeChatInput;
+			const func = command[entry.chatInput] as typeof command.executeChatInput;
 			await func?.bind(command)(interaction);
 		}
 
 		if (entry.hybrid) {
-			const func = command[
-				entry.hybrid as keyof typeof command
-			] as typeof command.executeHybrid;
+			const func = command[entry.hybrid] as typeof command.executeHybrid;
 			await func?.bind(command)(new BasedHybridContext(interaction) as HybridContext, args);
 		}
 	}
