@@ -3,8 +3,6 @@ import { Client, Collection, GatewayIntentBits } from "discord.js";
 import { loadCommands, loadComponents, loadEvents } from "./utils/loader.js";
 import ClientUtils from "./utils/others/ClientUtils.js";
 
-import {} from "./utils/others/Logger.js";
-
 import "./utils/error.js";
 
 import Managers from "./databases/Managers.js";
@@ -42,8 +40,8 @@ client.managers = new Managers(client.mysql, client.redis);
 client.mysql.init();
 client.redis.init();
 
-loadEvents(client);
-loadCommands(client);
-loadComponents(client);
+await loadEvents(client);
+await loadCommands(client);
+await loadComponents(client);
 
 client.login(process.env.BOT_TOKEN!);
