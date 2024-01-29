@@ -86,25 +86,19 @@ class MessageCreate extends Listener {
 			}
 		}
 
-		if (!parent["preconditions"] && entry.preconditions) {
+		if (parent["subcommands"] && entry.preconditions) {
 			if (!(await this.client.utils.checkPreconditions(message, entry.preconditions))) {
 				return;
 			}
 		}
 
 		if (entry.message) {
-			const func = command[
-				entry.message as keyof typeof command
-			] as typeof command.executeMessage;
-
+			const func = command[entry.message] as typeof command.executeMessage;
 			await func?.bind(command)(message, args);
 		}
 
 		if (entry.hybrid) {
-			const func = command[
-				entry.hybrid as keyof typeof command
-			] as typeof command.executeHybrid;
-
+			const func = command[entry.hybrid] as typeof command.executeHybrid;
 			await func?.bind(command)(new BasedHybridContext(message) as HybridContext, args);
 		}
 	}

@@ -9,9 +9,11 @@ import {
 	StringSelectMenuInteraction,
 	UserSelectMenuInteraction,
 } from "discord.js";
+import { Preconditions } from "../commands/Command.js";
 
 interface ComponentOptions {
 	memberPermissions?: PermissionResolvable;
+	preconditions?: Preconditions;
 }
 
 namespace Component {
@@ -27,11 +29,14 @@ namespace Component {
 class Component {
 	public client!: Client<true>;
 	public subCustomId!: string;
+	public preconditions: Preconditions;
 
 	public constructor(
 		public preCustomId: string,
-		public options?: ComponentOptions,
-	) {}
+		public options: ComponentOptions = {},
+	) {
+		this.preconditions = options.preconditions || {};
+	}
 
 	public execute?(
 		interaction: Component.Button | Component.Modal | Component.SelectMenu,
