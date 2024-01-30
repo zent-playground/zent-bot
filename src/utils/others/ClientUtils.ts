@@ -140,7 +140,7 @@ class ClientUtils {
 		}
 
 		if (tempVoiceChannel) {
-			if (!(await voices.get(member.voice.channelId!))) {
+			if (!(await voices.get({ id: member.voice.channelId! }))) {
 				await context.send({
 					embeds: [
 						embed.setDescription("You must in a temp voice channel to use this command."),

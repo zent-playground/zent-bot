@@ -9,7 +9,7 @@ import Logger from "../utils/others/Logger.js";
 import { loadControllers } from "../utils/loader.js";
 
 @Module({})
-export class AppModule {
+class AppModule {
 	static async forRoot(client: Client<true>): Promise<DynamicModule> {
 		return {
 			module: AppModule,
@@ -35,7 +35,7 @@ export const startApp = async (client: Client<true>): Promise<void> => {
 			saveUninitialized: true,
 			cookie: {
 				maxAge: 60_000,
-				secure: process.env.NODE_ENV === "development" ? false : true,
+				secure: process.env.NODE_ENV !== "development",
 			},
 		}),
 	);

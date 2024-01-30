@@ -1,8 +1,4 @@
-import {
-	EmbedBuilder,
-	SlashCommandBuilder,
-	PermissionFlagsBits,
-} from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
 
 import Command from "../Command.js";
 
@@ -64,7 +60,7 @@ class Prefix extends Command {
 
 	public async show(ctx: Command.HybridContext) {
 		const { guilds } = this.client.managers;
-		const { prefix } = (await guilds.get(ctx.guild.id))!;
+		const { prefix } = (await guilds.get({ id: ctx.guild.id }))!;
 
 		await ctx.send({
 			embeds: [
@@ -75,7 +71,7 @@ class Prefix extends Command {
 					})
 					.setDescription(`The current prefix of this server is \`${prefix}\`.`)
 					.setColor(this.client.config.colors.default),
-			]
+			],
 		});
 
 		return;
@@ -100,6 +96,18 @@ class Prefix extends Command {
 			return;
 		}
 
+		if (prefixToSet.length > 5) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription("The prefix must be less than 5 characters!")
+						.setColor(this.client.config.colors.error),
+				],
+			});
+
+			return;
+		}
+
 		if (!ctx.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
 			await ctx.send({
 				embeds: [
@@ -112,7 +120,7 @@ class Prefix extends Command {
 			return;
 		}
 
-		await guilds.set(ctx.guild.id, { prefix: prefixToSet }, { overwrite: true });
+		await guilds.upd({ id: ctx.guild.id }, { prefix: prefixToSet });
 
 		await ctx.send({
 			embeds: [

@@ -37,11 +37,11 @@ client.mysql = new MySql(client.config.mysql);
 client.redis = new Redis(client.config.redis);
 client.managers = new Managers(client.mysql, client.redis);
 
-client.mysql.init();
-client.redis.init();
+await client.mysql.init();
+await client.redis.init();
 
 await loadEvents(client);
 await loadCommands(client);
 await loadComponents(client);
 
-client.login(process.env.BOT_TOKEN!);
+await client.login(process.env.BOT_TOKEN!);

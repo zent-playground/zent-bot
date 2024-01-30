@@ -9,16 +9,22 @@ class Client {
 	@Get()
 	async information(@Res() res: Response) {
 		if (!this.client.user) {
-			throw new HttpException("Client user information is not available.", HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new HttpException(
+				"Client user information is not available.",
+				HttpStatus.INTERNAL_SERVER_ERROR,
+			);
 		}
 
-		return res.json(this.client.user.toJSON());
+		return res.status(HttpStatus.OK).json(this.client.user.toJSON());
 	}
 
 	@Get("status")
 	async status(@Res() res: Response) {
 		if (!this.client.ws) {
-			throw new HttpException("WebSocket information is not available.", HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new HttpException(
+				"WebSocket information is not available.",
+				HttpStatus.INTERNAL_SERVER_ERROR,
+			);
 		}
 
 		let databasePing: number;
@@ -28,10 +34,10 @@ class Client {
 			throw new HttpException("Database ping failed.", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		return res.json({
+		return res.status(HttpStatus.OK).json({
 			api: this.client.ws.ping,
 			online: this.client.ws.status,
-			database: databasePing
+			database: databasePing,
 		});
 	}
 
@@ -41,9 +47,9 @@ class Client {
 			throw new HttpException("Commands are not available.", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		return res.json(
-			this.client.commands.map(command => command.applicationCommands).flat()
-		);
+		return res
+			.status(HttpStatus.OK)
+			.json(this.client.commands.map((command) => command.applicationCommands).flat());
 	}
 }
 

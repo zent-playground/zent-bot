@@ -9,44 +9,30 @@ class RedisManager<T> {
 		this.prefix = prefix;
 	}
 
-	private getId(key: string | number): string | null {
-		return this.prefix + String(key);
+	private getId(keys: (string | number)[]): string {
+		return this.prefix + keys.join(":");
 	}
 
-	async set(key: string | number, values: T, options: SetOptions = {}): Promise<void> {
+	async set(keys: (string | number)[], values: T, options: SetOptions = {}): Promise<void> {
 		if (values === undefined) {
-			throw new Error(`No values provided to set for key: '${key}'.`);
+			throw new Error(`No values provided to set for keys: '${keys.join(", ")}'.`);
 		}
 
 		const serializedValues = JSON.stringify(values);
-		const id = this.getId(key);
-
-		if (!id) {
-			return;
-		}
+		const id = this.getId(keys);
 
 		await this.client.set(id, serializedValues, options);
 	}
 
-	async delete(key: string | number): Promise<void> {
-		const id = this.getId(key);
-
-		if (!id) {
-			return;
-		}
-
+	async delete(keys: (string | number)[]): Promise<void> {
+		const id = this.getId(keys);
 		await this.client.del(id);
 	}
 
-	async get(key: string | number): Promise<T | null> {
-		const id = this.getId(key);
-
-		if (!id) {
-			return null;
-		}
+	async get(keys: (string | number)[]): Promise<T | null> {
+		const id = this.getId(keys);
 
 		const result = await this.client.get(id);
-
 		return result ? (JSON.parse(result) as T) : null;
 	}
 }

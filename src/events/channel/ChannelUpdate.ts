@@ -24,21 +24,18 @@ class ChannelUpdate extends Listener {
 		}
 
 		if (oldChannel.isVoiceBased() && newChannel.isVoiceBased()) {
-			const data = await voices.get(newChannel.id);
+			const data = await voices.get({ id: newChannel.id });
 
 			if (data) {
-				if (!(await users.get(data.author_id))) {
-					await users.set(data.author_id, {});
+				if (!(await users.get({ id: data.author_id }))) {
+					await users.set({ id: data.author_id }, {});
 				}
 
-				await voices.configs.set(
-					data.author_id,
+				await voices.configs.upd(
+					{ id: data.author_id },
 					{
 						name: newChannel.name,
 						nsfw: newChannel.nsfw,
-					},
-					{
-						overwrite: true,
 					},
 				);
 			}

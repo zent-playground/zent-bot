@@ -47,21 +47,21 @@ class InteractionCreate extends Listener {
 					}
 				}
 
-				const guild = (await guilds.get(interaction.guild.id))!;
+				const guild = (await guilds.get({ id: interaction.guild.id }))!;
 
 				const args = new CommandArgs();
 
 				args.language = guild.language;
 				args.prefix = guild.prefix;
 
-				if (!(await users.get(interaction.user.id))) {
-					await users.set(interaction.user.id, {}, { overwrite: true });
+				if (!(await users.get({ id: interaction.user.id }))) {
+					await users.set({ id: interaction.user.id }, {});
 				}
 
 				if (interaction.isChatInputCommand()) {
 					command.executeChatInput?.(interaction);
 					command.executeHybrid?.(new BasedHybridContext(interaction) as HybridContext, args);
-					this.handleSubcommand(interaction, command, args);
+					await this.handleSubcommand(interaction, command, args);
 				}
 
 				if (interaction.isContextMenuCommand()) {
@@ -100,7 +100,7 @@ class InteractionCreate extends Listener {
 
 			if (!component) return;
 
-			const guild = (await this.client.managers.guilds.get(interaction.guild!.id))!;
+			const guild = (await this.client.managers.guilds.get({ id: interaction.guild!.id }))!;
 
 			const args = new ComponentArgs();
 

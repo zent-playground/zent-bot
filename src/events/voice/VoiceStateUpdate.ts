@@ -1,5 +1,4 @@
 import { Events, VoiceState, EmbedBuilder } from "discord.js";
-
 import Listener from "../Listener.js";
 
 class VoiceStateUpdate extends Listener {
@@ -8,84 +7,67 @@ class VoiceStateUpdate extends Listener {
 	}
 
 	public async execute(oldState: VoiceState, newState: VoiceState) {
-		const { managers, config } = this.client;
-		const { voices } = managers;
-
-		const handleCreation = async () => {
-			const { channel, guild, member } = newState;
-
-			if (!member || !channel) {
-				return;
-			}
-
-			const creator = await voices.creators.get(channel.id);
-
-			if (creator) {
-				if (member.user.bot) {
-					await member.voice.setChannel(null).catch(() => 0);
-					return;
-				}
-
-				const cooldown = await voices.cooldowns.get(member.id);
-
-				if (cooldown !== null) {
-					if (!cooldown) {
-						await member.user.send({
-							embeds: [
-								new EmbedBuilder()
-									.setDescription("You can only create a temp voice channel every 10 seconds.")
-									.setColor(config.colors.error),
-							],
-						});
-
-						await voices.cooldowns.set(member.id, true, { KEEPTTL: true }).catch(() => 0);
-					}
-
-					await member.voice.setChannel(null);
-
-					return;
-				}
-
-				const temp = await guild.channels.create(
-					Object.assign(
-						{
-							parent: channel.parent,
-						},
-						await voices.createOptions(this.client, {
-							userId: member.id,
-							guildId: guild.id,
-						}),
-					),
-				);
-
-				await voices.set(temp.id, {
-					author_id: member.id,
-					guild_id: guild.id,
-				});
-
-				await voices.cooldowns.set(member.id, false, { EX: 10 });
-				await member.voice.setChannel(temp);
-			}
-		};
-
-		const handleDeletion = async () => {
-			const { channel } = oldState;
-
-			if (!channel) {
-				return;
-			}
-
-			const temp = await voices.get(channel.id);
-
-			if (temp && channel.members.size === 0) {
-				await channel.delete();
-				await voices.delete(channel.id).catch(() => null);
-			}
-		};
-
 		if (oldState.channelId !== newState.channelId) {
-			handleCreation();
-			handleDeletion();
+			await Promise.all([this.handleCreation(newState), this.handleDeletion(oldState)]);
+		}
+	}
+
+	private async handleCreation(newState: VoiceState) {
+		const { channel, guild, member } = newState;
+		if (!member || !channel) return;
+
+		const creator = await this.client.managers.voices.creators.get({ id: channel.id });
+		if (!creator) return;
+
+		if (member.user.bot) {
+			member.voice.setChannel(null).catch(() => void 0);
+			return;
+		}
+
+		const cooldown = await this.client.managers.voices.cooldowns.get([member.id]);
+		if (cooldown && Date.now() < cooldown) {
+			await member.user
+				.send({
+					embeds: [
+						new EmbedBuilder()
+							.setDescription("You can only create a temp voice channel every 10 seconds.")
+							.setColor(this.client.config.colors.error),
+					],
+				})
+				.catch(() => void 0);
+
+			return;
+		}
+
+		const createOptions = await this.client.managers.voices.createOptions(this.client, {
+			userId: member.id,
+			guildId: guild.id,
+		});
+		const temp = await guild.channels.create(
+			Object.assign({ parent: channel.parent }, createOptions),
+		);
+
+		await this.client.managers.voices.set(
+			{ id: temp.id },
+			{
+				author_id: member.id,
+				guild_id: guild.id,
+			},
+		);
+		await this.client.managers.voices.cooldowns.set([member.id], Date.now() + 10 * 1000, {
+			EX: 10,
+		});
+		await member.voice.setChannel(temp);
+	}
+
+	private async handleDeletion(oldState: VoiceState) {
+		const { channel } = oldState;
+		if (!channel) return;
+
+		const temp = await this.client.managers.voices.get({ id: channel.id });
+		if (temp && channel.members.size === 0) {
+			await channel.delete().catch(() => void 0);
+			await this.client.managers.voices.del({ id: channel.id }).catch(() => void 0);
 		}
 	}
 }
