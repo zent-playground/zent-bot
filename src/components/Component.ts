@@ -9,6 +9,7 @@ import {
 	StringSelectMenuInteraction,
 	UserSelectMenuInteraction,
 } from "discord.js";
+
 import { Preconditions } from "../commands/Command.js";
 
 interface ComponentOptions {

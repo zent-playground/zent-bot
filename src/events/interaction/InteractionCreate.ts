@@ -107,10 +107,6 @@ class InteractionCreate extends Listener {
 			args.references = references;
 			args.language = guild.language;
 
-			const embed = new EmbedBuilder()
-				.setDescription("You don't have permissions to use this interaction.")
-				.setColor(this.client.config.colors.error);
-
 			if (
 				await this.client.users
 					.fetch(args[args.references.length - 1])
@@ -121,7 +117,12 @@ class InteractionCreate extends Listener {
 
 				if (interaction.user.id !== userId) {
 					await interaction.reply({
-						embeds: [embed],
+						embeds: [
+							new EmbedBuilder()
+								.setTitle(`${this.client.config.emojis.error} Unauthorized Interaction`)
+								.setDescription("You are not authorized to execute this interaction.")
+								.setColor(this.client.config.colors.error),
+						],
 						ephemeral: true,
 					});
 
@@ -134,7 +135,12 @@ class InteractionCreate extends Listener {
 				!interaction.memberPermissions?.has(component.options.memberPermissions)
 			) {
 				await interaction.reply({
-					embeds: [embed],
+					embeds: [
+						new EmbedBuilder()
+							.setTitle(`${this.client.config.emojis.error} Insufficient Permissions!`)
+							.setDescription("You lack the required permissions to execute this command.")
+							.setColor(this.client.config.colors.error),
+					],
 					ephemeral: true,
 				});
 				return;

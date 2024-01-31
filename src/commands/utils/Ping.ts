@@ -1,4 +1,5 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+
 import Command from "../Command.js";
 
 class Ping extends Command {

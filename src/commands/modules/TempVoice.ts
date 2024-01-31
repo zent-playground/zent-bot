@@ -1,20 +1,17 @@
 import {
-	ChannelType,
 	EmbedBuilder,
 	SlashCommandBuilder,
 	codeBlock,
-	PermissionFlagsBits,
-	CategoryChannel,
 	VoiceChannel,
 	ActionRowBuilder,
 	ButtonBuilder,
 } from "discord.js";
+import { ChannelType, ButtonStyle, PermissionFlagsBits } from "discord-api-types/v10";
 
 import Command from "../Command.js";
 import { TempVoiceJoinable } from "../../databases/managers/TempVoice/TempVoiceManager.js";
 import { TempVoiceConfig } from "../../types/database.js";
 import Logger from "../../utils/others/Logger.js";
-import { ButtonStyle } from "discord-api-types/v10";
 
 class TempVoice extends Command {
 	public constructor() {
@@ -75,8 +72,8 @@ class TempVoice extends Command {
 						.addChannelOption((option) =>
 							option
 								.setName("channel")
-								.setDescription("The category/voice channel that the bot will setup in it.")
-								.addChannelTypes(ChannelType.GuildVoice, ChannelType.GuildCategory)
+								.setDescription("The voice channel that the bot will setup in it.")
+								.addChannelTypes(ChannelType.GuildVoice)
 								.setRequired(true),
 						),
 				)
@@ -150,12 +147,14 @@ class TempVoice extends Command {
 
 	public async setup(ctx: Command.HybridContext, args: Command.Args) {
 		const { voices } = this.client.managers;
+		const { member } = ctx;
 
-		if (!ctx.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+		if (!member.permissions.has(PermissionFlagsBits.ManageGuild)) {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
-						.setDescription("You don't have permissions to use this command.")
+						.setTitle(`${this.client.config.emojis.error} Insufficient Permissions!`)
+						.setDescription("You lack the required permissions to execute this command.")
 						.setColor(this.client.config.colors.error),
 				],
 				ephemeral: true,
@@ -164,20 +163,12 @@ class TempVoice extends Command {
 			return;
 		}
 
-		let channel = ctx.isInteraction()
-			? (ctx.interaction.options.getChannel("channel") as CategoryChannel | VoiceChannel)
-			: await ctx.guild.channels.fetch(args[0]).catch(() => null);
-
-		if (
-			!channel ||
-			(channel.type !== ChannelType.GuildCategory && channel.type !== ChannelType.GuildVoice)
-		) {
+		if (ctx.isMessage() && !args[0]) {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
-						.setDescription(
-							"The command syntax is incorrect! Please use slash commands instead.",
-						)
+						.setTitle(`${this.client.config.emojis.error} Missing Channel!`)
+						.setDescription("Please specify the voice channel ID for setup.")
 						.setColor(this.client.config.colors.error),
 				],
 				ephemeral: true,
@@ -186,38 +177,78 @@ class TempVoice extends Command {
 			return;
 		}
 
-		if (channel.type === ChannelType.GuildCategory) {
-			channel = await ctx.guild.channels.create({
-				name: "➕ Join to create",
-				type: ChannelType.GuildVoice,
-				parent: channel,
+		const channel = ctx.isInteraction()
+			? (ctx.interaction.options.getChannel("channel") as VoiceChannel)
+			: ctx.guild.channels.cache.get(args[0]) ||
+				(await ctx.guild.channels.fetch(args[0]).catch(() => null));
+
+		if (!channel || channel.type !== ChannelType.GuildVoice) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setTitle(`${this.client.config.emojis.error} Invalid Channel!`)
+						.setDescription("The provided channel ID is invalid or doesn't exist.")
+						.setColor(this.client.config.colors.error),
+				],
+				ephemeral: true,
 			});
-		} else if (channel.type === ChannelType.GuildVoice) {
-			await voices.creators.set({ id: channel.id }, { guild_id: ctx.guild.id });
+
+			return;
 		}
+
+		if (!channel.parent) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setTitle(`${this.client.config.emojis.error} No Category!`)
+						.setDescription("This voice channel doesn't have a parent category.")
+						.setColor(this.client.config.colors.error),
+				],
+				ephemeral: true,
+			});
+
+			return;
+		}
+
+		const creators = await voices.creators.get({ id: channel.id });
+
+		if (creators) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setTitle(`${this.client.config.emojis.warn} Already Setup!`)
+						.setDescription("This channel has already been configured.")
+						.setColor(this.client.config.colors.warn),
+				],
+				ephemeral: true,
+			});
+
+			return;
+		}
+
+		await voices.creators.set({ id: channel.id }, { guild_id: ctx.guild.id });
 
 		await ctx.send({
 			embeds: [
 				new EmbedBuilder()
-					.setDescription(
-						`The temporary voice system has been successfully configured on ${channel}!`,
-					)
+					.setTitle(`${this.client.config.emojis.success} Setup Complete!`)
+					.setDescription(`The temporary voice system is now configured for ${channel}.`)
 					.setColor(this.client.config.colors.success),
 			],
 			components: [
 				new ActionRowBuilder<ButtonBuilder>().addComponents([
 					new ButtonBuilder()
-						.setLabel("Set Affix")
-						.setStyle(ButtonStyle.Secondary)
-						.setCustomId(`voice-affix-${channel!.id}-${ctx.member.id}`),
-					new ButtonBuilder()
 						.setLabel("Set Generic")
+						.setStyle(ButtonStyle.Success)
+						.setCustomId(`voice-generic-${channel.id}-${ctx.member.id}`),
+					new ButtonBuilder()
+						.setLabel("Set Affix")
 						.setStyle(ButtonStyle.Primary)
-						.setCustomId(`voice-generic-${channel!.id}-${ctx.member.id}`),
+						.setCustomId(`voice-affix-${channel.id}-${ctx.member.id}`),
 					new ButtonBuilder()
 						.setLabel("Allow Custom Name")
-						.setStyle(ButtonStyle.Secondary)
-						.setCustomId(`voice-custom-${channel!.id}-${ctx.member.id}`),
+						.setStyle(ButtonStyle.Danger)
+						.setCustomId(`voice-custom-${channel.id}-${ctx.member.id}`),
 				]),
 			],
 		});
