@@ -1,7 +1,7 @@
 import {
-	ChannelType,
-	Client,
+	Guild,
 	GuildChannelCreateOptions,
+	GuildMember,
 	OverwriteResolvable,
 	PermissionFlagsBits,
 } from "discord.js";
@@ -9,7 +9,7 @@ import {
 import BaseManager from "../../BaseManager.js";
 import RedisManager from "../../redis/RedisManager.js";
 
-import { TempVoice, TempVoiceConfig } from "../../../types/database.js";
+import { TempVoice, TempVoiceConfig, TempVoiceCreator } from "../../../types/database.js";
 import TempVoiceCreatorManager from "./TempVoiceCreatorManager.js";
 import TempVoiceConfigManager from "./TempVoiceConfigManager.js";
 
@@ -29,14 +29,14 @@ export enum TempVoiceJoinable {
 }
 
 class TempVoiceManager extends BaseManager<TempVoice> {
-	public readonly cooldowns: RedisManager<number>;
+	public readonly cooldowns: RedisManager<boolean>;
 	public readonly creators: TempVoiceCreatorManager;
 	public readonly configs: TempVoiceConfigManager;
 
 	public constructor(mysql: BaseManager.MySql, redis: BaseManager.Redis) {
-		super("temp_voices", mysql, redis);
+		super("temp_voices", mysql);
 
-		this.cooldowns = new RedisManager<number>(
+		this.cooldowns = new RedisManager<boolean>(
 			redis.client,
 			`${redis.prefix}temp_voice_cooldowns:`,
 		);
@@ -45,95 +45,114 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 		this.configs = new TempVoiceConfigManager(mysql, redis);
 	}
 
-	public async createOptions(
-		client: Client<true>,
-		options: {
-			userId: string;
-			guildId: string;
-		},
-	): Promise<(GuildChannelCreateOptions & { type: ChannelType.GuildVoice }) | undefined> {
-		const { users, guilds } = client;
-		const { userId, guildId } = options;
+	public async permissions(
+		{ id, joinable, whitelisted_ids, blacklisted_ids }: TempVoiceConfig,
+		guild: Guild,
+	): Promise<OverwriteResolvable[]> {
+		const permissionOverwrites: OverwriteResolvable[] = [
+			{
+				id: id,
+				allow: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
+			},
+		];
 
-		const user = users.cache.get(userId) || (await users.fetch(userId).catch(() => null));
-		const guild = guilds.cache.get(guildId) || (await guilds.fetch(guildId).catch(() => null));
+		switch (joinable) {
+			case TempVoiceJoinable.Everyone: {
+				for (const id of blacklisted_ids || []) {
+					const member =
+						guild.members.cache.get(id) || (await guild.members.fetch(id).catch(() => 0));
 
-		if (!user || !guild) {
-			return;
-		}
-
-		const config: TempVoiceConfig | null = await this.configs.get({ id: userId });
-
-		return {
-			name: config?.name || user.tag,
-			nsfw: config?.nsfw || false,
-			type: ChannelType.GuildVoice,
-			permissionOverwrites: await (async () => {
-				const permissionOverwrites: OverwriteResolvable[] = [
-					{
-						id: user.id,
-						allow: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
-					},
-				];
-				switch (config?.joinable) {
-					case TempVoiceJoinable.Everyone: {
-						for (const id of config.blacklisted_ids || []) {
-							const member =
-								guild.members.cache.get(id) || (await guild.members.fetch(id).catch(() => 0));
-
-							if (!member) {
-								continue;
-							}
-
-							const overwrite: OverwriteResolvable = {
-								id,
-								deny: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
-							};
-
-							permissionOverwrites.push(overwrite);
-						}
-
-						break;
+					if (!member) {
+						continue;
 					}
 
-					case TempVoiceJoinable.WhitelistedUsers: {
-						permissionOverwrites.push({
-							id: guild.id,
-							deny: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
-						});
+					const overwrite: OverwriteResolvable = {
+						id,
+						deny: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
+					};
 
-						for (const id of config.whitelisted_ids || []) {
-							const member =
-								guild.members.cache.get(id) || (await guild.members.fetch(id).catch(() => 0));
-
-							if (!member) {
-								continue;
-							}
-
-							const overwrite: OverwriteResolvable = {
-								id,
-								allow: [PermissionFlagsBits.Connect],
-							};
-
-							permissionOverwrites.push(overwrite);
-						}
-
-						break;
-					}
-
-					case TempVoiceJoinable.Owner: {
-						permissionOverwrites.push({
-							id: guild.id,
-							deny: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
-						});
-
-						break;
-					}
+					permissionOverwrites.push(overwrite);
 				}
 
-				return permissionOverwrites;
-			})(),
+				break;
+			}
+
+			case TempVoiceJoinable.WhitelistedUsers: {
+				permissionOverwrites.push({
+					id: guild.id,
+					deny: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
+				});
+
+				for (const id of whitelisted_ids || []) {
+					const member =
+						guild.members.cache.get(id) || (await guild.members.fetch(id).catch(() => 0));
+
+					if (!member) {
+						continue;
+					}
+
+					const overwrite: OverwriteResolvable = {
+						id,
+						allow: [PermissionFlagsBits.Connect],
+					};
+
+					permissionOverwrites.push(overwrite);
+				}
+
+				break;
+			}
+
+			case TempVoiceJoinable.Owner: {
+				permissionOverwrites.push({
+					id: guild.id,
+					deny: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
+				});
+
+				break;
+			}
+		}
+
+		return permissionOverwrites;
+	}
+
+	public async options(
+		creator: TempVoiceCreator,
+		member: GuildMember,
+		guild: Guild,
+	): Promise<GuildChannelCreateOptions> {
+		const { affix, generic_name, generic_limit, allow_custom_name } = creator;
+
+		const options: GuildChannelCreateOptions = {
+			name: affix ? affix + " " + member.user.tag : member.user.tag,
 		};
+
+		if (allow_custom_name) {
+			let config = await this.configs.get({ id: member.id, is_global: true });
+
+			if (!config) {
+				config = await this.configs.get({ id: member.id, guild_id: guild.id });
+			}
+
+			if (config) {
+				options.name = config.name || member.user.tag;
+				options.nsfw = config.nsfw || false;
+				options.permissionOverwrites = await this.permissions(config, guild);
+			}
+		} else if (generic_name) {
+			options.name = generic_name;
+		} else {
+			const config = await this.configs.get({ id: member.id, guild_id: guild.id });
+
+			if (config) {
+				options.name = config.name || member.user.tag;
+			}
+		}
+
+		if (generic_limit) {
+			options.userLimit = generic_limit;
+		}
+
+		return options;
 	}
 }
 

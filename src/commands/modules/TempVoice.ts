@@ -1,13 +1,20 @@
 import {
 	ChannelType,
 	EmbedBuilder,
-	GuildEditOptions,
 	SlashCommandBuilder,
 	codeBlock,
+	PermissionFlagsBits,
+	CategoryChannel,
+	VoiceChannel,
+	ActionRowBuilder,
+	ButtonBuilder,
 } from "discord.js";
 
 import Command from "../Command.js";
 import { TempVoiceJoinable } from "../../databases/managers/TempVoice/TempVoiceManager.js";
+import { TempVoiceConfig } from "../../types/database.js";
+import Logger from "../../utils/others/Logger.js";
+import { ButtonStyle } from "discord-api-types/v10";
 
 class TempVoice extends Command {
 	public constructor() {
@@ -67,16 +74,10 @@ class TempVoice extends Command {
 						.setDescription("Setup a voice channel creator.")
 						.addChannelOption((option) =>
 							option
-								.setName("category")
-								.setDescription("The category that the bot will setup in it.")
-								.addChannelTypes(ChannelType.GuildCategory)
-								.setRequired(true),
-						)
-						.addChannelOption((option) =>
-							option
 								.setName("channel")
-								.setDescription("The channel that the bot will create temp voice.")
-								.addChannelTypes(ChannelType.GuildVoice),
+								.setDescription("The category/voice channel that the bot will setup in it.")
+								.addChannelTypes(ChannelType.GuildVoice, ChannelType.GuildCategory)
+								.setRequired(true),
 						),
 				)
 				.addSubcommand((subcommand) =>
@@ -89,6 +90,11 @@ class TempVoice extends Command {
 								.setDescription("Name to change.")
 								.setMinLength(1)
 								.setRequired(true),
+						)
+						.addBooleanOption((option) =>
+							option
+								.setName("global")
+								.setDescription("Change your voice channel name globally."),
 						),
 				)
 				.addSubcommand((subcommand) =>
@@ -133,16 +139,24 @@ class TempVoice extends Command {
 		);
 	}
 
-	public async setup(ctx: Command.HybridContext) {
-		const { managers, config } = ctx.client;
-		const { voices } = managers;
+	private globally(args: Command.Args): boolean {
+		if (args[args.length - 1] === "true") {
+			args.pop();
+			return true;
+		}
 
-		if (!ctx.member.permissions.has("ManageChannels")) {
+		return false;
+	}
+
+	public async setup(ctx: Command.HybridContext, args: Command.Args) {
+		const { voices } = this.client.managers;
+
+		if (!ctx.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
 						.setDescription("You don't have permissions to use this command.")
-						.setColor(config.colors.error),
+						.setColor(this.client.config.colors.error),
 				],
 				ephemeral: true,
 			});
@@ -150,50 +164,171 @@ class TempVoice extends Command {
 			return;
 		}
 
-		const channel = await ctx.guild.channels.create({
-			name: "➕ Join to create",
-			type: ChannelType.GuildVoice,
-		});
+		let channel = ctx.isInteraction()
+			? (ctx.interaction.options.getChannel("channel") as CategoryChannel | VoiceChannel)
+			: await ctx.guild.channels.fetch(args[0]).catch(() => null);
 
-		await voices.creators.set({ id: channel.id }, { guild_id: ctx.guild.id });
+		if (
+			!channel ||
+			(channel.type !== ChannelType.GuildCategory && channel.type !== ChannelType.GuildVoice)
+		) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription(
+							"The command syntax is incorrect! Please use slash commands instead.",
+						)
+						.setColor(this.client.config.colors.error),
+				],
+				ephemeral: true,
+			});
+
+			return;
+		}
+
+		if (channel.type === ChannelType.GuildCategory) {
+			channel = await ctx.guild.channels.create({
+				name: "➕ Join to create",
+				type: ChannelType.GuildVoice,
+				parent: channel,
+			});
+		} else if (channel.type === ChannelType.GuildVoice) {
+			await voices.creators.set({ id: channel.id }, { guild_id: ctx.guild.id });
+		}
 
 		await ctx.send({
 			embeds: [
 				new EmbedBuilder()
-					.setDescription(`Created ${channel}.`)
-					.setColor(config.colors.success),
+					.setDescription(
+						`The temporary voice system has been successfully configured on ${channel}!`,
+					)
+					.setColor(this.client.config.colors.success),
+			],
+			components: [
+				new ActionRowBuilder<ButtonBuilder>().addComponents([
+					new ButtonBuilder()
+						.setLabel("Set Affix")
+						.setStyle(ButtonStyle.Secondary)
+						.setCustomId(`voice-affix-${channel!.id}-${ctx.member.id}`),
+					new ButtonBuilder()
+						.setLabel("Set Generic")
+						.setStyle(ButtonStyle.Primary)
+						.setCustomId(`voice-generic-${channel!.id}-${ctx.member.id}`),
+					new ButtonBuilder()
+						.setLabel("Allow Custom Name")
+						.setStyle(ButtonStyle.Secondary)
+						.setCustomId(`voice-custom-${channel!.id}-${ctx.member.id}`),
+				]),
 			],
 		});
 	}
 
 	public async setName(ctx: Command.HybridContext, args: Command.Args) {
-		const { managers, config } = ctx.client;
-		const { voices } = managers;
-		const { channel } = ctx.member.voice;
+		const { voices } = this.client.managers;
+		const { member } = ctx;
 
-		const data = (await voices.get({ id: channel?.id }))!;
+		const globally = this.globally(args) || ctx.interaction?.options.getBoolean("globally");
 		const name = args.join(" ") || ctx.interaction?.options.getString("name");
 
 		if (!name) {
 			return;
 		}
 
-		await voices.configs.set({ id: data.author_id }, { name });
+		const temp = (await voices.get({ id: member.voice.channel!.id, active: true }))!;
 
-		await channel!.edit(
-			(await voices.createOptions(this.client, {
-				userId: data.author_id,
-				guildId: ctx.guild.id,
-			})) as GuildEditOptions,
-		);
+		if (temp.author_id !== member.id) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription("You must be the channel owner to use this command!")
+						.setColor(this.client.config.colors.error),
+				],
+				ephemeral: true,
+			});
 
-		await ctx.send({
-			embeds: [
-				new EmbedBuilder()
-					.setDescription(`Set your temp voice channel name to \`${name}\``)
-					.setColor(config.colors.success),
-			],
-		});
+			return;
+		}
+
+		const creator = (await voices.creators.get({ id: temp.creator_id }))!;
+
+		if (creator.affix || creator.generic_name || creator.allow_custom_name) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription(
+							"This guild does not allow custom names for temporary voice channel!",
+						)
+						.setColor(this.client.config.colors.error),
+				],
+				ephemeral: true,
+			});
+
+			return;
+		}
+
+		const criteria: Partial<TempVoiceConfig> = {
+			id: member.id,
+		};
+
+		if (globally) {
+			criteria.is_global = true;
+		} else {
+			criteria.guild_id = ctx.guild.id;
+		}
+
+		const config = await voices.configs.get(criteria);
+
+		if (!config) {
+			await voices.configs.set(criteria, { name });
+		} else {
+			if (config.name === name) {
+				await ctx.send({
+					embeds: [
+						new EmbedBuilder()
+							.setDescription("This name is already assigned to your temporary voice channel!")
+							.setColor(this.client.config.colors.error),
+					],
+					ephemeral: true,
+				});
+
+				return;
+			}
+
+			await voices.configs.upd(criteria, { name });
+		}
+
+		await member.voice
+			.channel!.edit({
+				name: name,
+			})
+			.then(async () => {
+				await ctx.send({
+					embeds: [
+						new EmbedBuilder()
+							.setDescription(`Set your temporary voice channel name to **\`${name}\`**!`)
+							.setColor(this.client.config.colors.success),
+					],
+				});
+			})
+			.catch(async (error) => {
+				Logger.error(
+					`An error occurred while changing ${member.user.tag} temporary voice channel name.`,
+					error,
+				);
+
+				await ctx.send({
+					embeds: [
+						new EmbedBuilder()
+							.setDescription(
+								"An error occurred while changing your temporary voice channel name.",
+							)
+							.setColor(this.client.config.colors.error),
+					],
+					ephemeral: true,
+				});
+
+				await voices.configs.upd(criteria, { name: member.voice.channel!.name });
+			});
 	}
 
 	public async setBlacklist(ctx: Command.HybridContext, args: Command.Args) {
@@ -239,12 +374,12 @@ class TempVoice extends Command {
 			},
 		);
 
-		await channel!.edit(
-			(await voices.createOptions(this.client, {
-				userId: data.author_id,
-				guildId: ctx.guild.id,
-			})) as GuildEditOptions,
-		);
+		await channel!.edit({
+			permissionOverwrites: await voices.permissions(
+				(await voices.configs.get({ id: data.author_id }))!,
+				ctx.guild,
+			),
+		});
 
 		await ctx.send({
 			embeds: [
@@ -302,12 +437,12 @@ class TempVoice extends Command {
 			},
 		);
 
-		await channel!.edit(
-			(await voices.createOptions(this.client, {
-				userId: data.author_id,
-				guildId: ctx.guild.id,
-			})) as GuildEditOptions,
-		);
+		await channel!.edit({
+			permissionOverwrites: await voices.permissions(
+				(await voices.configs.get({ id: data.author_id }))!,
+				ctx.guild,
+			),
+		});
 
 		await ctx.send({
 			embeds: [
@@ -351,12 +486,12 @@ class TempVoice extends Command {
 			},
 		);
 
-		await ctx.member.voice.channel!.edit(
-			(await voices.createOptions(ctx.client, {
-				userId: ctx.author.id,
-				guildId: ctx.guild.id,
-			})) as GuildEditOptions,
-		);
+		await ctx.member.voice.channel!.edit({
+			permissionOverwrites: await voices.permissions(
+				(await voices.configs.get({ id: ctx.author.id }))!,
+				ctx.guild,
+			),
+		});
 
 		const formattedChoice = {
 			[TempVoiceJoinable.Everyone]: "Everyone",

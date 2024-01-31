@@ -8,7 +8,7 @@ namespace BaseManager {
 }
 
 class BaseManager<T> extends MySqlManager<T> {
-	public cache: RedisManager<T> | null = null;
+	private readonly cache: RedisManager<T> | null = null;
 
 	public constructor(table: string, mysql: BaseManager.MySql, redis?: BaseManager.Redis) {
 		super(mysql, table);
@@ -20,7 +20,10 @@ class BaseManager<T> extends MySqlManager<T> {
 
 	private buildWhereClause(criteria: Partial<T>): string {
 		return Object.entries(criteria)
-			.map(([field, value]) => `${field} = '${value}'`)
+			.map(
+				([field, value]) =>
+					`${field} = '${typeof value === "boolean" ? (value ? 1 : 0) : value}'`,
+			)
 			.join(" AND ");
 	}
 
