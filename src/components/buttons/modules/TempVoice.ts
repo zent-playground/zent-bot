@@ -64,7 +64,8 @@ class TempVoice extends Component {
 									.setPlaceholder("E.g., Duo, Gaming, Chat, ...")
 									.setStyle(TextInputStyle.Short)
 									.setCustomId("name")
-									.setRequired(true),
+									.setMaxLength(24)
+									.setRequired(false),
 							),
 							new ActionRowBuilder<TextInputBuilder>().addComponents(
 								new TextInputBuilder()
@@ -90,7 +91,9 @@ class TempVoice extends Component {
 									.setLabel("Enter Affix for Voice Channel")
 									.setPlaceholder("E.g., Duo, Gaming, Chat, ...")
 									.setStyle(TextInputStyle.Short)
-									.setCustomId("name"),
+									.setCustomId("name")
+									.setMaxLength(16)
+									.setRequired(false),
 							),
 						]),
 				);
@@ -108,7 +111,7 @@ class TempVoice extends Component {
 							row.components.map((component) => {
 								if (component.customId?.includes("custom")) {
 									return ButtonBuilder.from(component as unknown as ButtonBuilder).setLabel(
-										!creator.allow_custom_name ? "Allow Custom Name" : "Disallow Custom Name",
+										creator.allow_custom_name ? "Allow Custom Name" : "Disallow Custom Name",
 									);
 								}
 
@@ -123,12 +126,12 @@ class TempVoice extends Component {
 						new EmbedBuilder()
 							.setTitle(
 								`${this.client.config.emojis.success} Custom ${
-									!creator.allow_custom_name ? "Allowed" : "Disallowed"
+									creator.allow_custom_name ? "Allowed" : "Disallowed"
 								}!`,
 							)
 							.setDescription(
 								`Custom channel names are now ${
-									!creator.allow_custom_name ? "allowed" : "disallowed"
+									creator.allow_custom_name ? "allowed" : "disallowed"
 								}!`,
 							)
 							.setColor(this.client.config.colors.success),

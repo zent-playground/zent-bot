@@ -126,6 +126,8 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 			name: affix ? affix + " " + member.user.tag : member.user.tag,
 		};
 
+		console.log(affix);
+
 		if (allow_custom_name) {
 			let config = await this.configs.get({ id: member.id, is_global: true });
 
@@ -140,13 +142,9 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 			}
 		} else if (generic_name) {
 			options.name = generic_name;
-		} else {
-			const config = await this.configs.get({ id: member.id, guild_id: guild.id });
-
-			if (config) {
-				options.name = config.name || member.user.tag;
-			}
 		}
+
+		console.log(generic_limit);
 
 		if (generic_limit) {
 			options.userLimit = generic_limit;

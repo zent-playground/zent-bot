@@ -35,7 +35,7 @@ class BaseManager<T> extends MySqlManager<T> {
 		const cacheKeys = this.criteriaToCacheKey(criteria);
 		let data: T | undefined | null = force ? null : await this.cache?.get(cacheKeys);
 
-		if (!data) {
+		if (!data || force) {
 			const whereClause = this.buildWhereClause(criteria);
 			data = (
 				await this.select({
@@ -44,9 +44,7 @@ class BaseManager<T> extends MySqlManager<T> {
 				})
 			)?.[0];
 
-			if (data && this.cache) {
-				await this.cache.set(cacheKeys, data);
-			}
+			console.log(data);
 		}
 
 		return data;
@@ -75,6 +73,7 @@ class BaseManager<T> extends MySqlManager<T> {
 
 		if (this.cache) {
 			const cacheKey = this.criteriaToCacheKey(criteria);
+			console.log(cacheKey);
 			await this.cache.set(cacheKey, (await this.get(criteria, true))!, _options);
 		}
 	}

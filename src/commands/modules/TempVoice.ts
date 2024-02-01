@@ -287,7 +287,7 @@ class TempVoice extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription(
-							"This guild does not allow custom names for temporary voice channel!",
+							"This guild does not allow custom names for this temporary voice channel!",
 						)
 						.setColor(this.client.config.colors.error),
 				],
