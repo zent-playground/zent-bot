@@ -58,6 +58,7 @@ class VoiceStateUpdate extends Listener {
 			{
 				author_id: member.id,
 				guild_id: guild.id,
+				creator_id: creator.id,
 			},
 		);
 
