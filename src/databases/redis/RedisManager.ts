@@ -9,8 +9,8 @@ class RedisManager<T> {
 		this.prefix = prefix;
 	}
 
-	private getId(keys: (string | number)[]): string {
-		return this.prefix + keys.join(":");
+	private getId(method: string, keys: (string | number)[]): string {
+		return `${this.prefix}:${keys.join(":")}`;
 	}
 
 	async set(keys: (string | number)[], values: T, options: SetOptions = {}): Promise<void> {
@@ -19,18 +19,18 @@ class RedisManager<T> {
 		}
 
 		const serializedValues = JSON.stringify(values);
-		const id = this.getId(keys);
+		const id = this.getId("set", keys);
 
 		await this.client.set(id, serializedValues, options);
 	}
 
 	async delete(keys: (string | number)[]): Promise<void> {
-		const id = this.getId(keys);
+		const id = this.getId("delete", keys);
 		await this.client.del(id);
 	}
 
 	async get(keys: (string | number)[]): Promise<T | null> {
-		const id = this.getId(keys);
+		const id = this.getId("get", keys);
 
 		const result = await this.client.get(id);
 		return result ? (JSON.parse(result) as T) : null;

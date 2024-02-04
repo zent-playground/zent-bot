@@ -38,7 +38,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 
 		this.cooldowns = new RedisManager<number>(
 			redis.client,
-			`${redis.prefix}temp_voice_cooldowns:`,
+			`${redis.prefix}:temp_voice_cooldowns`,
 		);
 
 		this.creators = new TempVoiceCreatorManager(mysql, redis);

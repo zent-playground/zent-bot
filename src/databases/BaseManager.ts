@@ -14,7 +14,7 @@ class BaseManager<T> extends MySqlManager<T> {
 		super(mysql, table);
 
 		if (redis) {
-			this.cache = new RedisManager(redis.client, `${redis.prefix}${table}:`);
+			this.cache = new RedisManager(redis.client, `${redis.prefix}:${table}`);
 		}
 	}
 
@@ -30,10 +30,12 @@ class BaseManager<T> extends MySqlManager<T> {
 
 	public async get(criteria: Partial<T>, force = false): Promise<T | null> {
 		const cacheKeys = this.criteriaToCacheKey(criteria);
+
 		let data: T | undefined | null = force ? null : await this.cache?.get(cacheKeys);
 
 		if (!data) {
 			const whereClause = this.buildWhereClause(criteria);
+
 			data = (
 				await this.select({
 					where: whereClause,
@@ -52,32 +54,34 @@ class BaseManager<T> extends MySqlManager<T> {
 	public async set(
 		criteria: Partial<T>,
 		values: Partial<T>,
-		_options: SetOptions = {},
+		options: SetOptions = {},
 	): Promise<void> {
 		await this.insert({ ...criteria, ...values } as T);
 
 		if (this.cache) {
 			const cacheKey = this.criteriaToCacheKey(criteria);
-			await this.cache.set(cacheKey, { ...criteria, ...values } as T, _options);
+			await this.cache.set(cacheKey, { ...criteria, ...values } as T, options);
 		}
 	}
 
 	public async upd(
 		criteria: Partial<T>,
 		values: Partial<T>,
-		_options: SetOptions = {},
+		options: SetOptions = {},
 	): Promise<void> {
 		const whereClause = this.buildWhereClause(criteria);
+
 		await super.update(whereClause, values);
 
 		if (this.cache) {
 			const cacheKey = this.criteriaToCacheKey(criteria);
-			await this.cache.set(cacheKey, (await this.get(criteria, true))!, _options);
+			await this.cache.set(cacheKey, (await this.get(criteria, true))!, options);
 		}
 	}
 
 	public async del(criteria: Partial<T>): Promise<void> {
 		const whereClause = this.buildWhereClause(criteria);
+
 		await super.delete(whereClause);
 
 		if (this.cache) {
