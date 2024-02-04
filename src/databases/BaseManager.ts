@@ -36,12 +36,13 @@ class BaseManager<T> extends MySqlManager<T> {
 		if (!data) {
 			const whereClause = this.buildWhereClause(criteria);
 
-			data = (
-				await this.select({
-					where: whereClause,
-					selectFields: ["*"],
-				})
-			)?.[0];
+			data =
+				(
+					await this.select({
+						where: whereClause,
+						selectFields: ["*"],
+					})
+				)?.[0] || null;
 
 			if (data && this.cache) {
 				await this.cache.set(cacheKeys, data);
