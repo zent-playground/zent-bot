@@ -18,6 +18,7 @@ const client = new Client({
 		GatewayIntentBits.MessageContent,
 		GatewayIntentBits.GuildMembers,
 		GatewayIntentBits.GuildVoiceStates,
+		GatewayIntentBits.GuildModeration,
 	],
 	allowedMentions: {
 		repliedUser: false,
