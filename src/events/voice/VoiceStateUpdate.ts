@@ -8,7 +8,8 @@ class VoiceStateUpdate extends Listener {
 
 	public async execute(oldState: VoiceState, newState: VoiceState) {
 		if (oldState.channelId !== newState.channelId) {
-			await Promise.all([this.handleCreation(newState), this.handleDeletion(oldState)]);
+			this.handleCreation(newState);
+			this.handleDeletion(oldState);
 		}
 	}
 
@@ -17,7 +18,10 @@ class VoiceStateUpdate extends Listener {
 		if (!member || !channel) return;
 
 		const creator = await this.client.managers.voices.creators.get({ id: channel.id });
-		if (!creator) return;
+
+		if (!creator) {
+			return;
+		}
 
 		if (member.user.bot) {
 			member.voice.setChannel(null).catch(() => void 0);
@@ -25,6 +29,7 @@ class VoiceStateUpdate extends Listener {
 		}
 
 		const cooldown = await this.client.managers.voices.cooldowns.get([member.id]);
+
 		if (cooldown && Date.now() < cooldown) {
 			await member.user
 				.send({
@@ -43,6 +48,7 @@ class VoiceStateUpdate extends Listener {
 			userId: member.id,
 			guildId: guild.id,
 		});
+
 		const temp = await guild.channels.create(
 			Object.assign({ parent: channel.parent }, createOptions),
 		);
@@ -54,17 +60,23 @@ class VoiceStateUpdate extends Listener {
 				guild_id: guild.id,
 			},
 		);
+
 		await this.client.managers.voices.cooldowns.set([member.id], Date.now() + 10 * 1000, {
 			EX: 10,
 		});
+
 		await member.voice.setChannel(temp);
 	}
 
 	private async handleDeletion(oldState: VoiceState) {
 		const { channel } = oldState;
-		if (!channel) return;
+
+		if (!channel) {
+			return;
+		}
 
 		const temp = await this.client.managers.voices.get({ id: channel.id });
+
 		if (temp && channel.members.size === 0) {
 			await channel.delete().catch(() => void 0);
 			await this.client.managers.voices.del({ id: channel.id }).catch(() => void 0);
