@@ -13,9 +13,12 @@ class InteractionCreate extends Listener {
 		super(Events.InteractionCreate);
 	}
 
-	public async execute(interaction: Interaction) {
-		const { managers } = this.client;
-		const { guilds, users } = managers;
+	public override async execute(interaction: Interaction) {
+		const {
+			config,
+			managers: { guilds, users },
+			utils,
+		} = this.client;
 
 		if (interaction.isCommand() || interaction.isAutocomplete()) {
 			const command = this.client.commands.find((command) =>
@@ -31,8 +34,9 @@ class InteractionCreate extends Listener {
 					await interaction.reply({
 						embeds: [
 							new EmbedBuilder()
+								.setTitle(`${config.emojis.error} Error!`)
 								.setDescription("You can only use my commands in the server.")
-								.setColor(this.client.config.colors.error),
+								.setColor(config.colors.error),
 						],
 						ephemeral: true,
 					});
@@ -41,9 +45,7 @@ class InteractionCreate extends Listener {
 				}
 
 				if (command.preconditions) {
-					if (
-						!(await this.client.utils.checkPreconditions(interaction, command.preconditions))
-					) {
+					if (!(await utils.checkPreconditions(interaction, command.preconditions))) {
 						return;
 					}
 				}
@@ -91,7 +93,7 @@ class InteractionCreate extends Listener {
 				return;
 			}
 
-			const guild = (await this.client.managers.guilds.get({ id: interaction.guild!.id }))!;
+			const guild = (await guilds.get({ id: interaction.guild!.id }))!;
 
 			const args = new ComponentArgs();
 
@@ -110,9 +112,9 @@ class InteractionCreate extends Listener {
 					await interaction.reply({
 						embeds: [
 							new EmbedBuilder()
-								.setTitle(`${this.client.config.emojis.error} Unauthorized Interaction`)
+								.setTitle(`${config.emojis.error} Unauthorized Interaction!`)
 								.setDescription("You are not authorized to execute this interaction.")
-								.setColor(this.client.config.colors.error),
+								.setColor(config.colors.error),
 						],
 						ephemeral: true,
 					});
@@ -128,16 +130,15 @@ class InteractionCreate extends Listener {
 				await interaction.reply({
 					embeds: [
 						new EmbedBuilder()
-							.setTitle(`${this.client.config.emojis.error} Insufficient Permissions!`)
+							.setTitle(`${config.emojis.error} Insufficient Permissions!`)
 							.setDescription("You lack the required permissions to execute this command.")
-							.setColor(this.client.config.colors.error),
+							.setColor(config.colors.error),
 					],
 					ephemeral: true,
 				});
+
 				return;
 			}
-
-			component.execute?.(interaction as any, args);
 
 			if (interaction.isButton()) {
 				component.executeButton?.(interaction, args);
@@ -162,6 +163,18 @@ class InteractionCreate extends Listener {
 			if (interaction.isModalSubmit()) {
 				component.executeModal?.(interaction, args);
 			}
+
+			await interaction.reply({
+				embeds: [
+					new EmbedBuilder()
+						.setTitle(`${config.emojis.error} Interaction Unknown!`)
+						.setDescription(
+							"This interaction is not known. Try restarting Discord if this error persists.",
+						)
+						.setColor(config.colors.error),
+				],
+				ephemeral: true,
+			});
 		}
 	}
 
@@ -170,10 +183,11 @@ class InteractionCreate extends Listener {
 		command: Command,
 		args: CommandArgs,
 	) {
+		const { utils } = this.client;
 		const subcommand = interaction.options.getSubcommand(false) || undefined;
 		const subcommandGroup = interaction.options.getSubcommandGroup(false) || undefined;
 
-		const parsed = this.client.utils.parseSubcommand(command, args, {
+		const parsed = utils.parseSubcommand(command, args, {
 			subcommand,
 			subcommandGroup,
 		});
@@ -185,13 +199,13 @@ class InteractionCreate extends Listener {
 		const { parent, entry } = parsed;
 
 		if (parent.preconditions) {
-			if (!(await this.client.utils.checkPreconditions(interaction, parent.preconditions))) {
+			if (!(await utils.checkPreconditions(interaction, parent.preconditions))) {
 				return;
 			}
 		}
 
 		if (parent["subcommands"] && entry.preconditions) {
-			if (!(await this.client.utils.checkPreconditions(interaction, entry.preconditions))) {
+			if (!(await utils.checkPreconditions(interaction, entry.preconditions))) {
 				return;
 			}
 		}

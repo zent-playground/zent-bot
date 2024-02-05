@@ -10,7 +10,7 @@ class Ready extends Listener {
 		super(Events.ClientReady, true);
 	}
 
-	public async execute(client: Client<true>) {
+	public override async execute(client: Client<true>) {
 		await startApp(client);
 
 		Logger.info(`Successfully logged as '${client.user.tag}'.`);

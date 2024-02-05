@@ -1,5 +1,6 @@
 import {
 	AuditLogEvent,
+	EmbedBuilder,
 	Guild,
 	GuildAuditLogsEntry,
 	NonThreadGuildBasedChannel,
@@ -14,8 +15,11 @@ class GuildAuditLogEntryCreate extends Listener {
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	public async execute(entry: GuildAuditLogsEntry, guild: Guild) {
-		const { managers, user } = this.client;
-		const { voices, users } = managers;
+		const {
+			config,
+			managers: { voices, users },
+			user,
+		} = this.client;
 
 		if (entry.executorId === user.id) {
 			return;
@@ -32,6 +36,25 @@ class GuildAuditLogEntryCreate extends Listener {
 				const data = await voices.get({ id: channel.id });
 
 				if (!data) {
+					return;
+				}
+
+				const creator = (await voices.creators.get({ id: data.creator_channel_id }))!;
+
+				if (!creator.allow_custom_name) {
+					await channel.setName(
+						entry.changes.filter((change) => change.key == "name")[0].old as string,
+					);
+
+					await channel.send({
+						embeds: [
+							new EmbedBuilder()
+								.setTitle(`${config.emojis.warn} Disallowed Change!`)
+								.setDescription(`${entry.executor} channel name changes are not allowed!`)
+								.setColor(config.colors.warn),
+						],
+					});
+
 					return;
 				}
 

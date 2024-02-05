@@ -19,7 +19,6 @@ interface ComponentOptions {
 }
 
 namespace Component {
-	export type Any = Button | SelectMenu | Modal;
 	export type Button = ButtonInteraction;
 	export type SelectMenu = AnySelectMenuInteraction;
 	export type ChannelSelectMenu = ChannelSelectMenuInteraction;
@@ -40,8 +39,6 @@ class Component {
 	) {
 		this.preconditions = options.preconditions || {};
 	}
-
-	public execute?(interaction: Component.Any, args: Component.Args): Awaitable<void>;
 
 	public executeButton?(interaction: Component.Button, args: Component.Args): Awaitable<void>;
 

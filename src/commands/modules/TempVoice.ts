@@ -146,16 +146,19 @@ class TempVoice extends Command {
 	}
 
 	public async setup(ctx: Command.HybridContext, args: Command.Args) {
-		const { voices } = this.client.managers;
+		const {
+			config,
+			managers: { voices },
+		} = this.client;
 		const { member } = ctx;
 
 		if (!member.permissions.has(PermissionFlagsBits.ManageGuild)) {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
-						.setTitle(`${this.client.config.emojis.error} Insufficient Permissions!`)
+						.setTitle(`${config.emojis.error} Insufficient Permissions!`)
 						.setDescription("You lack the required permissions to execute this command.")
-						.setColor(this.client.config.colors.error),
+						.setColor(config.colors.error),
 				],
 				ephemeral: true,
 			});
@@ -167,9 +170,9 @@ class TempVoice extends Command {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
-						.setTitle(`${this.client.config.emojis.error} Missing Channel!`)
+						.setTitle(`${config.emojis.error} Missing Channel!`)
 						.setDescription("Please specify the voice channel ID for setup.")
-						.setColor(this.client.config.colors.error),
+						.setColor(config.colors.error),
 				],
 				ephemeral: true,
 			});
@@ -186,9 +189,9 @@ class TempVoice extends Command {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
-						.setTitle(`${this.client.config.emojis.error} Invalid Channel!`)
+						.setTitle(`${config.emojis.error} Invalid Channel!`)
 						.setDescription("The provided channel ID is invalid or doesn't exist.")
-						.setColor(this.client.config.colors.error),
+						.setColor(config.colors.error),
 				],
 				ephemeral: true,
 			});
@@ -200,9 +203,9 @@ class TempVoice extends Command {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
-						.setTitle(`${this.client.config.emojis.error} No Category!`)
+						.setTitle(`${config.emojis.error} No Category!`)
 						.setDescription("This voice channel doesn't have a parent category.")
-						.setColor(this.client.config.colors.error),
+						.setColor(config.colors.error),
 				],
 				ephemeral: true,
 			});
@@ -216,9 +219,9 @@ class TempVoice extends Command {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
-						.setTitle(`${this.client.config.emojis.warn} Already Setup!`)
+						.setTitle(`${config.emojis.warn} Already Setup!`)
 						.setDescription("This channel has already been configured.")
-						.setColor(this.client.config.colors.warn),
+						.setColor(config.colors.warn),
 				],
 				ephemeral: true,
 			});
@@ -231,9 +234,9 @@ class TempVoice extends Command {
 		await ctx.send({
 			embeds: [
 				new EmbedBuilder()
-					.setTitle(`${this.client.config.emojis.success} Setup Complete!`)
+					.setTitle(`${config.emojis.success} Setup Complete!`)
 					.setDescription(`The temporary voice system is now configured for ${channel}.`)
-					.setColor(this.client.config.colors.success),
+					.setColor(config.colors.success),
 			],
 			components: [
 				new ActionRowBuilder<ButtonBuilder>().addComponents([
@@ -246,7 +249,7 @@ class TempVoice extends Command {
 						.setStyle(ButtonStyle.Primary)
 						.setCustomId(`voice-affix-${channel.id}-${ctx.member.id}`),
 					new ButtonBuilder()
-						.setLabel("Allow Custom Name")
+						.setLabel("Custom Name")
 						.setStyle(ButtonStyle.Danger)
 						.setCustomId(`voice-custom-${channel.id}-${ctx.member.id}`),
 				]),
@@ -280,7 +283,7 @@ class TempVoice extends Command {
 			return;
 		}
 
-		const creator = (await voices.creators.get({ id: temp.creator_id }))!;
+		const creator = (await voices.creators.get({ id: temp.creator_channel_id }))!;
 
 		if (creator.affix || creator.generic_name || creator.allow_custom_name) {
 			await ctx.send({

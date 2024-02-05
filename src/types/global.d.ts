@@ -35,6 +35,7 @@ declare global {
 			REDIS_USER?: string;
 			REDIS_PASSWORD?: string;
 			REDIS_PREFIX?: string;
+			SESSION_SECRET?: string;
 			NODE_ENV?: string;
 			PNPM_HOME?: string;
 			PATH?: string;

@@ -46,8 +46,6 @@ class BaseManager<T> extends MySqlManager<T> {
 						selectFields: ["*"],
 					})
 				)?.[0] || null;
-
-			console.log(data);
 		}
 
 		return data;

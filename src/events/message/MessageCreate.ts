@@ -11,7 +11,7 @@ class MessageCreate extends Listener {
 		super(Events.MessageCreate);
 	}
 
-	public async execute(message: Message<true>) {
+	public override async execute(message: Message<true>) {
 		if (message.partial) {
 			try {
 				await message.fetch();
