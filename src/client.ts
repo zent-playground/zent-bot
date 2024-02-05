@@ -32,22 +32,28 @@ const client = new Client({
 		parse: [],
 	},
 	makeCache: Options.cacheWithLimits({
-		GuildMemberManager: {
-			maxSize: 0,
-			keepOverLimit: ({ id, client }) => id === client.user.id,
-		},
 		UserManager: {
-			maxSize: 0,
+			maxSize: 100,
 			keepOverLimit: ({ id, client }) => id === client.user.id,
 		},
+		GuildMemberManager: {
+			maxSize: 100,
+			keepOverLimit: ({ id, client }) => id === client.user.id,
+		},
+		ReactionManager: 100,
 	}),
 	sweepers: {
 		messages: {
-			interval: 60,
-			filter: () => (message) => {
-				const { createdTimestamp, author } = message;
-				return Date.now() - createdTimestamp >= 30 * 60_000 || author.bot;
-			},
+			interval: 15 * 60,
+			lifetime: 15 * 60,
+		},
+		users: {
+			interval: 15 * 60,
+			filter:
+				() =>
+				({ bot, id, client }) => {
+					return bot && id !== client.user.id;
+				},
 		},
 	},
 });
