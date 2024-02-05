@@ -6,7 +6,6 @@ import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.
 import Command from "../../commands/Command.js";
 import CommandArgs from "../../commands/Args.js";
 
-import Component from "../../components/Component.js";
 import ComponentArgs from "../../components/Args.js";
 
 class InteractionCreate extends Listener {
@@ -23,7 +22,9 @@ class InteractionCreate extends Listener {
 				command.applicationCommands.some((data) => data.name === interaction.commandName),
 			);
 
-			if (!command) return;
+			if (!command) {
+				return;
+			}
 
 			if (interaction.isCommand()) {
 				if (!interaction.guild) {
@@ -81,24 +82,14 @@ class InteractionCreate extends Listener {
 		}
 
 		if (interaction.isMessageComponent() || interaction.isModalSubmit()) {
-			const splitted = interaction.customId.split("-");
-			const [preCustomId, ...references] = splitted;
+			const splitted = interaction.customId.split(":");
+			const [key, ...references] = splitted;
 
-			let component: Component | undefined;
+			const component = this.client.components.get(key);
 
-			if (interaction.isAnySelectMenu()) {
-				component = this.client.components.selectMenus.get(preCustomId);
+			if (!component) {
+				return;
 			}
-
-			if (interaction.isButton()) {
-				component = this.client.components.buttons.get(preCustomId);
-			}
-
-			if (interaction.isModalSubmit()) {
-				component = this.client.components.modals.get(preCustomId);
-			}
-
-			if (!component) return;
 
 			const guild = (await this.client.managers.guilds.get({ id: interaction.guild!.id }))!;
 
@@ -146,7 +137,31 @@ class InteractionCreate extends Listener {
 				return;
 			}
 
-			await component.execute?.(interaction, args);
+			component.execute?.(interaction as any, args);
+
+			if (interaction.isButton()) {
+				component.executeButton?.(interaction, args);
+			}
+
+			if (interaction.isAnySelectMenu()) {
+				component.executeSelectMenu?.(interaction, args);
+			}
+
+			if (interaction.isStringSelectMenu()) {
+				component.executeStringSelectMenu?.(interaction, args);
+			}
+
+			if (interaction.isChannelSelectMenu()) {
+				component.executeChannelSelectMenu?.(interaction, args);
+			}
+
+			if (interaction.isMentionableSelectMenu()) {
+				component.executeMentionableSelectMenu?.(interaction, args);
+			}
+
+			if (interaction.isModalSubmit()) {
+				component.executeModal?.(interaction, args);
+			}
 		}
 	}
 

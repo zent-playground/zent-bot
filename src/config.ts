@@ -1,3 +1,9 @@
+const { env } = process as unknown as {
+	env: {
+		[x: string]: string;
+	};
+};
+
 const config = {
 	colors: {
 		default: 0xc8ad7f,
@@ -11,21 +17,21 @@ const config = {
 		success: "<:zent_success:1202350909888405504>",
 	},
 	mysql: {
-		host: process.env.MYSQL_HOST!,
-		port: process.env.MYSQL_PORT ? Number(process.env.MYSQL_PORT) : 3306,
-		user: process.env.MYSQL_USER!,
-		database: process.env.MYSQL_DATABASE!,
-		password: process.env.MYSQL_PASSWORD!,
+		host: env.MYSQL_HOST,
+		port: Number(env.MYSQL_PORT),
+		user: env.MYSQL_USER,
+		database: env.MYSQL_DATABASE,
+		password: env.MYSQL_PASSWORD,
 	},
 	redis: {
-		host: process.env.REDIS_HOST!,
-		port: Number(process.env.REDIS_PORT),
-		user: process.env.REDIS_USER!,
-		password: process.env.REDIS_PASSWORD!,
-		prefix: process.env.REDIS_PREFIX!,
+		host: env.REDIS_HOST,
+		port: Number(env.REDIS_PORT),
+		user: env.REDIS_USER,
+		password: env.REDIS_PASSWORD,
+		prefix: env.NODE_ENV === "development" ? "dev" : "prod",
 	},
-	token: process.env.BOT_TOKEN!,
-	sessionSecret: process.env.SESSION_SECRET!,
+	token: env.BOT_TOKEN,
+	sessionSecret: env.SESSION_SECRET,
 };
 
 export default config;
