@@ -57,11 +57,13 @@ class BaseManager<T> extends MySqlManager<T> {
 		values: Partial<T>,
 		options: SetOptions = {},
 	): Promise<void> {
-		await this.insert({ ...criteria, ...values } as T);
+		values = Object.assign(criteria, values);
+
+		await this.insert(values);
 
 		if (this.cache) {
 			const cacheKey = this.criteriaToCacheKey(criteria);
-			await this.cache.set(cacheKey, { ...criteria, ...values } as T, options);
+			await this.cache.set(cacheKey, values as T, options);
 		}
 	}
 
