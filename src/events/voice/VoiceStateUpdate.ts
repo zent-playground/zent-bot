@@ -15,7 +15,10 @@ class VoiceStateUpdate extends Listener {
 
 	private async handleCreation(newState: VoiceState) {
 		const { channel, guild, member } = newState;
-		if (!member || !channel) return;
+
+		if (!member || !channel) {
+			return;
+		}
 
 		const creator = await this.client.managers.voices.creators.get({ id: channel.id });
 
