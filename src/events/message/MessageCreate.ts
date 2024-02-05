@@ -12,6 +12,14 @@ class MessageCreate extends Listener {
 	}
 
 	public async execute(message: Message<true>) {
+		if (message.partial) {
+			try {
+				await message.fetch();
+			} catch {
+				return;
+			}
+		}
+
 		if (message.author.bot || !message.guild) return;
 
 		const { guilds, users } = this.client.managers;
