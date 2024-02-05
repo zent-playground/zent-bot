@@ -13,7 +13,7 @@ class Managers {
 	public constructor(mysql: MySql, redis: Redis) {
 		this.guilds = new GuildManager(mysql, redis);
 		this.voices = new TempVoiceManager(mysql, redis);
-		this.users = new UserManager(mysql, redis);
+		this.users = new UserManager(mysql);
 	}
 }
 

@@ -20,3 +20,24 @@ declare module "discord.js" {
 		utils: ClientUtils;
 	}
 }
+
+declare global {
+	namespace NodeJS {
+		interface ProcessEnv {
+			BOT_TOKEN?: string;
+			MYSQL_HOST?: string;
+			MYSQL_PORT?: string;
+			MYSQL_USER?: string;
+			MYSQL_DATABASE?: string;
+			MYSQL_PASSWORD?: string;
+			REDIS_HOST?: string;
+			REDIS_PORT?: string;
+			REDIS_USER?: string;
+			REDIS_PASSWORD?: string;
+			REDIS_PREFIX?: string;
+			NODE_ENV?: string;
+			PNPM_HOME?: string;
+			PATH?: string;
+		}
+	}
+}

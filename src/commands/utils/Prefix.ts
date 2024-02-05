@@ -1,4 +1,5 @@
-import { EmbedBuilder, SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { PermissionFlagsBits } from "discord-api-types/v10";
 
 import Command from "../Command.js";
 
@@ -51,8 +52,8 @@ class Prefix extends Command {
 			embeds: [
 				ctx.client.utils.createHelpEmbed(this, {
 					language,
-					usage: [`${prefix} prefix show`, `${prefix} prefix set <prefix>`].join("\n"),
-					example: `${prefix} prefix set zent`,
+					usage: [`${prefix}prefix show`, `${prefix}prefix set <prefix>`].join("\n"),
+					example: `${prefix}prefix set zent`,
 				}),
 			],
 		});

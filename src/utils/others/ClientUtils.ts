@@ -120,34 +120,36 @@ class ClientUtils {
 			context = new BasedHybridContext(context as any) as Command.HybridContext;
 		}
 
-		const { client, member } = context;
+		const { voices } = this.client.managers;
 
-		const { config, managers } = client;
-		const { voices } = managers;
-
-		const { voiceChannel, tempVoiceChannel } = preconditions;
-
-		const embed = new EmbedBuilder().setColor(config.colors.error);
-
-		if (voiceChannel) {
-			if (!member.voice.channel) {
+		if (preconditions.voiceChannel) {
+			if (!context.member.voice.channel) {
 				await context.send({
-					embeds: [embed.setDescription("You must in a voice channel to use this command.")],
+					embeds: [
+						new EmbedBuilder()
+							.setDescription("You must in a voice channel to use this command.")
+							.setColor(this.client.config.colors.error),
+					],
 				});
 
 				return false;
 			}
 		}
 
-		if (tempVoiceChannel) {
-			if (!(await voices.get({ id: member.voice.channelId! }))) {
+		if (preconditions.tempVoiceChannel) {
+			if (
+				!context.member.voice.channelId ||
+				!(await voices.get({ id: context.member.voice.channelId, active: true }))
+			) {
 				await context.send({
 					embeds: [
-						embed.setDescription("You must in a temp voice channel to use this command."),
+						new EmbedBuilder()
+							.setDescription("You must in a temp voice channel to use this command.")
+							.setColor(this.client.config.colors.error),
 					],
 				});
 
-				return;
+				return false;
 			}
 		}
 

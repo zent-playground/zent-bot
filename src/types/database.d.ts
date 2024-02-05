@@ -16,6 +16,8 @@ export interface TempVoice {
 	id: string;
 	guild_id: string;
 	author_id: string;
+	creator_id: string;
+	active: boolean;
 	created_at: string;
 }
 
@@ -25,15 +27,15 @@ export interface TempVoiceCreator {
 	affix: string | null;
 	generic_name: string | null;
 	generic_limit: number | null;
-	allow_global_name: boolean | false;
+	allow_custom_name: boolean | false;
 }
 
 export interface TempVoiceConfig {
 	id: string;
 	guild_id: string | null;
-	is_global: boolean | false;
+	is_global: boolean;
 	name: string | null;
-	nsfw: boolean | false;
+	nsfw: boolean;
 	joinable: TempVoiceJoinable;
 	blacklisted_ids: string[];
 	whitelisted_ids: string[];

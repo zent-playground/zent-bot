@@ -33,6 +33,7 @@ class RedisManager<T> {
 		const id = this.getId("get", keys);
 
 		const result = await this.client.get(id);
+
 		return result ? (JSON.parse(result) as T) : null;
 	}
 }

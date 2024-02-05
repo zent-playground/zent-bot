@@ -8,7 +8,13 @@ const config = {
 	colors: {
 		default: 0xc8ad7f,
 		error: 0xff6961,
+		warn: 0xffcc00,
 		success: 0x7abd7e,
+	},
+	emojis: {
+		error: "<:zent_error:1202351007116566629>",
+		warn: "<:zent_warn:1202351050003324928>",
+		success: "<:zent_success:1202350909888405504>",
 	},
 	mysql: {
 		host: env.MYSQL_HOST,

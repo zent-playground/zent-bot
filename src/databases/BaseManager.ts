@@ -8,7 +8,7 @@ namespace BaseManager {
 }
 
 class BaseManager<T> extends MySqlManager<T> {
-	public cache: RedisManager<T> | null = null;
+	private readonly cache: RedisManager<T> | null = null;
 
 	public constructor(table: string, mysql: BaseManager.MySql, redis?: BaseManager.Redis) {
 		super(mysql, table);
@@ -20,7 +20,10 @@ class BaseManager<T> extends MySqlManager<T> {
 
 	private buildWhereClause(criteria: Partial<T>): string {
 		return Object.entries(criteria)
-			.map(([field, value]) => `${field} = '${value}'`)
+			.map(
+				([field, value]) =>
+					`${field} = '${typeof value === "boolean" ? (value ? 1 : 0) : value}'`,
+			)
 			.join(" AND ");
 	}
 
@@ -33,7 +36,7 @@ class BaseManager<T> extends MySqlManager<T> {
 
 		let data: T | undefined | null = force ? null : await this.cache?.get(cacheKeys);
 
-		if (!data) {
+		if (!data || force) {
 			const whereClause = this.buildWhereClause(criteria);
 
 			data =
@@ -44,9 +47,7 @@ class BaseManager<T> extends MySqlManager<T> {
 					})
 				)?.[0] || null;
 
-			if (data && this.cache) {
-				await this.cache.set(cacheKeys, data);
-			}
+			console.log(data);
 		}
 
 		return data;
