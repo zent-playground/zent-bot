@@ -5,65 +5,90 @@ import RedisManager from "./redis/RedisManager.js";
 namespace BaseManager {
 	export type MySql = import("./mysql/MySql.js").default;
 	export type Redis = import("./redis/Redis.js").default;
-	export type Optional<T, K extends string = string> = Omit<Partial<T>, K>;
 }
 
 class BaseManager<T> extends MySqlManager<T> {
-	public cache!: RedisManager<T>;
+	public cache: RedisManager<T> | null = null;
 
 	public constructor(table: string, mysql: BaseManager.MySql, redis?: BaseManager.Redis) {
 		super(mysql, table);
 
 		if (redis) {
-			this.cache = new RedisManager(redis.client, `${redis.prefix}${table}:`);
+			this.cache = new RedisManager(redis.client, `${redis.prefix}:${table}`);
 		}
 	}
 
-	public async get(id: string, force = false): Promise<T | null> {
-		let data: T | null = force ? null : await this.cache?.get(id);
+	private buildWhereClause(criteria: Partial<T>): string {
+		return Object.entries(criteria)
+			.map(([field, value]) => `${field} = '${value}'`)
+			.join(" AND ");
+	}
 
-		if (!data || force) {
-			data = (
-				await this.select({
-					where: `id = '${id}'`,
-					selectFields: ["*"],
-				})
-			)?.[0];
+	private criteriaToCacheKey(criteria: Partial<T>): (string | number)[] {
+		return Object.values(criteria);
+	}
+
+	public async get(criteria: Partial<T>, force = false): Promise<T | null> {
+		const cacheKeys = this.criteriaToCacheKey(criteria);
+
+		let data: T | undefined | null = force ? null : await this.cache?.get(cacheKeys);
+
+		if (!data) {
+			const whereClause = this.buildWhereClause(criteria);
+
+			data =
+				(
+					await this.select({
+						where: whereClause,
+						selectFields: ["*"],
+					})
+				)?.[0] || null;
+
+			if (data && this.cache) {
+				await this.cache.set(cacheKeys, data);
+			}
 		}
 
-		if (data) {
-			await this.cache.set(id, data);
-			return data;
-		} else {
-			return null;
-		}
+		return data;
 	}
 
 	public async set(
-		id: string,
+		criteria: Partial<T>,
 		values: Partial<T>,
-		options: {
-			overwrite?: boolean;
-		} & SetOptions = {},
+		options: SetOptions = {},
 	): Promise<void> {
-		values = Object.assign(values, { id });
+		await this.insert({ ...criteria, ...values } as T);
 
-		if (options.overwrite) {
-			if (await this.get(id)) {
-				await this.update(`id = '${id}'`, values);
-			} else {
-				await this.insert(values);
-			}
-		} else {
-			await this.insert(values);
+		if (this.cache) {
+			const cacheKey = this.criteriaToCacheKey(criteria);
+			await this.cache.set(cacheKey, { ...criteria, ...values } as T, options);
 		}
-
-		await this.cache.set(id, (await this.get(id, true)) as T, options);
 	}
 
-	public async delete(id: string): Promise<void> {
-		await super.delete(`id = '${id}'`);
-		await this.cache.delete(id);
+	public async upd(
+		criteria: Partial<T>,
+		values: Partial<T>,
+		options: SetOptions = {},
+	): Promise<void> {
+		const whereClause = this.buildWhereClause(criteria);
+
+		await super.update(whereClause, values);
+
+		if (this.cache) {
+			const cacheKey = this.criteriaToCacheKey(criteria);
+			await this.cache.set(cacheKey, (await this.get(criteria, true))!, options);
+		}
+	}
+
+	public async del(criteria: Partial<T>): Promise<void> {
+		const whereClause = this.buildWhereClause(criteria);
+
+		await super.delete(whereClause);
+
+		if (this.cache) {
+			const cacheKeys = this.criteriaToCacheKey(criteria);
+			await this.cache.delete(cacheKeys);
+		}
 	}
 }
 

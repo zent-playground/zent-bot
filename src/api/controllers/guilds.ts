@@ -1,6 +1,14 @@
-import { Controller, Get, HttpStatus, Inject, Param, Res } from "@nestjs/common";
+import {
+	Controller,
+	Get,
+	HttpException,
+	HttpStatus,
+	Inject,
+	Param,
+	Res,
+} from "@nestjs/common";
 import { Response } from "express";
-import { Client as DiscordClient, Guild } from "discord.js";
+import { Client as DiscordClient } from "discord.js";
 
 @Controller("guilds")
 class Client {
@@ -8,15 +16,11 @@ class Client {
 
 	@Get(":id")
 	async information(@Param("id") guildId: string, @Res() res: Response) {
-		let guild: Guild | undefined = this.client.guilds.cache.get(guildId);
-
-		if (!guild) {
-			try {
-				guild = await this.client.guilds.fetch(guildId);
-			} catch (error) {
-				return res.status(HttpStatus.NOT_FOUND).json({ message: "Guild not found!" });
-			}
-		}
+		const guild =
+			this.client.guilds.cache.get(guildId) ||
+			(await this.client.guilds.fetch(guildId).catch(() => {
+				throw new HttpException("Guild not found!", HttpStatus.NOT_FOUND);
+			}));
 
 		return res.status(HttpStatus.OK).json(guild.toJSON());
 	}

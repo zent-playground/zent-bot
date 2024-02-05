@@ -16,11 +16,11 @@ interface CommandData {
 const localizations = new Collection<string, Localization>();
 
 const initLocalization = () => {
-	Object.keys(i18next.store.data).forEach((lang) => {
+	for (const lang of Object.keys(i18next.store.data)) {
 		const commands: Record<string, { data?: CommandData }> =
 			(i18next.store.data[lang]["translation"] as any).commands || {};
 
-		Object.entries(commands).forEach(([name, { data }]) => {
+		for (const [name, { data }] of Object.entries(commands)) {
 			if (!data) return;
 
 			const command = localizations.get(name) ?? {
@@ -42,14 +42,14 @@ const initLocalization = () => {
 			}
 
 			initOptions(command.options, data.options, lang);
-		});
-	});
+		}
+	}
 };
 
 const initOptions = (entry: Record<string, Localization>, data: CommandData, lang: string) => {
 	if (!data) return;
 
-	Object.entries(data).forEach(([key, { name, description, options }]) => {
+	for (const [key, { name, description, options }] of Object.entries(data)) {
 		const option = entry[key] ?? { names: {}, descriptions: {}, options: {} };
 		entry[key] = option;
 
@@ -64,7 +64,7 @@ const initOptions = (entry: Record<string, Localization>, data: CommandData, lan
 		if (options) {
 			initOptions(option.options, options, lang);
 		}
-	});
+	}
 };
 
 export { localizations, initLocalization as init };

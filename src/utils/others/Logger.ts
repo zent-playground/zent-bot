@@ -14,7 +14,7 @@ const log = (level: Level, ...args: any[]): void => {
 	}[level];
 	const formattedISO = chalk.cyanBright(`[${new Date().toISOString()}]`);
 
-	console.log(`${formattedISO}  ${formattedLevel}  `, ...args);
+	console.log(`${formattedISO}  ${formattedLevel} `, ...args);
 };
 
 namespace Logger {

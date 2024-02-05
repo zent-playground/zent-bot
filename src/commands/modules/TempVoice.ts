@@ -69,7 +69,14 @@ class TempVoice extends Command {
 							option
 								.setName("category")
 								.setDescription("The category that the bot will setup in it.")
-								.addChannelTypes(ChannelType.GuildCategory),
+								.addChannelTypes(ChannelType.GuildCategory)
+								.setRequired(true),
+						)
+						.addChannelOption((option) =>
+							option
+								.setName("channel")
+								.setDescription("The channel that the bot will create temp voice.")
+								.addChannelTypes(ChannelType.GuildVoice),
 						),
 				)
 				.addSubcommand((subcommand) =>
@@ -148,7 +155,7 @@ class TempVoice extends Command {
 			type: ChannelType.GuildVoice,
 		});
 
-		await voices.creators.set(channel.id, { guild_id: ctx.guild.id });
+		await voices.creators.set({ id: channel.id }, { guild_id: ctx.guild.id });
 
 		await ctx.send({
 			embeds: [
@@ -164,14 +171,14 @@ class TempVoice extends Command {
 		const { voices } = managers;
 		const { channel } = ctx.member.voice;
 
-		const data = (await voices.get(`${channel?.id}`))!;
+		const data = (await voices.get({ id: channel?.id }))!;
 		const name = args.join(" ") || ctx.interaction?.options.getString("name");
 
 		if (!name) {
 			return;
 		}
 
-		await voices.configs.set(data.author_id, { name }, { overwrite: true });
+		await voices.configs.set({ id: data.author_id }, { name });
 
 		await channel!.edit(
 			(await voices.createOptions(this.client, {
@@ -194,8 +201,8 @@ class TempVoice extends Command {
 		const { voices } = managers;
 		const { channel } = ctx.member.voice;
 
-		const data = (await voices.get(`${channel?.id}`))!;
-		const userConfig = await voices.configs.get(data.author_id);
+		const data = (await voices.get({ id: channel?.id }))!;
+		const userConfig = await voices.configs.get({ id: data.author_id });
 		const target = await ctx.client.users
 			.fetch(
 				`${
@@ -226,12 +233,9 @@ class TempVoice extends Command {
 		}
 
 		await voices.configs.set(
-			data.author_id,
+			{ id: data.author_id },
 			{
 				blacklisted_ids: blacklistedIds,
-			},
-			{
-				overwrite: true,
 			},
 		);
 
@@ -260,8 +264,8 @@ class TempVoice extends Command {
 		const { voices } = managers;
 		const { channel } = ctx.member.voice;
 
-		const data = (await voices.get(`${channel?.id}`))!;
-		const userConfig = await voices.configs.get(data.author_id);
+		const data = (await voices.get({ id: channel?.id }))!;
+		const userConfig = await voices.configs.get({ id: data.author_id });
 		const target = await ctx.client.users
 			.fetch(
 				`${
@@ -292,12 +296,9 @@ class TempVoice extends Command {
 		}
 
 		await voices.configs.set(
-			data.author_id,
+			{ id: data.author_id },
 			{
 				whitelisted_ids: whitelistedIds,
-			},
-			{
-				overwrite: true,
 			},
 		);
 
@@ -344,11 +345,10 @@ class TempVoice extends Command {
 		}
 
 		await voices.configs.set(
-			ctx.author.id,
+			{ id: ctx.author.id },
 			{
 				joinable: choice,
 			},
-			{ overwrite: true },
 		);
 
 		await ctx.member.voice.channel!.edit(

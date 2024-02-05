@@ -12,11 +12,19 @@ class MessageCreate extends Listener {
 	}
 
 	public async execute(message: Message<true>) {
+		if (message.partial) {
+			try {
+				await message.fetch();
+			} catch {
+				return;
+			}
+		}
+
 		if (message.author.bot || !message.guild) return;
 
 		const { guilds, users } = this.client.managers;
 
-		const guild = (await guilds.get(message.guildId))!;
+		const guild = (await guilds.get({ id: message.guildId }))!;
 
 		const prefixes: string[] = [this.client.user.toString()];
 
@@ -53,13 +61,13 @@ class MessageCreate extends Listener {
 		args.language = guild.language;
 		args.prefix = guild.prefix;
 
-		if (!(await users.get(message.author.id))) {
-			await users.set(message.author.id, {}, { overwrite: true });
+		if (!(await users.get({ id: message.author.id }))) {
+			await users.set({ id: message.author.id }, {});
 		}
 
 		command.executeMessage?.(message, args);
 		command.executeHybrid?.(new BasedHybridContext(message) as HybridContext, args);
-		this.handleSubcommand(message, command, args);
+		await this.handleSubcommand(message, command, args);
 	}
 
 	public async handleSubcommand(message: Message<true>, command: Command, args: Args) {

@@ -15,7 +15,7 @@ class Ready extends Listener {
 
 		Logger.info(`Successfully logged as '${client.user.tag}'.`);
 
-		client.application.commands.set(
+		await client.application.commands.set(
 			client.commands.map((command) => command.applicationCommands).flat(),
 		);
 

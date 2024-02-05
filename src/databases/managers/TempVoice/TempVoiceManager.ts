@@ -29,16 +29,16 @@ export enum TempVoiceJoinable {
 }
 
 class TempVoiceManager extends BaseManager<TempVoice> {
-	public readonly cooldowns: RedisManager<boolean>;
+	public readonly cooldowns: RedisManager<number>;
 	public readonly creators: TempVoiceCreatorManager;
 	public readonly configs: TempVoiceConfigManager;
 
 	public constructor(mysql: BaseManager.MySql, redis: BaseManager.Redis) {
 		super("temp_voices", mysql, redis);
 
-		this.cooldowns = new RedisManager<boolean>(
+		this.cooldowns = new RedisManager<number>(
 			redis.client,
-			`${redis.prefix}temp_voice_cooldowns`,
+			`${redis.prefix}:temp_voice_cooldowns`,
 		);
 
 		this.creators = new TempVoiceCreatorManager(mysql, redis);
@@ -62,18 +62,11 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 			return;
 		}
 
-		const config: TempVoiceConfig = (await this.configs.get(userId)) || {
-			id: userId,
-			name: user.tag,
-			joinable: TempVoiceJoinable.Everyone,
-			nsfw: false,
-			blacklisted_ids: [],
-			whitelisted_ids: [],
-		};
+		const config: TempVoiceConfig | null = await this.configs.get({ id: userId });
 
 		return {
-			name: config.name!,
-			nsfw: config.nsfw,
+			name: config?.name || user.tag,
+			nsfw: config?.nsfw || false,
 			type: ChannelType.GuildVoice,
 			permissionOverwrites: await (async () => {
 				const permissionOverwrites: OverwriteResolvable[] = [
@@ -82,8 +75,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 						allow: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
 					},
 				];
-
-				switch (config.joinable) {
+				switch (config?.joinable) {
 					case TempVoiceJoinable.Everyone: {
 						for (const id of config.blacklisted_ids || []) {
 							const member =
