@@ -25,7 +25,7 @@ class Prefix extends Command {
 		});
 	}
 
-	public initialize() {
+	public override initialize() {
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
 				.setName(this.name)

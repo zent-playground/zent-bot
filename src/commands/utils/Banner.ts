@@ -9,7 +9,7 @@ class Banner extends Command {
 		});
 	}
 
-	public initialize() {
+	public override initialize() {
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
 				.setName("banner")
@@ -19,7 +19,7 @@ class Banner extends Command {
 		);
 	}
 
-	public async executeHybrid(ctx: Command.HybridContext, args: Command.Args) {
+	public override async executeHybrid(ctx: Command.HybridContext, args: Command.Args) {
 		const { parseId } = ctx.client.utils;
 
 		const user = await this.client.users

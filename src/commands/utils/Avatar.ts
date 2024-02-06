@@ -21,7 +21,7 @@ class Avatar extends Command {
 		});
 	}
 
-	public initialize() {
+	public override initialize() {
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
 				.setName(this.name)
@@ -51,9 +51,7 @@ class Avatar extends Command {
 
 		const user = await this.client.users
 			.fetch(
-				parseId(args[0]) ||
-					ctx.interaction?.options.getUser("user")?.id ||
-					ctx.author.id,
+				parseId(args[0]) || ctx.interaction?.options.getUser("user")?.id || ctx.author.id,
 				{ force: true },
 			)
 			.catch(() => null);
@@ -88,10 +86,7 @@ class Avatar extends Command {
 
 		const member = await ctx.guild.members
 			.fetch({
-				user:
-					parseId(args[0]) ||
-					ctx.interaction?.options.getUser("member") ||
-					ctx.author.id,
+				user: parseId(args[0]) || ctx.interaction?.options.getUser("member") || ctx.author.id,
 				force: true,
 			})
 			.catch(() => null);

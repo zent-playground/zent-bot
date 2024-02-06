@@ -8,7 +8,7 @@ class GuildAuditLogEntryCreate extends Listener {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	public async execute(entry: GuildAuditLogsEntry, guild: Guild) {
+	public override async execute(entry: GuildAuditLogsEntry, guild: Guild) {
 		const { user } = this.client;
 
 		if (entry.executorId === user.id) {
