@@ -1,16 +1,16 @@
 import { ActivityType, Client, Events } from "discord.js";
 
-import Listener from "./Listener.js";
+import Listener from "../Listener.js";
 
-import Logger from "../utils/others/Logger.js";
-import { startApp } from "../api/app.js";
+import Logger from "../../utils/others/Logger.js";
+import { startApp } from "../../api/app.js";
 
 class Ready extends Listener {
 	public constructor() {
 		super(Events.ClientReady, true);
 	}
 
-	public async execute(client: Client<true>) {
+	public override async execute(client: Client<true>) {
 		await startApp(client);
 
 		Logger.info(`Successfully logged as '${client.user.tag}'.`);

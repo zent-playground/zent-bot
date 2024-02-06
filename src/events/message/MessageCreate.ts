@@ -1,17 +1,17 @@
 import { Events, Message } from "discord.js";
 
-import Listener from "./Listener.js";
+import Listener from "../Listener.js";
 
-import { BasedHybridContext, HybridContext } from "../commands/HybridContext.js";
-import Args from "../commands/Args.js";
-import Command from "../commands/Command.js";
+import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
+import Args from "../../commands/Args.js";
+import Command from "../../commands/Command.js";
 
 class MessageCreate extends Listener {
 	public constructor() {
 		super(Events.MessageCreate);
 	}
 
-	public async execute(message: Message<true>) {
+	public override async execute(message: Message<true>) {
 		if (message.partial) {
 			try {
 				message = await message.fetch();

@@ -8,7 +8,7 @@ import {
 	StringSelectMenuBuilder,
 } from "discord.js";
 
-import Listener from "./Listener.js";
+import Listener from "../Listener.js";
 import { ButtonStyle } from "discord-api-types/v10";
 
 class VoiceStateUpdate extends Listener {

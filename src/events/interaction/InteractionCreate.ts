@@ -1,12 +1,12 @@
 import { ChatInputCommandInteraction, EmbedBuilder, Events, Interaction } from "discord.js";
 
-import Listener from "./Listener.js";
+import Listener from "../Listener.js";
 
-import { BasedHybridContext, HybridContext } from "../commands/HybridContext.js";
-import Command from "../commands/Command.js";
-import CommandArgs from "../commands/Args.js";
+import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
+import Command from "../../commands/Command.js";
+import CommandArgs from "../../commands/Args.js";
 
-import ComponentArgs from "../components/Args.js";
+import ComponentArgs from "../../components/Args.js";
 
 class InteractionCreate extends Listener {
 	public constructor() {
