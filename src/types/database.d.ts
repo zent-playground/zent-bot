@@ -16,7 +16,8 @@ export interface TempVoice {
 	id: string;
 	guild_id: string;
 	author_id: string;
-	creator_id: string;
+	creator_channel_id: string;
+	claimed_by: string | null;
 	active: boolean;
 	created_at: string;
 }

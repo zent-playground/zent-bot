@@ -7,7 +7,7 @@ class GuildCreate extends Listener {
 		super(Events.GuildAvailable);
 	}
 
-	public async execute(guild: Guild) {
+	public override async execute(guild: Guild) {
 		const { guilds } = this.client.managers;
 
 		if (!(await guilds.get({ id: guild.id }))) {

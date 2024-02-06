@@ -14,7 +14,7 @@ class MessageCreate extends Listener {
 	public async execute(message: Message<true>) {
 		if (message.partial) {
 			try {
-				await message.fetch();
+				message = await message.fetch();
 			} catch {
 				return;
 			}

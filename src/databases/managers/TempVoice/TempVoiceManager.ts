@@ -121,7 +121,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 		const { affix, generic_name, generic_limit, allow_custom_name } = creator;
 
 		const options: GuildChannelCreateOptions = {
-			name: affix ? affix + " " + member.user.tag : member.user.tag,
+			name: affix ? affix + " " : member.user.globalName || member.user.tag,
 		};
 
 		if (allow_custom_name) {
@@ -132,7 +132,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 			}
 
 			if (config) {
-				options.name = config.name || member.user.tag;
+				options.name += config.name || member.user.globalName || member.user.tag;
 				options.nsfw = config.nsfw || false;
 				options.permissionOverwrites = await this.createPermissionOverwrites(config, guild);
 			}
