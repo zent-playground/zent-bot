@@ -16,4 +16,6 @@ manager.on("shardCreate", (shard) => {
 	Logger.info(`Created shard '${shard.id}'.`);
 });
 
-await manager.spawn();
+await manager.spawn({
+	timeout: 60_000,
+});
