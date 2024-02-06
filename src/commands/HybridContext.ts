@@ -61,14 +61,14 @@ export class BasedHybridContext {
 
 export class HybridContextInteraction extends BasedHybridContext {
 	public declare context: ChatInputCommandInteraction;
-	public get interaction(): ChatInputCommandInteraction {
+	public override get interaction(): ChatInputCommandInteraction {
 		return this.context as ChatInputCommandInteraction;
 	}
 }
 
 export class HybridContextMessage extends BasedHybridContext {
 	public declare context: Message<true>;
-	public get message(): Message<true> {
+	public override get message(): Message<true> {
 		return this.context as Message<true>;
 	}
 }
