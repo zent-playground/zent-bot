@@ -27,7 +27,7 @@ class TempVoice extends Component {
 		const { client } = interaction;
 		const { config } = client;
 
-		const [choice, id] = args.references!;
+		const [choice, id] = args.entries;
 
 		const creator = await this.client.managers.voices.creators.get({
 			id: id,
@@ -168,7 +168,7 @@ class TempVoice extends Component {
 		const { managers, config } = client;
 		const { voices } = managers;
 
-		const [choice, id] = args.references!;
+		const [choice, id] = args.entries;
 
 		const name = fields.getTextInputValue("name");
 		const limit = Number(fields.getTextInputValue("limit"));

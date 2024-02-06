@@ -12,6 +12,11 @@ import {
 } from "discord.js";
 
 import { Preconditions } from "../commands/Command.js";
+import Args from "../utils/others/Args.js";
+
+export class ComponentArgs extends Args {
+	language!: string;
+}
 
 interface ComponentOptions {
 	memberPermissions?: PermissionResolvable;
@@ -26,7 +31,7 @@ namespace Component {
 	export type StringSelectMenu = StringSelectMenuInteraction<"cached">;
 	export type UserSelectMenu = UserSelectMenuInteraction<"cached">;
 	export type Modal = ModalSubmitInteraction<"cached">;
-	export type Args = import("./Args.js").default;
+	export type Args = ComponentArgs;
 }
 
 class Component {

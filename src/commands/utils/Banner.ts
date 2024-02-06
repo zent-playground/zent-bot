@@ -24,7 +24,9 @@ class Banner extends Command {
 
 		const user = await this.client.users
 			.fetch(
-				parseId(args[0]) || ctx.interaction?.options.getUser("user")?.id || ctx.author.id,
+				parseId(args.entries[0]) ||
+					ctx.interaction?.options.getUser("user")?.id ||
+					ctx.author.id,
 				{ force: true },
 			)
 			.catch(() => null);

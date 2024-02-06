@@ -3,10 +3,9 @@ import { ChatInputCommandInteraction, EmbedBuilder, Events, Interaction } from "
 import Listener from "../Listener.js";
 
 import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
-import Command from "../../commands/Command.js";
-import CommandArgs from "../../commands/Args.js";
+import Command, { CommandArgs } from "../../commands/Command.js";
 
-import ComponentArgs from "../../components/Args.js";
+import { ComponentArgs } from "../../components/Component.js";
 
 class InteractionCreate extends Listener {
 	public constructor() {
@@ -95,18 +94,17 @@ class InteractionCreate extends Listener {
 
 			const guild = (await guilds.get({ id: interaction.guild!.id }))!;
 
-			const args = new ComponentArgs();
+			const args = new ComponentArgs(...references);
 
-			args.references = references;
 			args.language = guild.language;
 
 			if (
 				await this.client.users
-					.fetch(args[args.references.length - 1])
+					.fetch(args[args.entries.length - 1])
 					.then(() => true)
 					.catch(() => false)
 			) {
-				const userId = args[args.references.length - 1];
+				const userId = args[args.entries.length - 1];
 
 				if (interaction.user.id !== userId) {
 					await interaction.reply({

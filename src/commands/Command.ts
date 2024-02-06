@@ -10,8 +10,15 @@ import {
 	UserContextMenuCommandInteraction,
 } from "discord.js";
 
-import { Subcommand } from "../types/subcommand.js";
-import Arguments from "./Args.js";
+import { Subcommand, SubcommandBody } from "../types/subcommand.js";
+import Args from "../utils/others/Args.js";
+
+export class CommandArgs extends Args {
+	prefix!: string;
+	language!: string;
+	entrySubcommand?: SubcommandBody;
+	parentSubcommand?: Subcommand;
+}
 
 namespace Command {
 	export type ChatInput = ChatInputCommandInteraction;
@@ -20,7 +27,7 @@ namespace Command {
 	export type MessageContextMenu = MessageContextMenuCommandInteraction;
 	export type Autocomplete = AutocompleteInteraction;
 	export type HybridContext = import("./HybridContext.js").HybridContext;
-	export type Args = import("./Args.js").default;
+	export type Args = CommandArgs;
 }
 
 export interface CommandOptions {
@@ -53,8 +60,8 @@ class Command {
 	public executeAutocomplete?(interaction: Command.Autocomplete): Awaitable<void>;
 	public executeChatInput?(interaction: Command.ChatInput): Awaitable<void>;
 	public executeContextMenu?(interaction: Command.ContextMenu): Awaitable<void>;
-	public executeHybrid?(context: Command.HybridContext, args: Arguments): Awaitable<void>;
-	public executeMessage?(message: Message, args: Arguments): Awaitable<void>;
+	public executeHybrid?(context: Command.HybridContext, args: Command.Args): Awaitable<void>;
+	public executeMessage?(message: Message, args: Command.Args): Awaitable<void>;
 	public executeMessageContextMenu?(interaction: Command.MessageContextMenu): Awaitable<void>;
 	public executeUserContextMenu?(interaction: Command.UserContextMenu): Awaitable<void>;
 }

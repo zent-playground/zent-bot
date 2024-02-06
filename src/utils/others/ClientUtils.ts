@@ -1,7 +1,6 @@
 import { Client, CommandInteraction, EmbedBuilder, Message, codeBlock } from "discord.js";
 
 import Command, { Preconditions } from "../../commands/Command.js";
-import Args from "../../commands/Args.js";
 
 import { Subcommand, SubcommandBody } from "../../types/subcommand.js";
 import { BasedHybridContext } from "../../commands/HybridContext.js";
@@ -16,7 +15,7 @@ class ClientUtils {
 
 	public parseSubcommand(
 		command: Command,
-		args: Args,
+		args: Command.Args,
 		options: { subcommand?: string; subcommandGroup?: string },
 	) {
 		const { subcommand, subcommandGroup } = options;
@@ -55,7 +54,7 @@ class ClientUtils {
 				}
 			}
 
-			args.splice(0, 1);
+			args.entries.splice(0, 1);
 		} else {
 			entry = parent;
 		}
@@ -66,7 +65,7 @@ class ClientUtils {
 		args.parentSubcommand = parent;
 
 		if (!entry["subcommands"] && args[0]?.toLowerCase() === entry.name) {
-			args.splice(0, 1);
+			args.entries.splice(0, 1);
 		}
 
 		return {

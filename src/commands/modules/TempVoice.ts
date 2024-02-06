@@ -137,8 +137,8 @@ class TempVoice extends Command {
 	}
 
 	private globally(args: Command.Args): boolean {
-		if (args[args.length - 1] === "true") {
-			args.pop();
+		if (args[args.entries.length - 1] === "true") {
+			args.entries.pop();
 			return true;
 		}
 
@@ -248,7 +248,7 @@ class TempVoice extends Command {
 		const { member } = ctx;
 
 		const globally = this.globally(args) || ctx.interaction?.options.getBoolean("globally");
-		const name = args.join(" ") || ctx.interaction?.options.getString("name");
+		const name = args.entries.join(" ") || ctx.interaction?.options.getString("name");
 
 		if (!name) {
 			return;

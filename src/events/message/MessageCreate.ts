@@ -3,8 +3,7 @@ import { Events, Message } from "discord.js";
 import Listener from "../Listener.js";
 
 import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
-import Args from "../../commands/Args.js";
-import Command from "../../commands/Command.js";
+import Command, { CommandArgs } from "../../commands/Command.js";
 
 class MessageCreate extends Listener {
 	public constructor() {
@@ -56,7 +55,7 @@ class MessageCreate extends Listener {
 			}
 		}
 
-		const args = new Args(...content);
+		const args = new CommandArgs(...content);
 
 		args.language = guild.language;
 		args.prefix = guild.prefix;
@@ -70,8 +69,8 @@ class MessageCreate extends Listener {
 		await this.handleSubcommand(message, command, args);
 	}
 
-	public async handleSubcommand(message: Message<true>, command: Command, args: Args) {
-		let [first, second] = args;
+	public async handleSubcommand(message: Message<true>, command: Command, args: CommandArgs) {
+		let [first, second] = args.entries;
 
 		first = first?.toLowerCase();
 		second = second?.toLowerCase();
