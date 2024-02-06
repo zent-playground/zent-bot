@@ -4,12 +4,10 @@ import {
 	EmbedBuilder,
 	ChannelType,
 	ActionRowBuilder,
-	ButtonBuilder,
 	StringSelectMenuBuilder,
 } from "discord.js";
 
 import Listener from "../Listener.js";
-import { ButtonStyle } from "discord-api-types/v10";
 
 class VoiceStateUpdate extends Listener {
 	public constructor() {
@@ -52,21 +50,16 @@ class VoiceStateUpdate extends Listener {
 				.send({
 					embeds: [
 						new EmbedBuilder()
-							.setAuthor({ name: guild.name, iconURL: guild.iconURL({ forceStatic: true })! })
+							.setAuthor({
+								name: guild.name,
+								iconURL: guild.iconURL({ forceStatic: true })!,
+								url: guild.channels.cache.find((x) => x.isTextBased())?.url,
+							})
 							.setDescription(
 								"You can only create a temporary voice channel every 10 seconds.",
 							)
 							.setTimestamp()
 							.setColor(config.colors.error),
-					],
-					components: [
-						new ActionRowBuilder<ButtonBuilder>().addComponents(
-							new ButtonBuilder()
-								.setLabel(`Sent from **${guild.name}**`)
-								.setStyle(ButtonStyle.Secondary)
-								.setDisabled(true)
-								.setCustomId("origin"),
-						),
 					],
 				})
 				.catch(() => void 0);
@@ -102,13 +95,13 @@ class VoiceStateUpdate extends Listener {
 						.setDescription(
 							"**Welcome to your personal temporary voice channel!**\n\nFeel free to manage your channel settings and permissions using the provided dropdown menus.\n\nIf you prefer, you can also use the `/voice` commands.",
 						)
-						.setColor(this.client.config.colors.default),
+						.setColor(config.colors.default),
 				],
 				components: [
 					new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 						new StringSelectMenuBuilder()
 							.setPlaceholder("Voice Settings")
-							.setCustomId("voice-settings")
+							.setCustomId("voice:settings")
 							.setOptions(
 								{
 									label: "Name",
@@ -151,7 +144,7 @@ class VoiceStateUpdate extends Listener {
 					new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 						new StringSelectMenuBuilder()
 							.setPlaceholder("Voice Permissions")
-							.setCustomId("voice-permissions")
+							.setCustomId("voice:permissions")
 							.setOptions(
 								{
 									label: "Lock",
