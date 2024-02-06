@@ -19,13 +19,13 @@ interface ComponentOptions {
 }
 
 namespace Component {
-	export type Button = ButtonInteraction;
-	export type SelectMenu = AnySelectMenuInteraction;
-	export type ChannelSelectMenu = ChannelSelectMenuInteraction;
-	export type MentionableSelectMenu = MentionableSelectMenuInteraction;
-	export type StringSelectMenu = StringSelectMenuInteraction;
-	export type UserSelectMenu = UserSelectMenuInteraction;
-	export type Modal = ModalSubmitInteraction;
+	export type Button = ButtonInteraction<"cached">;
+	export type SelectMenu = AnySelectMenuInteraction<"cached">;
+	export type ChannelSelectMenu = ChannelSelectMenuInteraction<"cached">;
+	export type MentionableSelectMenu = MentionableSelectMenuInteraction<"cached">;
+	export type StringSelectMenu = StringSelectMenuInteraction<"cached">;
+	export type UserSelectMenu = UserSelectMenuInteraction<"cached">;
+	export type Modal = ModalSubmitInteraction<"cached">;
 	export type Args = import("./Args.js").default;
 }
 

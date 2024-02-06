@@ -13,7 +13,7 @@ class InteractionCreate extends Listener {
 		super(Events.InteractionCreate);
 	}
 
-	public override async execute(interaction: Interaction) {
+	public override async execute(interaction: Interaction<"cached">) {
 		const {
 			config,
 			managers: { guilds, users },
