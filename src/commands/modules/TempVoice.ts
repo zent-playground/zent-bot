@@ -196,19 +196,19 @@ class TempVoice extends Command {
 			return;
 		}
 
-		if (!channel.parent) {
-			await ctx.send({
-				embeds: [
-					new EmbedBuilder()
-						.setTitle(`${this.client.config.emojis.error} No Category!`)
-						.setDescription("This voice channel doesn't have a parent category.")
-						.setColor(this.client.config.colors.error),
-				],
-				ephemeral: true,
-			});
+		//if (!channel.parent) {
+		//	await ctx.send({
+		//		embeds: [
+		//			new EmbedBuilder()
+		//				.setTitle(`${this.client.config.emojis.error} No Category!`)
+		//				.setDescription("This voice channel doesn't have a parent category.")
+		//				.setColor(this.client.config.colors.error),
+		//		],
+		//		ephemeral: true,
+		//	});
 
-			return;
-		}
+		//	return;
+		//}
 
 		const creators = await voices.creators.get({ id: channel.id });
 
@@ -240,15 +240,15 @@ class TempVoice extends Command {
 					new ButtonBuilder()
 						.setLabel("Set Generic")
 						.setStyle(ButtonStyle.Success)
-						.setCustomId(`voice-generic-${channel.id}-${ctx.member.id}`),
+						.setCustomId(`voice:generic:${channel.id}:${ctx.member.id}`),
 					new ButtonBuilder()
 						.setLabel("Set Affix")
 						.setStyle(ButtonStyle.Primary)
-						.setCustomId(`voice-affix-${channel.id}-${ctx.member.id}`),
+						.setCustomId(`voice:affix:${channel.id}:${ctx.member.id}`),
 					new ButtonBuilder()
 						.setLabel("Allow Custom Name")
 						.setStyle(ButtonStyle.Danger)
-						.setCustomId(`voice-custom-${channel.id}-${ctx.member.id}`),
+						.setCustomId(`voice:custom:${channel.id}:${ctx.member.id}`),
 				]),
 			],
 		});
@@ -406,7 +406,7 @@ class TempVoice extends Command {
 		);
 
 		await channel!.edit({
-			permissionOverwrites: await voices.permissions(
+			permissionOverwrites: await voices.createPermissionOverwrites(
 				(await voices.configs.get({ id: data.author_id }))!,
 				ctx.guild,
 			),
@@ -469,7 +469,7 @@ class TempVoice extends Command {
 		);
 
 		await channel!.edit({
-			permissionOverwrites: await voices.permissions(
+			permissionOverwrites: await voices.createPermissionOverwrites(
 				(await voices.configs.get({ id: data.author_id }))!,
 				ctx.guild,
 			),
@@ -518,7 +518,7 @@ class TempVoice extends Command {
 		);
 
 		await ctx.member.voice.channel!.edit({
-			permissionOverwrites: await voices.permissions(
+			permissionOverwrites: await voices.createPermissionOverwrites(
 				(await voices.configs.get({ id: ctx.author.id }))!,
 				ctx.guild,
 			),
