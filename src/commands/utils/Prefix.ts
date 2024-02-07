@@ -1,4 +1,5 @@
-import { EmbedBuilder, SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { PermissionFlagsBits } from "discord-api-types/v10";
 
 import Command from "../Command.js";
 
@@ -24,7 +25,7 @@ class Prefix extends Command {
 		});
 	}
 
-	public initialize() {
+	public override initialize() {
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
 				.setName(this.name)
@@ -51,8 +52,8 @@ class Prefix extends Command {
 			embeds: [
 				ctx.client.utils.createHelpEmbed(this, {
 					language,
-					usage: [`${prefix} prefix show`, `${prefix} prefix set <prefix>`].join("\n"),
-					example: `${prefix} prefix set zent`,
+					usage: [`${prefix}prefix show`, `${prefix}prefix set <prefix>`].join("\n"),
+					example: `${prefix}prefix set zent`,
 				}),
 			],
 		});
@@ -80,7 +81,7 @@ class Prefix extends Command {
 	public async set(ctx: Command.HybridContext, args: Command.Args) {
 		const { guilds } = this.client.managers;
 
-		const prefixToSet = (args[0] || ctx.interaction?.options.getString("prefix"))
+		const prefixToSet = (args.entries[0] || ctx.interaction?.options.getString("prefix"))
 			?.split(/ +/g)[0]
 			.toLowerCase();
 

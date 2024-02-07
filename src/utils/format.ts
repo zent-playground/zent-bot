@@ -14,3 +14,7 @@ export const formatTimestamp = (date?: Date | number) => {
 
 	return `${yyyy}/${mm}/${dd} - ${hh}:${mm}:${ss}`;
 };
+
+export const capitalize = (value: string) => {
+	return value[0].toUpperCase() + value.substring(1);
+};

@@ -8,6 +8,8 @@ import helmet from "helmet";
 import Logger from "../utils/others/Logger.js";
 import { loadControllers } from "../utils/loader.js";
 
+const controllers = await loadControllers();
+
 @Module({})
 class AppModule {
 	static async forRoot(client: Client<true>): Promise<DynamicModule> {
@@ -19,7 +21,7 @@ class AppModule {
 					useValue: client,
 				},
 			],
-			controllers: await loadControllers(),
+			controllers,
 		};
 	}
 }
@@ -45,5 +47,5 @@ export const startApp = async (client: Client<true>): Promise<void> => {
 	app.setGlobalPrefix("api/v1");
 
 	await app.listen(Number(process.env.PORT));
-	Logger.info("Started Nest server.");
+	Logger.info(`Started Nest server with ${controllers.length} controllers.`);
 };

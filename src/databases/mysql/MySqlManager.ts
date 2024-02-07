@@ -17,7 +17,7 @@ interface JoinClause {
 
 class MySqlManager<T> {
 	private db: MySql;
-	public readonly table: string;
+	protected readonly table: string;
 
 	public constructor(db: MySql, table: string) {
 		this.db = db;

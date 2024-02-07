@@ -1,4 +1,5 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+
 import Command from "../Command.js";
 
 class Ping extends Command {
@@ -8,7 +9,7 @@ class Ping extends Command {
 		});
 	}
 
-	public initialize() {
+	public override initialize() {
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
 				.setName(this.name)
@@ -17,7 +18,7 @@ class Ping extends Command {
 		);
 	}
 
-	public async executeHybrid(ctx: Command.HybridContext) {
+	public override async executeHybrid(ctx: Command.HybridContext) {
 		const message = await ctx.send({
 			embeds: [
 				new EmbedBuilder().setTitle("Pinging...").setColor(this.client.config.colors.default),
