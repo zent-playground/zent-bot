@@ -47,7 +47,9 @@ class BaseManager<T> extends MySqlManager<T> {
 					})
 				)?.[0] || null;
 
-			console.log(data);
+			if (data !== null && this.cache) {
+				await this.cache.set(cacheKeys, data);
+			}
 		}
 
 		return data;

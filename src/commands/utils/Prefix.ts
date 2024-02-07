@@ -25,7 +25,7 @@ class Prefix extends Command {
 		});
 	}
 
-	public initialize() {
+	public override initialize() {
 		this.applicationCommands.push(
 			new SlashCommandBuilder()
 				.setName(this.name)
@@ -81,7 +81,7 @@ class Prefix extends Command {
 	public async set(ctx: Command.HybridContext, args: Command.Args) {
 		const { guilds } = this.client.managers;
 
-		const prefixToSet = (args[0] || ctx.interaction?.options.getString("prefix"))
+		const prefixToSet = (args.entries[0] || ctx.interaction?.options.getString("prefix"))
 			?.split(/ +/g)[0]
 			.toLowerCase();
 

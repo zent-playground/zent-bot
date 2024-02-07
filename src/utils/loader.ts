@@ -6,8 +6,9 @@ import { fileURLToPath, pathToFileURL } from "url";
 
 import Command from "../commands/Command.js";
 import Component from "../components/Component.js";
-
 import Listener from "../events/Listener.js";
+
+import Logger from "./others/Logger.js";
 
 const _dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -16,13 +17,19 @@ export const loadEvents = async (client: Client): Promise<void> => {
 
 	const files = await glob(`${path}/*/**/*.js`);
 
+	let count = 0;
+
 	for (const file of files) {
 		const listener = new (await import(`${pathToFileURL(file)}`)).default() as Listener;
 
 		listener.client = client as Client<true>;
 
 		client[listener.once ? "once" : "on"](listener.name, listener.execute!.bind(listener));
+
+		count++;
 	}
+
+	Logger.info(`Loaded ${count} events.`);
 };
 
 export const loadCommands = async (client: Client): Promise<void> => {
@@ -39,12 +46,14 @@ export const loadCommands = async (client: Client): Promise<void> => {
 
 		client.commands.set(command.name, command);
 	}
+
+	Logger.info(`Loaded ${client.commands.size} commands.`);
 };
 
 export const loadComponents = async (client: Client): Promise<void> => {
 	const path = join(_dirname, "..", "components").replace(/\\/g, "/");
 
-	const files = await glob(`${path}/**/*.js`);
+	const files = await glob(`${path}/*/**/*.js`);
 
 	for (const file of files) {
 		const component = new (await import(`${pathToFileURL(file)}`)).default() as Component;
@@ -53,19 +62,21 @@ export const loadComponents = async (client: Client): Promise<void> => {
 
 		client.components.set(component.key, component);
 	}
+
+	Logger.info(`Loaded ${client.components.size} components.`);
 };
 
 export const loadControllers = async (): Promise<any[]> => {
 	const path = join(_dirname, "..", "api", "controllers").replace(/\\/g, "/");
 
-	const Controllers: any[] = [];
+	const controllers: any[] = [];
 
 	const files = await glob(`${path}/**/*.js`);
 
 	for (const file of files) {
-		const Controller = (await import(`${pathToFileURL(file)}`)).default;
-		Controllers.push(Controller);
+		const controller = (await import(`${pathToFileURL(file)}`)).default;
+		controllers.push(controller);
 	}
 
-	return Controllers;
+	return controllers;
 };

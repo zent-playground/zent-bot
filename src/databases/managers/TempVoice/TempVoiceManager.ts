@@ -45,33 +45,32 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 		this.configs = new TempVoiceConfigManager(mysql, redis);
 	}
 
-	public async permissions(
-		{ id, joinable, whitelisted_ids, blacklisted_ids }: TempVoiceConfig,
+	public async createPermissionOverwrites(
+		config: TempVoiceConfig,
 		guild: Guild,
 	): Promise<OverwriteResolvable[]> {
+		const { id, joinable, whitelisted_ids, blacklisted_ids } = config;
+
 		const permissionOverwrites: OverwriteResolvable[] = [
 			{
-				id: id,
-				allow: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
+				id,
+				allow: [PermissionFlagsBits.Connect],
 			},
 		];
 
 		switch (joinable) {
 			case TempVoiceJoinable.Everyone: {
 				for (const id of blacklisted_ids || []) {
-					const member =
-						guild.members.cache.get(id) || (await guild.members.fetch(id).catch(() => 0));
+					const member = await guild.members.fetch(id).catch(() => 0);
 
 					if (!member) {
 						continue;
 					}
 
-					const overwrite: OverwriteResolvable = {
+					permissionOverwrites.push({
 						id,
 						deny: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
-					};
-
-					permissionOverwrites.push(overwrite);
+					});
 				}
 
 				break;
@@ -84,19 +83,16 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 				});
 
 				for (const id of whitelisted_ids || []) {
-					const member =
-						guild.members.cache.get(id) || (await guild.members.fetch(id).catch(() => 0));
+					const member = await guild.members.fetch(id).catch(() => 0);
 
 					if (!member) {
 						continue;
 					}
 
-					const overwrite: OverwriteResolvable = {
+					permissionOverwrites.push({
 						id,
 						allow: [PermissionFlagsBits.Connect],
-					};
-
-					permissionOverwrites.push(overwrite);
+					});
 				}
 
 				break;
@@ -112,10 +108,12 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 			}
 		}
 
+		console.log(permissionOverwrites);
+
 		return permissionOverwrites;
 	}
 
-	public async options(
+	public async createOptions(
 		creator: TempVoiceCreator,
 		member: GuildMember,
 		guild: Guild,
@@ -123,10 +121,8 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 		const { affix, generic_name, generic_limit, allow_custom_name } = creator;
 
 		const options: GuildChannelCreateOptions = {
-			name: affix ? affix + " " + member.user.tag : member.user.tag,
+			name: affix ? affix + " " : member.user.globalName || member.user.tag,
 		};
-
-		console.log(affix);
 
 		if (allow_custom_name) {
 			let config = await this.configs.get({ id: member.id, is_global: true });
@@ -136,15 +132,13 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 			}
 
 			if (config) {
-				options.name = config.name || member.user.tag;
+				options.name += config.name || member.user.globalName || member.user.tag;
 				options.nsfw = config.nsfw || false;
-				options.permissionOverwrites = await this.permissions(config, guild);
+				options.permissionOverwrites = await this.createPermissionOverwrites(config, guild);
 			}
 		} else if (generic_name) {
 			options.name = generic_name;
 		}
-
-		console.log(generic_limit);
 
 		if (generic_limit) {
 			options.userLimit = generic_limit;

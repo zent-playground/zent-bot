@@ -10,7 +10,8 @@
 		"skipLibCheck": true,
 		"noImplicitAny": false,
 		"lib": ["ES2023", "ES2023.Array", "ES2023.Collection"],
-		"traceResolution": true
+		"traceResolution": true,
+		"noImplicitOverride": true
 	},
 	"include": ["src/**/*.ts", "*.js"]
 }

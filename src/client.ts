@@ -3,7 +3,7 @@ import { Client, Collection, GatewayIntentBits, Options, Partials } from "discor
 import { loadCommands, loadComponents, loadEvents } from "./utils/loader.js";
 import ClientUtils from "./utils/others/ClientUtils.js";
 
-import "./utils/error.js";
+import "./utils/process.js";
 
 import Managers from "./databases/Managers.js";
 import MySql from "./databases/mysql/MySql.js";
@@ -78,4 +78,4 @@ await loadEvents(client);
 await loadCommands(client);
 await loadComponents(client);
 
-await client.login(process.env.BOT_TOKEN!);
+await client.login(config.token);
