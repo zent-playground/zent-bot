@@ -108,8 +108,6 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 			}
 		}
 
-		console.log(permissionOverwrites);
-
 		return permissionOverwrites;
 	}
 
@@ -124,19 +122,23 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 			name: affix ? affix + " " : member.user.globalName || member.user.tag,
 		};
 
-		if (allow_custom_name) {
-			let config = await this.configs.get({ id: member.id, is_global: true });
+		let config = await this.configs.get({ id: member.id, is_global: true });
 
-			if (!config) {
-				config = await this.configs.get({ id: member.id, guild_id: guild.id });
+		if (!config) {
+			config = await this.configs.get({ id: member.id, guild_id: guild.id });
+		}
+
+		if (config) {
+			if (allow_custom_name) {
+				options.name +=
+					config.name || member.nickname || member.user.globalName || member.user.tag;
 			}
 
-			if (config) {
-				options.name += config.name || member.user.globalName || member.user.tag;
-				options.nsfw = config.nsfw || false;
-				options.permissionOverwrites = await this.createPermissionOverwrites(config, guild);
-			}
-		} else if (generic_name) {
+			options.nsfw = config.nsfw || false;
+			options.permissionOverwrites = await this.createPermissionOverwrites(config, guild);
+		}
+
+		if (generic_name) {
 			options.name = generic_name;
 		}
 
