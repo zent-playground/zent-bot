@@ -101,7 +101,7 @@ class VoiceStateUpdate extends Listener {
 					new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 						new StringSelectMenuBuilder()
 							.setPlaceholder("Voice Settings")
-							.setCustomId("voice:settings")
+							.setCustomId("voice:panel:settings")
 							.setOptions(
 								{
 									label: "Name",
@@ -144,7 +144,7 @@ class VoiceStateUpdate extends Listener {
 					new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 						new StringSelectMenuBuilder()
 							.setPlaceholder("Voice Permissions")
-							.setCustomId("voice:permissions")
+							.setCustomId("voice:panel:permissions")
 							.setOptions(
 								{
 									label: "Lock",
