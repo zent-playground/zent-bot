@@ -506,7 +506,7 @@ class TempVoice extends Command {
 			},
 		);
 
-		await ctx.member.voice.channel!.edit({
+		await ctx.member.voice.channel?.edit({
 			permissionOverwrites: await voices.createPermissionOverwrites(
 				(await voices.configs.get({ id: ctx.author.id }))!,
 				ctx.guild,
