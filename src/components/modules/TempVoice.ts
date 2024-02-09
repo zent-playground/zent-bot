@@ -276,8 +276,20 @@ class TempVoice extends Component {
 
 		let userConfig = await voices.configs.get({ id: member.id, is_global: true });
 
-		if (!config) {
+		if (!userConfig) {
 			userConfig = await voices.configs.get({ id: member.id, guild_id: guild.id });
+		}
+
+		if (!userConfig) {
+			await voices.configs.set(
+				{
+					id: member.id,
+					is_global: true,
+				},
+				{},
+			);
+
+			userConfig = await voices.configs.get({ id: member.id, is_global: true });
 		}
 
 		const upd = async (values: Partial<TempVoiceConfig>) => {
@@ -325,6 +337,8 @@ class TempVoice extends Component {
 				case "limit": {
 					const value = Math.floor(Number(interaction.fields.getTextInputValue("value")));
 
+					let limit: number | null = null;
+
 					if (value) {
 						if (value < 1 || value > 99) {
 							await interaction.reply({
@@ -340,7 +354,7 @@ class TempVoice extends Component {
 							return;
 						}
 
-						await upd({ limit: value });
+						limit = value;
 					} else if (isNaN(value)) {
 						await interaction.reply({
 							embeds: [
@@ -353,9 +367,26 @@ class TempVoice extends Component {
 						});
 
 						return;
-					} else {
-						await upd({ limit: null });
 					}
+
+					await upd({ user_limit: limit });
+
+					await interaction.reply({
+						embeds: [
+							new EmbedBuilder()
+								.setAuthor({
+									name: user.tag,
+									iconURL: user.displayAvatarURL(),
+									url: `https://discord.com/users/${user.id}`,
+								})
+								.setDescription(
+									limit
+										? `Successfully set your temp voice channel user limit to \`${limit}\`.`
+										: "Successfully removed your temp voice channel user limit.",
+								)
+								.setColor(config.colors.success),
+						],
+					});
 
 					break;
 				}
@@ -459,7 +490,7 @@ class TempVoice extends Component {
 						new TextInputBuilder()
 							.setCustomId("value")
 							.setLabel("limit")
-							.setRequired(true)
+							.setRequired(false)
 							.setStyle(TextInputStyle.Short),
 					),
 				);
@@ -470,34 +501,10 @@ class TempVoice extends Component {
 			}
 
 			case "game": {
-				modal.setComponents(
-					new ActionRowBuilder<TextInputBuilder>().setComponents(
-						new TextInputBuilder()
-							.setCustomId("value")
-							.setLabel("limit")
-							.setRequired(true)
-							.setStyle(TextInputStyle.Short),
-					),
-				);
-
-				await interaction.showModal(modal);
-
 				break;
 			}
 
 			case "bitrate": {
-				modal.setComponents(
-					new ActionRowBuilder<TextInputBuilder>().setComponents(
-						new TextInputBuilder()
-							.setCustomId("value")
-							.setLabel("limit")
-							.setRequired(true)
-							.setStyle(TextInputStyle.Short),
-					),
-				);
-
-				await interaction.showModal(modal);
-
 				break;
 			}
 
