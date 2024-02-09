@@ -117,9 +117,12 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 		guild: Guild,
 	): Promise<GuildChannelCreateOptions> {
 		const { affix, generic_name, generic_limit, allow_custom_name } = creator;
+		const { nickname, user } = member;
+
+		const displayName = nickname || user.globalName || user.tag;
 
 		const options: GuildChannelCreateOptions = {
-			name: affix ? affix + " " : member.user.globalName || member.user.tag,
+			name: affix ? affix + " " : displayName,
 		};
 
 		let config = await this.configs.get({ id: member.id, is_global: true });
@@ -130,8 +133,11 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 
 		if (config) {
 			if (allow_custom_name) {
-				options.name +=
-					config.name || member.nickname || member.user.globalName || member.user.tag;
+				options.name += config.name || displayName;
+			}
+
+			if (config.user_limit) {
+				options.userLimit = config.user_limit;
 			}
 
 			options.nsfw = config.nsfw || false;
