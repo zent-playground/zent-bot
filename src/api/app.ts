@@ -27,25 +27,25 @@ class AppModule {
 }
 
 export const startApp = async (client: Client<true>): Promise<void> => {
-	const appModule = await AppModule.forRoot(client);
-	const app = await NestFactory.create(appModule, { logger: false });
+	const module = await AppModule.forRoot(client);
+	const app = await NestFactory.create(module, {
+		logger: false,
+		cors: true,
+	});
 
-	app.use(
-		session({
-			secret: client.config.sessionSecret || "zent",
-			resave: false,
-			saveUninitialized: true,
-			cookie: {
-				maxAge: 60_000,
-				secure: process.env.NODE_ENV !== "development",
-			},
-		}),
-	);
+	const requestHandler = session({
+		secret: client.config.sessionSecret || "zent",
+		resave: false,
+		saveUninitialized: true,
+		cookie: {
+			maxAge: 60_000,
+			secure: process.env.NODE_ENV !== "development",
+		},
+	});
 
-	app.use(helmet());
-
-	app.setGlobalPrefix("api/v1");
+	app.use(requestHandler, helmet());
 
 	await app.listen(Number(process.env.PORT));
+
 	Logger.info(`Started Nest server with ${controllers.length} controllers.`);
 };
