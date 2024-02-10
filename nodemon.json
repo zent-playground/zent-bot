@@ -1,5 +1,5 @@
 {
-	"watch": ["src", ".env"],
+	"watch": ["src", ".env", "scripts"],
 	"ext": "ts",
 	"exec": "pnpm build && pnpm start",
 	"delay": 500,

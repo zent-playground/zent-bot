@@ -18,4 +18,5 @@ manager.on("shardCreate", (shard) => {
 
 await manager.spawn({
 	timeout: 60_000,
+	delay: 5_000,
 });

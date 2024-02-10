@@ -108,8 +108,6 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 			}
 		}
 
-		console.log(permissionOverwrites);
-
 		return permissionOverwrites;
 	}
 
@@ -119,24 +117,32 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 		guild: Guild,
 	): Promise<GuildChannelCreateOptions> {
 		const { affix, generic_name, generic_limit, allow_custom_name } = creator;
+		const { displayName } = member;
 
 		const options: GuildChannelCreateOptions = {
-			name: affix ? affix + " " : member.user.globalName || member.user.tag,
+			name: affix ? affix + " " : displayName,
 		};
 
-		if (allow_custom_name) {
-			let config = await this.configs.get({ id: member.id, is_global: true });
+		let config = await this.configs.get({ id: member.id, is_global: true });
 
-			if (!config) {
-				config = await this.configs.get({ id: member.id, guild_id: guild.id });
+		if (!config) {
+			config = await this.configs.get({ id: member.id, guild_id: guild.id });
+		}
+
+		if (config) {
+			if (allow_custom_name) {
+				options.name += config.name || displayName;
 			}
 
-			if (config) {
-				options.name += config.name || member.user.globalName || member.user.tag;
-				options.nsfw = config.nsfw || false;
-				options.permissionOverwrites = await this.createPermissionOverwrites(config, guild);
+			if (config.user_limit) {
+				options.userLimit = config.user_limit;
 			}
-		} else if (generic_name) {
+
+			options.nsfw = config.nsfw || false;
+			options.permissionOverwrites = await this.createPermissionOverwrites(config, guild);
+		}
+
+		if (generic_name) {
 			options.name = generic_name;
 		}
 

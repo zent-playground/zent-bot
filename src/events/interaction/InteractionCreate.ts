@@ -116,11 +116,11 @@ class InteractionCreate extends Listener {
 
 		if (
 			await this.client.users
-				.fetch(args[args.entries.length - 1])
+				.fetch(args.entries[args.entries.length - 1])
 				.then(() => true)
 				.catch(() => false)
 		) {
-			const userId = args[args.entries.length - 1];
+			const userId = args.entries[args.entries.length - 1];
 
 			if (interaction.user.id !== userId) {
 				await interaction.reply({

@@ -16,13 +16,15 @@ class Client {
 
 	@Get(":id")
 	async information(@Param("id") guildId: string, @Res() res: Response) {
-		const guild =
-			this.client.guilds.cache.get(guildId) ||
-			(await this.client.guilds.fetch(guildId).catch(() => {
-				throw new HttpException("Guild not found!", HttpStatus.NOT_FOUND);
-			}));
+		const guild = await this.client.guilds.fetch(guildId).catch(() => {
+			throw new HttpException("Guild not found!", HttpStatus.NOT_FOUND);
+		});
 
-		return res.status(HttpStatus.OK).json(guild.toJSON());
+		const data = guild.toJSON() as any;
+
+		delete data.members;
+
+		return res.status(HttpStatus.OK).json(data);
 	}
 }
 

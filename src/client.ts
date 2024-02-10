@@ -29,7 +29,7 @@ const client = new Client({
 	],
 	allowedMentions: {
 		repliedUser: false,
-		parse: [],
+		parse: ["users", "roles"],
 	},
 	makeCache: Options.cacheWithLimits({
 		UserManager: {
