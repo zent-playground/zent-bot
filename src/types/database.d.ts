@@ -38,6 +38,7 @@ export interface TempVoiceConfig {
 	name: string | null;
 	nsfw: boolean;
 	joinable: TempVoiceJoinable;
+	user_limit: number | null;
 	blacklisted_ids: string[];
 	whitelisted_ids: string[];
 }

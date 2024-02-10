@@ -11,13 +11,7 @@ class Ready extends Listener {
 	}
 
 	public override async execute(client: Client<true>) {
-		await startApp(client);
-
 		Logger.info(`Successfully logged as '${client.user.tag}'.`);
-
-		await client.application.commands.set(
-			client.commands.map((command) => command.applicationCommands).flat(),
-		);
 
 		client.user.setPresence({
 			status: "online",
@@ -28,6 +22,12 @@ class Ready extends Listener {
 				},
 			],
 		});
+
+		await startApp(client);
+
+		await client.application.commands.set(
+			client.commands.map((command) => command.applicationCommands).flat(),
+		);
 	}
 }
 

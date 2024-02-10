@@ -229,15 +229,15 @@ class TempVoice extends Command {
 					new ButtonBuilder()
 						.setLabel("Set Generic")
 						.setStyle(ButtonStyle.Success)
-						.setCustomId(`voice:generic:${channel.id}:${ctx.member.id}`),
+						.setCustomId(`voice:creator:generic:${channel.id}:${ctx.member.id}`),
 					new ButtonBuilder()
 						.setLabel("Set Affix")
 						.setStyle(ButtonStyle.Primary)
-						.setCustomId(`voice:affix:${channel.id}:${ctx.member.id}`),
+						.setCustomId(`voice:creator:affix:${channel.id}:${ctx.member.id}`),
 					new ButtonBuilder()
 						.setLabel("Custom Name")
 						.setStyle(ButtonStyle.Danger)
-						.setCustomId(`voice:custom:${channel.id}:${ctx.member.id}`),
+						.setCustomId(`voice:creator:custom:${channel.id}:${ctx.member.id}`),
 				]),
 			],
 		});
@@ -506,7 +506,7 @@ class TempVoice extends Command {
 			},
 		);
 
-		await ctx.member.voice.channel!.edit({
+		await ctx.member.voice.channel?.edit({
 			permissionOverwrites: await voices.createPermissionOverwrites(
 				(await voices.configs.get({ id: ctx.author.id }))!,
 				ctx.guild,
