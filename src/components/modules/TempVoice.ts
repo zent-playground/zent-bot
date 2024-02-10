@@ -260,41 +260,73 @@ class TempVoice extends Component {
 		const { client, user, guild } = interaction;
 		const {
 			managers: { voices },
-			config,
+			config: { colors, emojis },
 		} = client;
 
 		const [type, choice] = args.entries.slice(1);
 
-		const voice = await voices.get({ id: interaction.message!.channelId });
+		const voice = await voices.get({ id: interaction.message?.channelId });
 		const creator = await voices.creators.get({ id: voice?.creator_channel_id });
 
+		const successEmbed = new EmbedBuilder()
+			.setAuthor({
+				name: interaction.member.displayName,
+				iconURL: interaction.member.displayAvatarURL({ forceStatic: true }),
+				url: `https://discord.com/users/${user.id}`,
+			})
+			.setColor(colors.success);
+
+		const errorEmbed = new EmbedBuilder().setColor(colors.error);
+
 		if (!voice || !creator) {
+			await interaction.reply({
+				embeds: [
+					errorEmbed.setDescription(
+						"Couldn't fetch your data! Please create another temp voice channel and try again.",
+					),
+				],
+				ephemeral: true,
+			});
+
 			return;
 		}
 
 		const member = await guild.members.fetch(voice.author_id);
 
-		let userConfig = await voices.configs.get({ id: member.id, is_global: true });
+		const config = await (async () => {
+			let config = await voices.configs.get({ id: member.id, is_global: true });
 
-		if (!userConfig) {
-			userConfig = await voices.configs.get({ id: member.id, guild_id: guild.id });
-		}
+			if (!config) {
+				config = await voices.configs.get({ id: member.id, guild_id: guild.id });
+			}
 
-		if (!userConfig) {
-			await voices.configs.set(
-				{
-					id: member.id,
-					is_global: true,
-				},
-				{},
-			);
+			if (!config) {
+				await voices.configs.set(
+					{
+						id: member.id,
+						is_global: true,
+					},
+					{},
+				);
 
-			userConfig = await voices.configs.get({ id: member.id, is_global: true });
+				config = await voices.configs.get({ id: member.id, is_global: true });
+			}
+
+			return config;
+		})();
+
+		if (!config) {
+			await interaction.reply({
+				embeds: [errorEmbed.setDescription("An error occurred while generating config data.")],
+				ephemeral: true,
+			});
+
+			return;
 		}
 
 		const upd = async (values: Partial<TempVoiceConfig>) => {
 			await voices.configs.upd(
-				userConfig?.is_global
+				config?.is_global
 					? {
 							id: member.id,
 							is_global: true,
@@ -308,26 +340,19 @@ class TempVoice extends Component {
 		};
 
 		if (type === "settings") {
+			const value = interaction.fields.getTextInputValue("value");
+
 			switch (choice) {
 				case "name": {
-					const value = interaction.fields.getTextInputValue("value");
-
 					await upd({
 						name: value,
 					});
 
 					await interaction.reply({
 						embeds: [
-							new EmbedBuilder()
-								.setAuthor({
-									name: user.tag,
-									iconURL: user.displayAvatarURL(),
-									url: `https://discord.com/users/${user.id}`,
-								})
-								.setDescription(
-									`Successfully set your temp voice channel name to \`${value}\`.`,
-								)
-								.setColor(config.colors.success),
+							successEmbed.setDescription(
+								`Successfully set your temp voice channel name to \`${value}\`.`,
+							),
 						],
 					});
 
@@ -335,69 +360,62 @@ class TempVoice extends Component {
 				}
 
 				case "limit": {
-					const value = Math.floor(Number(interaction.fields.getTextInputValue("value")));
+					let limit: number | null = Number(value);
 
-					let limit: number | null = null;
+					if (isNaN(limit)) {
+						await interaction.reply({
+							embeds: [
+								errorEmbed
+									.setTitle(`${emojis.error} Invalid Limit!`)
+									.setDescription("The limit entered is not a valid number!"),
+							],
+							ephemeral: true,
+						});
 
-					if (value) {
-						if (value < 1 || value > 99) {
+						return;
+					} else if (limit) {
+						if (limit < 1 || limit > 99) {
 							await interaction.reply({
 								embeds: [
-									new EmbedBuilder()
-										.setTitle(`${config.emojis.error} Invalid Limit!`)
-										.setDescription("The limit entered is not between 1 and 99!")
-										.setColor(config.colors.error),
+									errorEmbed
+										.setTitle(`${emojis.error} Invalid Limit!`)
+										.setDescription("The limit entered is not between 1 and 99!"),
 								],
 								ephemeral: true,
 							});
 
 							return;
 						}
-
-						limit = value;
-					} else if (isNaN(value)) {
-						await interaction.reply({
-							embeds: [
-								new EmbedBuilder()
-									.setTitle(`${config.emojis.error} Invalid Limit!`)
-									.setDescription("The limit entered is not a valid number!")
-									.setColor(config.colors.error),
-							],
-							ephemeral: true,
-						});
-
-						return;
+					} else {
+						limit = null;
 					}
 
 					await upd({ user_limit: limit });
 
 					await interaction.reply({
 						embeds: [
-							new EmbedBuilder()
-								.setAuthor({
-									name: user.tag,
-									iconURL: user.displayAvatarURL(),
-									url: `https://discord.com/users/${user.id}`,
-								})
-								.setDescription(
-									limit
-										? `Successfully set your temp voice channel user limit to \`${limit}\`.`
-										: "Successfully removed your temp voice channel user limit.",
-								)
-								.setColor(config.colors.success),
+							successEmbed.setDescription(
+								limit
+									? `Successfully set your temp voice channel user limit to \`${limit}\`.`
+									: "Successfully removed your temp voice channel user limit.",
+							),
 						],
 					});
 
+					break;
+				}
+
+				case "bitrate": {
 					break;
 				}
 			}
 		}
 
 		if (type === "permissions") {
-			//
+			// ...
 		}
 
-		await member.voice.channel
+		await interaction.member.voice.channel
 			?.edit((await voices.createOptions(creator, member, guild)) as GuildChannelEditOptions)
 			.catch(() => 0);
 	}
@@ -500,11 +518,20 @@ class TempVoice extends Component {
 				break;
 			}
 
-			case "game": {
-				break;
-			}
-
 			case "bitrate": {
+				modal.setComponents(
+					new ActionRowBuilder<TextInputBuilder>().setComponents(
+						new TextInputBuilder()
+							.setCustomId("value")
+							.setLabel("Bitrate")
+							.setRequired(false)
+							.setPlaceholder("Default: 64")
+							.setStyle(TextInputStyle.Short),
+					),
+				);
+
+				await interaction.showModal(modal);
+
 				break;
 			}
 
