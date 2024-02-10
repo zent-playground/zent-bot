@@ -117,9 +117,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 		guild: Guild,
 	): Promise<GuildChannelCreateOptions> {
 		const { affix, generic_name, generic_limit, allow_custom_name } = creator;
-		const { nickname, user } = member;
-
-		const displayName = nickname || user.globalName || user.tag;
+		const { displayName } = member;
 
 		const options: GuildChannelCreateOptions = {
 			name: affix ? affix + " " : displayName,
