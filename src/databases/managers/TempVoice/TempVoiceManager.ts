@@ -1,7 +1,7 @@
 import {
 	Guild,
 	GuildChannelCreateOptions,
-	GuildMember,
+	GuildMemberResolvable,
 	OverwriteResolvable,
 	PermissionFlagsBits,
 } from "discord.js";
@@ -113,9 +113,11 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 
 	public async createOptions(
 		creator: TempVoiceCreator,
-		member: GuildMember,
+		member: GuildMemberResolvable,
 		guild: Guild,
 	): Promise<GuildChannelCreateOptions> {
+		member = await guild.members.fetch(member);
+
 		const { affix, generic_name, generic_limit, allow_custom_name } = creator;
 		const { displayName } = member;
 
@@ -138,7 +140,8 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 				options.userLimit = config.user_limit;
 			}
 
-			options.nsfw = config.nsfw || false;
+			options.nsfw = config.nsfw;
+			options.bitrate = config.bitrate * 1000;
 			options.permissionOverwrites = await this.createPermissionOverwrites(config, guild);
 		}
 
