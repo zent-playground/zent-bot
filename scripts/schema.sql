@@ -41,6 +41,7 @@ CREATE TABLE temp_voice_configs (
     whitelisted_ids JSON,
     joinable INT NOT NULL DEFAULT 0,
     user_limit INT NULL,
+    bitrate INT NOT NULL DEFAULT 64,
     FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (guild_id) REFERENCES guilds(id) ON DELETE CASCADE
 );

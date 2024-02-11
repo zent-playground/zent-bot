@@ -11,7 +11,7 @@ import {
 
 import Component from "../Component.js";
 
-import { TempVoiceConfig, TempVoiceCreator } from "../../types/database.js";
+import { TempVoiceCreator } from "../../types/database.js";
 import { capitalize } from "../../utils/format.js";
 
 class TempVoice extends Component {
@@ -291,29 +291,12 @@ class TempVoice extends Component {
 			return;
 		}
 
-		const member = await guild.members.fetch(voice.author_id);
+		const configOptions = {
+			memberId: voice.author_id,
+			guildId: guild.id,
+		};
 
-		const config = await (async () => {
-			let config = await voices.configs.get({ id: member.id, is_global: true });
-
-			if (!config) {
-				config = await voices.configs.get({ id: member.id, guild_id: guild.id });
-			}
-
-			if (!config) {
-				await voices.configs.set(
-					{
-						id: member.id,
-						is_global: true,
-					},
-					{},
-				);
-
-				config = await voices.configs.get({ id: member.id, is_global: true });
-			}
-
-			return config;
-		})();
+		const config = await voices.configs.create(configOptions);
 
 		if (!config) {
 			await interaction.reply({
@@ -324,27 +307,12 @@ class TempVoice extends Component {
 			return;
 		}
 
-		const upd = async (values: Partial<TempVoiceConfig>) => {
-			await voices.configs.upd(
-				config?.is_global
-					? {
-							id: member.id,
-							is_global: true,
-						}
-					: {
-							id: member.id,
-							guild_id: guild.id,
-						},
-				values,
-			);
-		};
-
 		if (type === "settings") {
 			const value = interaction.fields.getTextInputValue("value");
 
 			switch (choice) {
 				case "name": {
-					await upd({
+					await voices.configs.edit(configOptions, {
 						name: value,
 					});
 
@@ -360,20 +328,22 @@ class TempVoice extends Component {
 				}
 
 				case "limit": {
-					let limit: number | null = Number(value);
+					let limit: number | null = value ? Number(value) : null;
 
-					if (isNaN(limit)) {
-						await interaction.reply({
-							embeds: [
-								errorEmbed
-									.setTitle(`${emojis.error} Invalid Limit!`)
-									.setDescription("The limit entered is not a valid number!"),
-							],
-							ephemeral: true,
-						});
+					if (limit !== null) {
+						if (isNaN(limit)) {
+							await interaction.reply({
+								embeds: [
+									errorEmbed
+										.setTitle(`${emojis.error} Invalid Limit!`)
+										.setDescription("The limit entered is not a valid number!"),
+								],
+								ephemeral: true,
+							});
 
-						return;
-					} else if (limit) {
+							return;
+						}
+
 						if (limit < 1 || limit > 99) {
 							await interaction.reply({
 								embeds: [
@@ -386,11 +356,13 @@ class TempVoice extends Component {
 
 							return;
 						}
-					} else {
-						limit = null;
+
+						limit = Math.floor(limit);
 					}
 
-					await upd({ user_limit: limit });
+					await voices.configs.edit(configOptions, {
+						user_limit: limit,
+					});
 
 					await interaction.reply({
 						embeds: [
@@ -406,17 +378,59 @@ class TempVoice extends Component {
 				}
 
 				case "bitrate": {
+					let bitrate: number = value ? Number(value) : 64;
+
+					if (isNaN(bitrate)) {
+						await interaction.reply({
+							embeds: [errorEmbed.setDescription(`\`${value}\` is not a valid number.`)],
+							ephemeral: true,
+						});
+
+						return;
+					}
+
+					if (bitrate < 8 || bitrate > 128) {
+						await interaction.reply({
+							embeds: [errorEmbed.setDescription("Bitrate must be between 8 and 128.")],
+							ephemeral: true,
+						});
+
+						return;
+					}
+
+					bitrate = Math.floor(bitrate);
+
+					await voices.configs.edit(configOptions, { bitrate });
+
+					await interaction.reply({
+						embeds: [
+							successEmbed.setDescription(
+								`Successfully set your temp voice bitrate to \`${bitrate}\`.`,
+							),
+						],
+					});
+
 					break;
 				}
 			}
 		}
 
 		if (type === "permissions") {
-			// ...
+			switch (choice) {
+				default: {
+					break;
+				}
+			}
 		}
 
 		await interaction.member.voice.channel
-			?.edit((await voices.createOptions(creator, member, guild)) as GuildChannelEditOptions)
+			?.edit(
+				(await voices.createOptions(
+					creator,
+					voice.author_id,
+					guild,
+				)) as GuildChannelEditOptions,
+			)
 			.catch(() => 0);
 	}
 
@@ -440,9 +454,9 @@ class TempVoice extends Component {
 		interaction: Component.StringSelectMenu,
 		args: Component.Args,
 	) {
-		const { client, member, guild } = interaction;
+		const { client, guild, member } = interaction;
 		const {
-			config,
+			config: { colors },
 			managers: { voices },
 		} = client;
 		const [choice] = interaction.values;
@@ -451,14 +465,14 @@ class TempVoice extends Component {
 			.setTitle("Voice Settings")
 			.setCustomId(`voice:panel:${args.entries[1]}:${choice}`);
 
-		const voice = await voices.get({ id: interaction.message!.channelId });
+		const voice = await voices.get({ id: interaction.message?.channelId });
 
 		if (voice?.author_id !== interaction.user.id) {
 			await interaction.reply({
 				embeds: [
 					new EmbedBuilder()
 						.setDescription("You cannot use this interaction.")
-						.setColor(config.colors.error),
+						.setColor(colors.error),
 				],
 				ephemeral: true,
 			});
@@ -466,17 +480,20 @@ class TempVoice extends Component {
 			return;
 		}
 
-		let userConfig = await voices.configs.get({ id: member.id, is_global: true });
+		const config = await voices.configs.create({
+			memberId: voice.author_id,
+			guildId: guild.id,
+		});
 
 		if (!config) {
-			userConfig = await voices.configs.get({ id: member.id, guild_id: guild.id });
+			return;
 		}
 
 		switch (choice) {
 			default: {
 				await interaction.reply({
 					embeds: [
-						new EmbedBuilder().setDescription("Unknown choice.").setColor(config.colors.error),
+						new EmbedBuilder().setDescription("Unknown choice.").setColor(colors.error),
 					],
 					ephemeral: true,
 				});
@@ -491,8 +508,8 @@ class TempVoice extends Component {
 					.setRequired(true)
 					.setStyle(TextInputStyle.Short);
 
-				if (userConfig?.name) {
-					textInput.setValue(userConfig.name);
+				if (config.name) {
+					textInput.setValue(config.name);
 				}
 
 				modal.setComponents(new ActionRowBuilder<TextInputBuilder>().setComponents(textInput));
@@ -503,15 +520,17 @@ class TempVoice extends Component {
 			}
 
 			case "limit": {
-				modal.setComponents(
-					new ActionRowBuilder<TextInputBuilder>().setComponents(
-						new TextInputBuilder()
-							.setCustomId("value")
-							.setLabel("limit")
-							.setRequired(false)
-							.setStyle(TextInputStyle.Short),
-					),
-				);
+				const textInput = new TextInputBuilder()
+					.setCustomId("value")
+					.setLabel("limit")
+					.setRequired(false)
+					.setStyle(TextInputStyle.Short);
+
+				if (config.user_limit) {
+					textInput.setValue(`${config.user_limit}`);
+				}
+
+				modal.setComponents(new ActionRowBuilder<TextInputBuilder>().setComponents(textInput));
 
 				await interaction.showModal(modal);
 
@@ -519,16 +538,18 @@ class TempVoice extends Component {
 			}
 
 			case "bitrate": {
-				modal.setComponents(
-					new ActionRowBuilder<TextInputBuilder>().setComponents(
-						new TextInputBuilder()
-							.setCustomId("value")
-							.setLabel("Bitrate")
-							.setRequired(false)
-							.setPlaceholder("Default: 64")
-							.setStyle(TextInputStyle.Short),
-					),
-				);
+				const textInput = new TextInputBuilder()
+					.setCustomId("value")
+					.setLabel("Bitrate")
+					.setRequired(false)
+					.setPlaceholder("Default: 64")
+					.setStyle(TextInputStyle.Short);
+
+				if (config.bitrate) {
+					textInput.setValue(`${config.bitrate}`);
+				}
+
+				modal.setComponents(new ActionRowBuilder<TextInputBuilder>().setComponents(textInput));
 
 				await interaction.showModal(modal);
 
@@ -536,6 +557,43 @@ class TempVoice extends Component {
 			}
 
 			case "nsfw": {
+				const value = !config.nsfw;
+
+				await voices.configs.edit(
+					{
+						memberId: voice.author_id,
+						guildId: guild.id,
+					},
+					{
+						nsfw: value,
+					},
+				);
+
+				const embed = new EmbedBuilder()
+					.setAuthor({
+						name: interaction.member.displayName,
+						iconURL: interaction.member.displayAvatarURL({ forceStatic: true }),
+						url: `https://discord.com/users/${member.user.id}`,
+					})
+					.setColor(colors.success)
+					.setDescription(
+						`Successfully **${
+							value ? "enabled" : "disabled"
+						}** nsfw for your temp voice channel.`,
+					);
+
+				await interaction.reply({
+					embeds: [embed],
+				});
+
+				await member.voice.channel?.edit(
+					(await voices.createOptions(
+						(await voices.creators.get({ id: voice.creator_channel_id }))!,
+						voice.author_id,
+						guild,
+					)) as GuildChannelEditOptions,
+				);
+
 				break;
 			}
 
