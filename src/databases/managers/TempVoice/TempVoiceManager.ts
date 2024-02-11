@@ -122,7 +122,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 		const { displayName } = member;
 
 		const options: GuildChannelCreateOptions = {
-			name: affix ? affix + " " : displayName,
+			name: affix ? `${affix} ` : "",
 		};
 
 		let config = await this.configs.get({ id: member.id, is_global: true });
@@ -147,6 +147,8 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 
 		if (generic_name) {
 			options.name = generic_name;
+		} else if (options.name === `${affix} `) {
+			options.name += displayName;
 		}
 
 		if (generic_limit) {
