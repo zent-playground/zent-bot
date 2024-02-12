@@ -32,7 +32,8 @@ class VoiceStateUpdate extends Listener {
 			config,
 			managers: { voices },
 		} = this.client;
-		const creator = await voices.creators.get({ id: channel.id });
+
+		const creator = await voices.creators.get({ id: channel.id, guild_id: guild.id });
 
 		if (!creator) {
 			return;

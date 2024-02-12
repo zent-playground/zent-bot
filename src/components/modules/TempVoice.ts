@@ -25,10 +25,21 @@ class TempVoice extends Component {
 		interaction: Component.Button,
 		args: Component.Args,
 	): Promise<void> {
-		const { client } = interaction;
-		const { config } = client;
+		switch (args.entries[0]) {
+			case "creator": {
+				await this.handleButtonCreator(interaction, args);
+				break;
+			}
+		}
+	}
 
-		const [choice, id] = args.entries;
+	public async handleButtonCreator(interaction: Component.Button, args: Component.Args) {
+		const { client } = interaction;
+		const {
+			config: { emojis, colors },
+		} = client;
+
+		const [choice, id] = args.entries.slice(1);
 
 		const creator = await this.client.managers.voices.creators.get({
 			id: id,
@@ -49,9 +60,9 @@ class TempVoice extends Component {
 			await interaction.reply({
 				embeds: [
 					new EmbedBuilder()
-						.setTitle(`${config.emojis.error} Setup Error!`)
+						.setTitle(`${emojis.error} Setup Error!`)
 						.setDescription("This setup action is unrecognized. Please check and try again.")
-						.setColor(config.colors.error),
+						.setColor(colors.error),
 				],
 				ephemeral: true,
 			});
@@ -64,7 +75,7 @@ class TempVoice extends Component {
 				await interaction.showModal(
 					new ModalBuilder()
 						.setTitle("Configure Generic Voice Channel")
-						.setCustomId(`voice:generic:${id}`)
+						.setCustomId(`voice:creator:generic:${id}`)
 						.addComponents([
 							new ActionRowBuilder<TextInputBuilder>().addComponents(
 								new TextInputBuilder()
@@ -77,7 +88,7 @@ class TempVoice extends Component {
 							),
 							new ActionRowBuilder<TextInputBuilder>().addComponents(
 								new TextInputBuilder()
-									.setLabel("User Limit (Optional)")
+									.setLabel("User Limit")
 									.setPlaceholder("Enter a number (max 99)")
 									.setStyle(TextInputStyle.Short)
 									.setCustomId("limit")
@@ -92,14 +103,14 @@ class TempVoice extends Component {
 				await interaction.showModal(
 					new ModalBuilder()
 						.setTitle("Configure Voice Channel Affix")
-						.setCustomId(`voice:affix:${id}`)
+						.setCustomId(`voice:creator:affix:${id}`)
 						.addComponents([
 							new ActionRowBuilder<TextInputBuilder>().addComponents(
 								new TextInputBuilder()
 									.setLabel("Enter Affix for Voice Channel")
 									.setPlaceholder("E.g., Duo, Gaming, Chat, ...")
 									.setStyle(TextInputStyle.Short)
-									.setCustomId("name")
+									.setCustomId("affix")
 									.setMaxLength(16)
 									.setRequired(false),
 							),
@@ -109,7 +120,7 @@ class TempVoice extends Component {
 				break;
 			case "custom": {
 				await this.client.managers.voices.creators.upd(
-					{ id: id, guild_id: interaction.guild!.id },
+					{ id: id, guild_id: interaction.guild.id },
 					{ allow_custom_name: !creator.allow_custom_name },
 				);
 
@@ -134,9 +145,9 @@ class TempVoice extends Component {
 				await interaction.reply({
 					embeds: [
 						new EmbedBuilder()
-							.setTitle(`${config.emojis.success} Custom ${capitalize(choice)}!`)
+							.setTitle(`${emojis.success} Custom ${capitalize(choice)}!`)
 							.setDescription(`Custom channel names are now ${choice}!`)
-							.setColor(config.colors.success),
+							.setColor(colors.success),
 					],
 					ephemeral: true,
 				});
@@ -144,20 +155,21 @@ class TempVoice extends Component {
 				break;
 			}
 
-			default:
+			default: {
 				await interaction.reply({
 					embeds: [
 						new EmbedBuilder()
-							.setTitle(`${config.emojis.error} Action Unrecognized!`)
+							.setTitle(`${emojis.error} Action Unrecognized!`)
 							.setDescription(
 								"This action is unrecognized. Please recheck your command or selection.",
 							)
-							.setColor(config.colors.error),
+							.setColor(colors.error),
 					],
 					ephemeral: true,
 				});
 
 				break;
+			}
 		}
 	}
 
@@ -184,13 +196,31 @@ class TempVoice extends Component {
 		const { voices } = managers;
 
 		const [choice, id] = args.entries.slice(1);
-		const name = fields.getTextInputValue("name");
-		const limit = Number(fields.getTextInputValue("limit"));
+
 		const values: Partial<TempVoiceCreator> = {};
 
 		switch (choice) {
 			case "generic": {
-				if (limit) {
+				const name = fields.getTextInputValue("name").trim() || null;
+				let limit: number | string | null = fields.getTextInputValue("limit");
+
+				limit = limit ? Number(limit) : null;
+
+				if (limit !== null) {
+					if (isNaN(limit)) {
+						await interaction.reply({
+							embeds: [
+								new EmbedBuilder()
+									.setTitle(`${config.emojis.error} Invalid Limit!`)
+									.setDescription("The limit entered is not a valid number!")
+									.setColor(config.colors.error),
+							],
+							ephemeral: true,
+						});
+
+						return;
+					}
+
 					if (limit < 1 || limit > 99) {
 						await interaction.reply({
 							embeds: [
@@ -201,40 +231,36 @@ class TempVoice extends Component {
 							],
 							ephemeral: true,
 						});
+
 						return;
 					}
-					values.generic_limit = limit;
-				} else if (isNaN(limit)) {
-					await interaction.reply({
-						embeds: [
-							new EmbedBuilder()
-								.setTitle(`${config.emojis.error} Invalid Limit!`)
-								.setDescription("The limit entered is not a valid number!")
-								.setColor(config.colors.error),
-						],
-						ephemeral: true,
-					});
-					return;
-				} else {
-					values.generic_limit = null;
+
+					limit = Math.floor(limit);
 				}
-				values.generic_name = name || null;
+
+				values.generic_limit = limit;
+				values.generic_name = name;
+
 				break;
 			}
+
 			case "affix": {
-				values.affix = name || null;
+				const affix = fields.getTextInputValue("affix").trim() || null;
+				values.affix = affix;
 				break;
 			}
 		}
+
 		try {
-			await voices.creators.upd({ id: id, guild_id: interaction.guild!.id }, values);
+			await voices.creators.upd({ id: id, guild_id: interaction.guildId }, values);
+
 			await interaction.reply({
 				embeds: [
 					new EmbedBuilder()
 						.setTitle(`${config.emojis.success} ${capitalize(choice)} Configured!`)
 						.setDescription(
 							`The ${choice} has been ${
-								name || limit ? "configured" : "cancelled"
+								values.generic_name || values.generic_limit ? "configured" : "cancelled"
 							} for this voice channel!`,
 						)
 						.setColor(config.colors.success),
@@ -266,7 +292,10 @@ class TempVoice extends Component {
 		const [type, choice] = args.entries.slice(1);
 
 		const voice = await voices.get({ id: interaction.message?.channelId });
-		const creator = await voices.creators.get({ id: voice?.creator_channel_id });
+		const creator = await voices.creators.get({
+			id: voice?.creator_channel_id,
+			guild_id: guild.id,
+		});
 
 		const successEmbed = new EmbedBuilder()
 			.setAuthor({
@@ -313,13 +342,15 @@ class TempVoice extends Component {
 			switch (choice) {
 				case "name": {
 					await voices.configs.edit(configOptions, {
-						name: value,
+						name: value || null,
 					});
 
 					await interaction.reply({
 						embeds: [
 							successEmbed.setDescription(
-								`Successfully set your temp voice channel name to \`${value}\`.`,
+								value
+									? `Successfully set your temp voice channel name to \`${value}\`.`
+									: "Successfully removed your temp voice channel name.",
 							),
 						],
 					});
@@ -505,7 +536,7 @@ class TempVoice extends Component {
 				const textInput = new TextInputBuilder()
 					.setCustomId("value")
 					.setLabel("Name")
-					.setRequired(true)
+					.setRequired(false)
 					.setStyle(TextInputStyle.Short);
 
 				if (config.name) {
