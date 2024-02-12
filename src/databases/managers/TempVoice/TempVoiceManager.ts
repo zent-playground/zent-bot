@@ -147,7 +147,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 
 		if (generic_name) {
 			options.name = generic_name;
-		} else if (options.name === `${affix} `) {
+		} else if (!options.name || options.name === `${affix} `) {
 			options.name += displayName;
 		}
 
