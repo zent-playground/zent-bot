@@ -110,7 +110,7 @@ class TempVoice extends Component {
 									.setLabel("Enter Affix for Voice Channel")
 									.setPlaceholder("E.g., Duo, Gaming, Chat, ...")
 									.setStyle(TextInputStyle.Short)
-									.setCustomId("name")
+									.setCustomId("affix")
 									.setMaxLength(16)
 									.setRequired(false),
 							),
@@ -196,11 +196,12 @@ class TempVoice extends Component {
 		const { voices } = managers;
 
 		const [choice, id] = args.entries.slice(1);
+
 		const values: Partial<TempVoiceCreator> = {};
 
 		switch (choice) {
 			case "generic": {
-				const name = fields.getTextInputValue("name") || null;
+				const name = fields.getTextInputValue("name").trim() || null;
 				let limit: number | string | null = fields.getTextInputValue("limit");
 
 				limit = limit ? Number(limit) : null;
@@ -244,14 +245,14 @@ class TempVoice extends Component {
 			}
 
 			case "affix": {
-				const affix = fields.getTextInputValue("affix") || null;
+				const affix = fields.getTextInputValue("affix").trim() || null;
 				values.affix = affix;
 				break;
 			}
 		}
 
 		try {
-			await voices.creators.upd({ id: id, guild_id: interaction.guild!.id }, values);
+			await voices.creators.upd({ id: id, guild_id: interaction.guildId }, values);
 
 			await interaction.reply({
 				embeds: [
@@ -291,7 +292,10 @@ class TempVoice extends Component {
 		const [type, choice] = args.entries.slice(1);
 
 		const voice = await voices.get({ id: interaction.message?.channelId });
-		const creator = await voices.creators.get({ id: voice?.creator_channel_id });
+		const creator = await voices.creators.get({
+			id: voice?.creator_channel_id,
+			guild_id: guild.id,
+		});
 
 		const successEmbed = new EmbedBuilder()
 			.setAuthor({
@@ -338,13 +342,15 @@ class TempVoice extends Component {
 			switch (choice) {
 				case "name": {
 					await voices.configs.edit(configOptions, {
-						name: value,
+						name: value || null,
 					});
 
 					await interaction.reply({
 						embeds: [
 							successEmbed.setDescription(
-								`Successfully set your temp voice channel name to \`${value}\`.`,
+								value
+									? `Successfully set your temp voice channel name to \`${value}\`.`
+									: "Successfully removed your temp voice channel name.",
 							),
 						],
 					});
@@ -530,7 +536,7 @@ class TempVoice extends Component {
 				const textInput = new TextInputBuilder()
 					.setCustomId("value")
 					.setLabel("Name")
-					.setRequired(true)
+					.setRequired(false)
 					.setStyle(TextInputStyle.Short);
 
 				if (config.name) {
