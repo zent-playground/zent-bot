@@ -80,8 +80,15 @@ class BaseManager<T> extends MySqlManager<T> {
 		await super.update(whereClause, values);
 
 		if (this.cache) {
-			const cacheKey = this.criteriaToCacheKey(criteria);
-			await this.cache.set(cacheKey, (await this.get(criteria, true))!, options);
+			await this.cache.delete(this.criteriaToCacheKey(criteria));
+
+			const updatedValues = (await this.get(criteria, true)) as T;
+
+			for (const key of Object.keys(criteria)) {
+				criteria[key] = updatedValues[key];
+			}
+
+			await this.cache.set(this.criteriaToCacheKey(criteria), updatedValues, options);
 		}
 	}
 
