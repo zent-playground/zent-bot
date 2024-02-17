@@ -5,7 +5,6 @@ import {
 	ModalBuilder,
 	TextInputBuilder,
 	TextInputStyle,
-	PermissionFlagsBits,
 	GuildChannelEditOptions,
 } from "discord.js";
 
@@ -16,9 +15,7 @@ import { capitalize } from "../../utils/format.js";
 
 class TempVoice extends Component {
 	public constructor() {
-		super("voice", {
-			memberPermissions: PermissionFlagsBits.ManageChannels,
-		});
+		super("voice");
 	}
 
 	public override async executeButton(
@@ -485,7 +482,7 @@ class TempVoice extends Component {
 		interaction: Component.StringSelectMenu,
 		args: Component.Args,
 	) {
-		const { client, guild, member } = interaction;
+		const { client, guild, member, message } = interaction;
 		const {
 			config: { colors },
 			managers: { voices },
@@ -496,9 +493,12 @@ class TempVoice extends Component {
 			.setTitle("Voice Settings")
 			.setCustomId(`voice:panel:${args.entries[1]}:${choice}`);
 
-		const voice = await voices.get({ id: interaction.message?.channelId });
+		const voice = (await voices.get({ id: message.channelId }))!;
 
-		if (voice?.author_id !== interaction.user.id) {
+		if (
+			(choice !== "claim" && voice?.author_id !== interaction.user.id) ||
+			!message.channel.isVoiceBased()
+		) {
 			await interaction.reply({
 				embeds: [
 					new EmbedBuilder()
@@ -602,9 +602,9 @@ class TempVoice extends Component {
 
 				const embed = new EmbedBuilder()
 					.setAuthor({
-						name: interaction.member.displayName,
-						iconURL: interaction.member.displayAvatarURL({ forceStatic: true }),
-						url: `https://discord.com/users/${member.user.id}`,
+						name: member.displayName,
+						iconURL: member.displayAvatarURL({ forceStatic: true }),
+						url: `https://discord.com/users/${member.id}`,
 					})
 					.setColor(colors.success)
 					.setDescription(
@@ -629,6 +629,78 @@ class TempVoice extends Component {
 			}
 
 			case "claim": {
+				if (voice.author_id === member.id) {
+					await interaction.reply({
+						embeds: [
+							new EmbedBuilder()
+								.setDescription("You are already the owner of this temp voice channel.")
+								.setColor(colors.error),
+						],
+						ephemeral: true,
+					});
+
+					return;
+				}
+
+				if (message.channel.members.has(voice.author_id)) {
+					await interaction.reply({
+						embeds: [
+							new EmbedBuilder()
+								.setDescription(
+									"You cannot claim this voice channel while the temp voice owner is still in the channel.",
+								)
+								.setColor(colors.error),
+						],
+						ephemeral: true,
+					});
+
+					return;
+				}
+
+				if (!message.channel.members.has(interaction.user.id)) {
+					await interaction.reply({
+						embeds: [
+							new EmbedBuilder()
+								.setDescription("You must join this temp voice channel to claim it.")
+								.setColor(colors.error),
+						],
+						ephemeral: true,
+					});
+
+					return;
+				}
+
+				await voices.upd(
+					{
+						id: voice.id,
+						author_id: voice.author_id,
+					},
+					{
+						author_id: member.id,
+					},
+				);
+
+				await interaction.reply({
+					embeds: [
+						new EmbedBuilder()
+							.setAuthor({
+								name: member.displayName,
+								iconURL: member.displayAvatarURL({ forceStatic: true }),
+								url: `https://discord.com/users/${member.id}`,
+							})
+							.setDescription("Successfully claimed this temp voice channel!")
+							.setColor(colors.success),
+					],
+				});
+
+				await member.voice.channel?.edit(
+					(await voices.createOptions(
+						(await voices.creators.get({ id: member.id }))!,
+						member.id,
+						guild,
+					)) as GuildChannelEditOptions,
+				);
+
 				break;
 			}
 		}
