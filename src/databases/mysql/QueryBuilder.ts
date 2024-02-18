@@ -1,69 +1,77 @@
 class QueryBuilder {
-	private query: string;
+	protected query: string;
 
 	constructor() {
 		this.query = "";
 	}
 
-	private static FormatValue(value: any): string {
+	public static formatValue(value: any): string {
 		if (value === null || value === undefined) {
 			return "NULL";
-		} else if (typeof value === "string") {
-			return `'${value.replace(/'/g, "''")}'`;
-		} else if (typeof value === "boolean") {
-			return `${value}`;
-		} else {
-			return `'${JSON.stringify(value)}'`;
+		}
+
+		switch (typeof value) {
+			default: {
+				return `'${JSON.stringify(value)}`;
+			}
+
+			case "string": {
+				return `'${value.replace(/'/g, "''")}'`;
+			}
+
+			case "boolean": {
+				return `'${value ? 1 : 0}'`;
+			}
 		}
 	}
 
-	select(table: string, fields: string[] = ["*"]): QueryBuilder {
+	public select(table: string, fields: string[] = ["*"]): this {
 		this.query = `SELECT ${fields.join(", ")} FROM ${table}`;
 		return this;
 	}
 
-	join(type: string, table: string, condition: string): QueryBuilder {
+	public join(type: string, table: string, condition: string): this {
 		this.query += ` ${type.toUpperCase()} JOIN ${table} ON ${condition}`;
 		return this;
 	}
 
-	where(condition: string): QueryBuilder {
+	public where(condition: string): this {
 		this.query += ` WHERE ${condition}`;
 		return this;
 	}
 
-	orderBy(orderBy: { field: string, direction: "ASC" | "DESC" }[]): QueryBuilder {
-		const orderClause = orderBy.map(order => `${order.field} ${order.direction}`).join(", ");
+	public orderBy(orderBy: { field: string; direction: "ASC" | "DESC" }[]): this {
+		const orderClause = orderBy.map((order) => `${order.field} ${order.direction}`).join(", ");
 		this.query += ` ORDER BY ${orderClause}`;
 		return this;
 	}
 
-	limit(limit: number): QueryBuilder {
+	public limit(limit: number): this {
 		this.query += ` LIMIT ${limit}`;
 		return this;
 	}
 
-	insert(table: string, data: { [key: string]: any }): QueryBuilder {
+	public insert(table: string, data: { [key: string]: any }): this {
 		const keys = Object.keys(data);
-		const values = keys.map(key => QueryBuilder.FormatValue(data[key]));
+		const values = keys.map((key) => QueryBuilder.formatValue(data[key]));
 		this.query = `INSERT INTO ${table} (${keys.join(", ")}) VALUES (${values.join(", ")})`;
 		return this;
 	}
 
-	update(table: string, data: { [key: string]: any }, condition: string): QueryBuilder {
+	public update(table: string, data: { [key: string]: any }, condition: string): this {
 		const updates = Object.keys(data)
-			.map(key => `${key} = ${QueryBuilder.FormatValue(data[key])}`)
+			.map((key) => `${key} = ${QueryBuilder.formatValue(data[key])}`)
 			.join(", ");
 		this.query = `UPDATE ${table} SET ${updates} WHERE ${condition}`;
 		return this;
 	}
 
-	delete(table: string, condition: string): QueryBuilder {
+	public delete(table: string, condition: string): this {
 		this.query = `DELETE FROM ${table} WHERE ${condition}`;
 		return this;
 	}
 
-	build(): string {
+	public toString(): string {
 		return this.query;
 	}
 }

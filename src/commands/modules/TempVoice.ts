@@ -2,11 +2,12 @@ import {
 	EmbedBuilder,
 	SlashCommandBuilder,
 	codeBlock,
-	VoiceChannel,
 	ActionRowBuilder,
 	ButtonBuilder,
+	ChannelType,
+	ButtonStyle,
+	PermissionFlagsBits,
 } from "discord.js";
-import { ChannelType, ButtonStyle, PermissionFlagsBits } from "discord-api-types/v10";
 
 import Command from "../Command.js";
 import { TempVoiceJoinable } from "../../databases/managers/TempVoice/TempVoiceManager.js";
@@ -73,8 +74,7 @@ class TempVoice extends Command {
 							option
 								.setName("channel")
 								.setDescription("The voice channel that the bot will setup in it.")
-								.addChannelTypes(ChannelType.GuildVoice)
-								.setRequired(true),
+								.addChannelTypes(ChannelType.GuildVoice),
 						),
 				)
 				.addSubcommand((subcommand) =>
@@ -150,7 +150,7 @@ class TempVoice extends Command {
 			config,
 			managers: { voices },
 		} = this.client;
-		const { member } = ctx;
+		const { member, guild } = ctx;
 
 		if (!member.permissions.has(PermissionFlagsBits.ManageGuild)) {
 			await ctx.send({
@@ -180,23 +180,32 @@ class TempVoice extends Command {
 			return;
 		}
 
-		const channel = ctx.isInteraction()
-			? (ctx.interaction.options.getChannel("channel") as VoiceChannel)
-			: ctx.guild.channels.cache.get(args[0]) ||
-				(await ctx.guild.channels.fetch(args[0]).catch(() => null));
+		let channel = await (async () => {
+			if (ctx.isInteraction()) {
+				return ctx.interaction.options.getChannel("channel", false, [ChannelType.GuildVoice]);
+			} else {
+				return await guild.channels.fetch(args.entries[0]).catch(() => null);
+			}
+		})();
 
-		if (!channel || channel.type !== ChannelType.GuildVoice) {
-			await ctx.send({
-				embeds: [
-					new EmbedBuilder()
-						.setTitle(`${config.emojis.error} Invalid Channel!`)
-						.setDescription("The provided channel ID is invalid or doesn't exist.")
-						.setColor(config.colors.error),
-				],
-				ephemeral: true,
+		if (channel) {
+			if (!channel.isVoiceBased()) {
+				await ctx.send({
+					embeds: [
+						new EmbedBuilder()
+							.setTitle(`${config.emojis.error} Invalid Channel!`)
+							.setDescription("The provided channel ID is invalid or doesn't exist.")
+							.setColor(config.colors.error),
+					],
+					ephemeral: true,
+				});
+				return;
+			}
+		} else {
+			channel = await guild.channels.create({
+				name: "Join to create",
+				type: ChannelType.GuildVoice,
 			});
-
-			return;
 		}
 
 		const creators = await voices.creators.get({ id: channel.id });
