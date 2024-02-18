@@ -25,9 +25,8 @@ class MySqlManager<T> {
 	}
 
 	protected async insert(values: Partial<T>): Promise<void> {
-		const builder = new QueryBuilder().insert(this.table, values);
-		const query = builder.build();
-		await this.db.query(query);
+		const query = new QueryBuilder().insert(this.table, values);
+		await this.db.query(`${query}`);
 	}
 
 	protected async delete(condition: string): Promise<void> {
@@ -35,45 +34,42 @@ class MySqlManager<T> {
 			throw new Error("Attempted to delete with empty condition.");
 		}
 
-		const builder = new QueryBuilder().delete(this.table, condition);
-		const query = builder.build();
-
-		await this.db.query(query);
+		const query = new QueryBuilder().delete(this.table, condition);
+		await this.db.query(`${query}`);
 	}
 
-	protected async select(options?: QueryOptions<T>): Promise<T[]> {
-		const builder = new QueryBuilder().select(this.table, options?.selectFields);
+	protected async select(options: QueryOptions<T> = {}): Promise<T[]> {
+		const query = new QueryBuilder().select(this.table, options?.selectFields);
 
-		options?.joins?.forEach((join) => {
-			builder.join(join.type || "INNER", join.table, join.condition);
-		});
-
-		if (options?.where) {
-			builder.where(options.where);
+		if (options.joins) {
+			for (const entry of options.joins) {
+				query.join(entry.type || "INNER", entry.table, entry.condition);
+			}
 		}
 
-		if (options?.orderBy) {
-			const orderBy = options?.orderBy?.map((order) => ({
+		if (options.where) {
+			query.where(options.where);
+		}
+
+		if (options.orderBy) {
+			const orderBy = options.orderBy.map((order) => ({
 				field: order.field as string,
 				direction: order.direction,
 			}));
 
-			builder.orderBy(orderBy);
+			query.orderBy(orderBy);
 		}
 
 		if (options?.limit) {
-			builder.limit(options.limit);
+			query.limit(options.limit);
 		}
 
-		const query = builder.build();
-
-		return await this.db.query(query);
+		return await this.db.query(`${query}`);
 	}
 
 	protected async update(condition: string, values: Partial<T>): Promise<void> {
-		const builder = new QueryBuilder().update(this.table, values, condition);
-		const query = builder.build();
-		await this.db.query(query);
+		const query = new QueryBuilder().update(this.table, values, condition);
+		await this.db.query(`${query}`);
 	}
 }
 
