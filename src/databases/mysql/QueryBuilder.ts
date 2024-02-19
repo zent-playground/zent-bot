@@ -22,6 +22,10 @@ class QueryBuilder {
 			case "boolean": {
 				return `'${value ? 1 : 0}'`;
 			}
+
+			case "number": {
+				return `'${value}'`;
+			}
 		}
 	}
 
