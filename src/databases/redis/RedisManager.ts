@@ -9,32 +9,25 @@ class RedisManager<T> {
 		this.prefix = prefix;
 	}
 
-	private getId(keys: (string | number)[]): string {
-		return `${this.prefix}:${keys.join(":")}`;
+	private getFullKey(key: string): string {
+		return `${this.prefix}:${key}`;
 	}
 
-	async set(keys: (string | number)[], values: T, options: SetOptions = {}): Promise<void> {
-		if (values === undefined) {
-			throw new Error(`No values provided to set for keys: '${keys.join(", ")}'.`);
-		}
-
-		const serializedValues = JSON.stringify(values);
-		const id = this.getId(keys);
-
-		await this.client.set(id, serializedValues, options);
+	public async set(key: string, values: T, options: SetOptions = {}): Promise<void> {
+		await this.client.set(this.getFullKey(key), JSON.stringify(values), options);
 	}
 
-	async delete(keys: (string | number)[]): Promise<void> {
-		const id = this.getId(keys);
-		await this.client.del(id);
+	public async delete(key: string): Promise<void> {
+		await this.client.del(this.getFullKey(key));
 	}
 
-	async get(keys: (string | number)[]): Promise<T | null> {
-		const id = this.getId(keys);
-
-		const result = await this.client.get(id);
-
+	public async get(key: string): Promise<T | null> {
+		const result = await this.client.get(this.getFullKey(key));
 		return result ? (JSON.parse(result) as T) : null;
+	}
+
+	public async rename(key: string, newKey: string): Promise<string> {
+		return await this.client.rename(this.getFullKey(key), this.getFullKey(newKey));
 	}
 }
 

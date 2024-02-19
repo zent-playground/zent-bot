@@ -20,16 +20,16 @@ class BaseManager<T extends object> extends MySqlManager<T> {
 	}
 
 	private createWhereClause(criteria: Partial<T>): string {
-		const a = Object.entries(criteria)
+		return Object.entries(criteria)
 			.map(([k, v]) => `${k} = ${QueryBuilder.formatValue(v)}`)
 			.join(" AND ");
-		return a;
 	}
 
-	private createCacheKey(criteria: Partial<T>): (string | number)[] {
+	private createCacheKey(criteria: Partial<T>): string {
 		return Object.keys(criteria)
 			.sort()
-			.map((k) => criteria[k]);
+			.map((k) => criteria[k])
+			.join(":");
 	}
 
 	public async get(criteria: Partial<T>, force = false): Promise<T | null> {
@@ -38,22 +38,19 @@ class BaseManager<T extends object> extends MySqlManager<T> {
 		let data: T | undefined | null = force ? null : await this.cache?.get(key);
 
 		if (!data || force) {
-			const whereClause = this.createWhereClause(criteria);
+			data = (
+				await this.select({
+					where: this.createWhereClause(criteria),
+					selectFields: ["*"],
+				})
+			)?.[0];
 
-			data =
-				(
-					await this.select({
-						where: whereClause,
-						selectFields: ["*"],
-					})
-				)?.[0] || null;
-
-			if (data !== null && this.cache) {
+			if (data && this.cache) {
 				await this.cache.set(key, data);
 			}
 		}
 
-		return data;
+		return data || null;
 	}
 
 	public async set(
@@ -66,8 +63,7 @@ class BaseManager<T extends object> extends MySqlManager<T> {
 		await this.insert(values);
 
 		if (this.cache) {
-			const key = this.createCacheKey(criteria);
-			await this.cache.set(key, values as T, options);
+			await this.cache.set(this.createCacheKey(criteria), values as T, options);
 		}
 	}
 
@@ -76,41 +72,31 @@ class BaseManager<T extends object> extends MySqlManager<T> {
 		values: Partial<T>,
 		options: SetOptions = {},
 	): Promise<void> {
-		const whereClause = this.createWhereClause(criteria);
-
-		await super.update(whereClause, values);
+		await super.update(this.createWhereClause(criteria), values);
 
 		if (this.cache) {
-			let key = this.createCacheKey(criteria);
-
+			const key = this.createCacheKey(criteria);
 			const updatedValues = (await this.get(criteria, true))!;
 
-			const isCriteriaUpdated = (() => {
-				let result = false;
+			await this.cache.set(key, updatedValues, options);
 
-				for (const k of Object.keys(criteria)) {
-					if (k in updatedValues && criteria[k] !== updatedValues[k]) {
-						criteria[k] = updatedValues[k];
-						result = true;
-					}
+			let isCriteriaUpdated = false;
+
+			for (const k of Object.keys(criteria)) {
+				if (k in updatedValues && criteria[k] !== updatedValues[k]) {
+					criteria[k] = updatedValues[k];
+					isCriteriaUpdated = true;
 				}
-
-				return result;
-			})();
-
-			if (isCriteriaUpdated) {
-				await this.cache.delete(key);
-				key = this.createCacheKey(criteria);
 			}
 
-			await this.cache.set(key, updatedValues, options);
+			if (isCriteriaUpdated) {
+				await this.cache.rename(key, this.createCacheKey(criteria));
+			}
 		}
 	}
 
 	public async del(criteria: Partial<T>): Promise<void> {
-		const whereClause = this.createWhereClause(criteria);
-
-		await super.delete(whereClause);
+		await super.delete(this.createWhereClause(criteria));
 
 		if (this.cache) {
 			const cacheKeys = this.createCacheKey(criteria);

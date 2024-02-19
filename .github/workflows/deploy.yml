@@ -43,7 +43,6 @@ jobs:
           echo REDIS_PORT=${{ secrets.REDIS_PORT }} >> .env
           echo REDIS_USER=${{ secrets.PROD_REDIS_USERNAME }} >> .env
           echo REDIS_PASSWORD=${{ secrets.PROD_REDIS_PASSWORD }} >> .env
-          echo REDIS_PREFIX=prod: >> .env
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
