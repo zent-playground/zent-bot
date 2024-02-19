@@ -695,7 +695,7 @@ class TempVoice extends Component {
 
 				await member.voice.channel?.edit(
 					(await voices.createOptions(
-						(await voices.creators.get({ id: member.id }))!,
+						(await voices.creators.get({ id: voice.creator_channel_id }))!,
 						member.id,
 						guild,
 					)) as GuildChannelEditOptions,
