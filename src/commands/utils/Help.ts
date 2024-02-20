@@ -23,7 +23,7 @@ class Help extends Command {
 			embeds: [
 				new EmbedBuilder()
 					.setTitle("Overview")
-					.setDescription("Hi, I'm Zent! A powerful cute Discord bot Ò w Ó")
+					.setDescription("Hi, I'm Zent! A cute, powerful Discord bot Ò w Ó")
 					.setFields(
 						{
 							name: "Commands:",
