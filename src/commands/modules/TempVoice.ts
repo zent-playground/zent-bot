@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 
 import Command from "../Command.js";
-import { TempVoiceJoinable } from "../../databases/managers/TempVoice/TempVoiceManager.js";
+import { TempVoiceJoinable } from "../../database/managers/tempVoice/TempVoiceManager.js";
 import { TempVoiceConfig } from "../../types/database.js";
 import Logger from "../../utils/others/Logger.js";
 
@@ -148,7 +148,7 @@ class TempVoice extends Command {
 	public async setup(ctx: Command.HybridContext, args: Command.Args) {
 		const {
 			config,
-			managers: { voices },
+			database: { voices },
 		} = this.client;
 		const { member, guild } = ctx;
 
@@ -253,7 +253,7 @@ class TempVoice extends Command {
 	}
 
 	public async setName(ctx: Command.HybridContext, args: Command.Args) {
-		const { voices } = this.client.managers;
+		const { voices } = this.client.database;
 		const { member } = ctx;
 
 		const globally = this.globally(args) || ctx.interaction?.options.getBoolean("globally");
@@ -361,8 +361,8 @@ class TempVoice extends Command {
 	}
 
 	public async setBlacklist(ctx: Command.HybridContext, args: Command.Args) {
-		const { managers, config } = ctx.client;
-		const { voices } = managers;
+		const { database, config } = ctx.client;
+		const { voices } = database;
 		const { channel } = ctx.member.voice;
 
 		const data = (await voices.get({ id: channel?.id }))!;
@@ -424,8 +424,8 @@ class TempVoice extends Command {
 	}
 
 	public async setWhitelist(ctx: Command.HybridContext, args: Command.Args) {
-		const { managers, config } = ctx.client;
-		const { voices } = managers;
+		const { database, config } = ctx.client;
+		const { voices } = database;
 		const { channel } = ctx.member.voice;
 
 		const data = (await voices.get({ id: channel?.id }))!;
@@ -487,8 +487,8 @@ class TempVoice extends Command {
 	}
 
 	public async setJoinable(ctx: Command.HybridContext, args: Command.Args) {
-		const { config, managers } = ctx.client;
-		const { voices } = managers;
+		const { config, database } = ctx.client;
+		const { voices } = database;
 
 		let choice: number | null | undefined = Number(args[0]);
 
