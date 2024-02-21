@@ -1,4 +1,4 @@
-import { TempVoiceJoinable } from "../databases/managers/TempVoice/TempVoiceManager.js";
+import { TempVoiceJoinable } from "../database/managers/tempVoice/TempVoiceManager.js";
 
 export interface Guild {
 	id: string;

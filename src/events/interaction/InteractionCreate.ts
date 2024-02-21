@@ -24,8 +24,8 @@ class InteractionCreate extends Listener {
 	public async handleCommand(
 		interaction: Command.Autocomplete | Command.ChatInput | Command.ContextMenu,
 	) {
-		const { managers, config, utils } = this.client;
-		const { guilds, users } = managers;
+		const { database, config, utils } = this.client;
+		const { guilds, users } = database;
 
 		const command = this.client.commands.find((command) =>
 			command.applicationCommands.some((data) => data.name === interaction.commandName),
@@ -92,8 +92,8 @@ class InteractionCreate extends Listener {
 	public async handleComponent(
 		interaction: Component.Button | Component.SelectMenu | Component.Modal,
 	) {
-		const { managers, config } = this.client;
-		const { guilds, users } = managers;
+		const { database, config } = this.client;
+		const { guilds, users } = database;
 
 		const splitted = interaction.customId.split(":");
 		const [key, ...references] = splitted;

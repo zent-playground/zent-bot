@@ -38,7 +38,7 @@ class TempVoice extends Component {
 
 		const [choice, id] = args.entries.slice(1);
 
-		const creator = await this.client.managers.voices.creators.get({
+		const creator = await this.client.database.voices.creators.get({
 			id: id,
 			guild_id: interaction.guild!.id,
 		});
@@ -116,7 +116,7 @@ class TempVoice extends Component {
 
 				break;
 			case "custom": {
-				await this.client.managers.voices.creators.upd(
+				await this.client.database.voices.creators.upd(
 					{ id: id, guild_id: interaction.guild.id },
 					{ allow_custom_name: !creator.allow_custom_name },
 				);
@@ -189,8 +189,8 @@ class TempVoice extends Component {
 
 	private async handleModalCreator(interaction: Component.Modal, args: Component.Args) {
 		const { fields, client } = interaction;
-		const { managers, config } = client;
-		const { voices } = managers;
+		const { database, config } = client;
+		const { voices } = database;
 
 		const [choice, id] = args.entries.slice(1);
 
@@ -282,7 +282,7 @@ class TempVoice extends Component {
 	private async handleModalPanel(interaction: Component.Modal, args: Component.Args) {
 		const { client, user, guild } = interaction;
 		const {
-			managers: { voices },
+			database: { voices },
 			config: { colors, emojis },
 		} = client;
 
@@ -485,7 +485,7 @@ class TempVoice extends Component {
 		const { client, guild, member, message } = interaction;
 		const {
 			config: { colors },
-			managers: { voices },
+			database: { voices },
 		} = client;
 		const [choice] = interaction.values;
 

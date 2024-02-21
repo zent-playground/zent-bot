@@ -119,7 +119,7 @@ class ClientUtils {
 			context = new BasedHybridContext(context as any) as Command.HybridContext;
 		}
 
-		const { voices } = this.client.managers;
+		const { voices } = this.client.database;
 
 		if (preconditions.voiceChannel) {
 			if (!context.member.voice.channel) {

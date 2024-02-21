@@ -21,7 +21,7 @@ class MessageCreate extends Listener {
 
 		if (message.author.bot || !message.guild) return;
 
-		const { guilds, users } = this.client.managers;
+		const { guilds, users } = this.client.database;
 
 		const guild = (await guilds.get({ id: message.guildId }))!;
 
