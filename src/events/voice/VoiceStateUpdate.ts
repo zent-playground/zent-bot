@@ -30,7 +30,7 @@ class VoiceStateUpdate extends Listener {
 
 		const {
 			config,
-			managers: { voices },
+			database: { voices },
 		} = this.client;
 
 		const creator = await voices.creators.get({ id: channel.id, guild_id: guild.id });
@@ -44,7 +44,7 @@ class VoiceStateUpdate extends Listener {
 			return;
 		}
 
-		const cooldown = await voices.cooldowns.get([member.id, guild.id]);
+		const cooldown = await voices.cooldowns.get(`${member.id}:${guild.id}`);
 
 		if (cooldown) {
 			await member.user
@@ -82,7 +82,7 @@ class VoiceStateUpdate extends Listener {
 			{ author_id: member.id, guild_id: guild.id, creator_channel_id: channel.id },
 		);
 
-		await voices.cooldowns.set([member.id, guild.id], true, { EX: 10 });
+		await voices.cooldowns.set(`${member.id}:${guild.id}`, true, { EX: 10 });
 		await member.voice.setChannel(temp).catch(() => void 0);
 
 		await temp.send({
@@ -196,7 +196,7 @@ class VoiceStateUpdate extends Listener {
 			return;
 		}
 
-		const { voices } = this.client.managers;
+		const { voices } = this.client.database;
 		const temp = await voices.get({ id: channel.id });
 
 		if (temp && channel.members.size === 0) {

@@ -60,7 +60,7 @@ class Prefix extends Command {
 	}
 
 	public async show(ctx: Command.HybridContext) {
-		const { guilds } = this.client.managers;
+		const { guilds } = this.client.database;
 		const { prefix } = (await guilds.get({ id: ctx.guild.id }))!;
 
 		await ctx.send({
@@ -79,7 +79,7 @@ class Prefix extends Command {
 	}
 
 	public async set(ctx: Command.HybridContext, args: Command.Args) {
-		const { guilds } = this.client.managers;
+		const { guilds } = this.client.database;
 
 		const prefixToSet = (args.entries[0] || ctx.interaction?.options.getString("prefix"))
 			?.split(/ +/g)[0]

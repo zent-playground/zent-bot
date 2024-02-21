@@ -5,9 +5,9 @@ import ClientUtils from "./utils/others/ClientUtils.js";
 
 import "./utils/process.js";
 
-import Managers from "./databases/Managers.js";
-import MySql from "./databases/mysql/MySql.js";
-import Redis from "./databases/redis/Redis.js";
+import Database from "./database/Database.js";
+import MySql from "./database/mysql/MySql.js";
+import Redis from "./database/redis/Redis.js";
 
 import config from "./config.js";
 
@@ -67,7 +67,7 @@ client.components = new Collection();
 
 client.mysql = new MySql(client.config.mysql);
 client.redis = new Redis(client.config.redis);
-client.managers = new Managers(client.mysql, client.redis);
+client.database = new Database(client.mysql, client.redis);
 
 client.utils = new ClientUtils(client);
 
