@@ -4,9 +4,9 @@ import config from "../config.js";
 
 import ClientUtils from "../utils/others/ClientUtils.js";
 
-import Managers from "../databases/Managers.js";
-import MySql from "../databases/mysql/MySql.js";
-import Redis from "../databases/redis/Redis.js";
+import Database from "../database/Database.js";
+import MySql from "../database/mysql/MySql.js";
+import Redis from "../database/redis/Redis.js";
 
 declare module "discord.js" {
 	export interface Client {
@@ -14,7 +14,7 @@ declare module "discord.js" {
 		process: NodeJS.Process;
 		commands: Collection<string, import("../commands/Command.js").default>;
 		components: Collection<string, import("../components/Component.js").default>;
-		managers: Managers;
+		database: Database;
 		mysql: MySql;
 		redis: Redis;
 		utils: ClientUtils;
@@ -39,6 +39,7 @@ declare global {
 			NODE_ENV?: string;
 			PNPM_HOME?: string;
 			PATH?: string;
+			PORT?: string;
 		}
 	}
 }
