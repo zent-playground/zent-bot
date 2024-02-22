@@ -19,16 +19,11 @@ class MySql {
 			user: config.user,
 			database: config.database,
 			password: config.password,
-			waitForConnections: true,
-			connectionLimit: 10,
-			queueLimit: 0,
 		});
 	}
 
 	public async init(): Promise<void> {
-		const connection = await this.pool.getConnection();
-		connection.release();
-
+		(await this.pool.getConnection()).release();
 		Logger.info("Connected to MySql server.");
 	}
 
