@@ -10,6 +10,8 @@ import { loadControllers } from "../utils/loader.js";
 
 const controllers = await loadControllers();
 
+process.env.PORT = process.env.PORT || "3000";
+
 @Module({})
 class AppModule {
 	static async forRoot(client: Client<true>): Promise<DynamicModule> {
