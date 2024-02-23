@@ -46,8 +46,8 @@ const config = {
 		password: env.REDIS_PASSWORD!,
 		prefix: env.NODE_ENV === "development" ? "dev" : "prod",
 	},
-	token: env.BOT_TOKEN,
-	sessionSecret: env.SESSION_SECRET,
+	token: env.BOT_TOKEN!,
+	sessionSecret: env.SESSION_SECRET!,
 };
 
 export default config;
