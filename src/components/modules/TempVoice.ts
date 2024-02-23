@@ -189,8 +189,10 @@ class TempVoice extends Component {
 
 	private async handleModalCreator(interaction: Component.Modal, args: Component.Args) {
 		const { fields, client } = interaction;
-		const { database, config } = client;
-		const { voices } = database;
+		const {
+			database: { voices },
+			config,
+		} = client;
 
 		const [choice, id] = args.entries.slice(1);
 
