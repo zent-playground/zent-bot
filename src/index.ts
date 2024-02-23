@@ -54,9 +54,8 @@ const client = new Client({
 			interval: 15 * 60,
 			filter:
 				() =>
-				({ bot, id, client }) => {
-					return bot && id !== client.user.id;
-				},
+				({ bot, id, client }) =>
+					bot && id !== client.user.id,
 		},
 	},
 });
