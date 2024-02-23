@@ -30,9 +30,11 @@ class Ping extends Command {
 				new EmbedBuilder()
 					.setTitle("Pong!")
 					.setDescription(
-						`API: \`${message.createdTimestamp - ctx.createdTimestamp}\`ms\nHeartbeat: \`${
-							this.client.ws.ping
-						}\`ms\nDatabase: \`${await this.client.mysql.ping()}\`ms`,
+						[
+							`API: \`${message.createdTimestamp - ctx.createdTimestamp}ms`,
+							`Heartbeat: \`${this.client.ws.ping}\`ms`,
+							`Database: \`${await this.client.mysql.ping()}\`ms`,
+						].join("\n"),
 					)
 					.setColor(this.client.config.colors.default),
 			],

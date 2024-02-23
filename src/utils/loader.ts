@@ -29,7 +29,7 @@ export const loadEvents = async (client: Client): Promise<void> => {
 		count++;
 	}
 
-	Logger.info(`Loaded ${count} events.`);
+	Logger.info(`Loaded ${count} listeners.`);
 };
 
 export const loadCommands = async (client: Client): Promise<void> => {

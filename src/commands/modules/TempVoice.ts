@@ -487,8 +487,10 @@ class TempVoice extends Command {
 	}
 
 	public async setJoinable(ctx: Command.HybridContext, args: Command.Args) {
-		const { config, database } = ctx.client;
-		const { voices } = database;
+		const {
+			config,
+			database: { voices },
+		} = ctx.client;
 
 		let choice: number | null | undefined = Number(args[0]);
 
