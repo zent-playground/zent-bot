@@ -522,6 +522,14 @@ class TempVoice extends Component {
 			return;
 		}
 
+		const successEmbed = new EmbedBuilder()
+			.setAuthor({
+				name: member.displayName,
+				iconURL: member.displayAvatarURL({ forceStatic: true }),
+				url: `https://discord.com/users/${member.id}`,
+			})
+			.setColor(colors.success);
+
 		switch (choice) {
 			default: {
 				await interaction.reply({
@@ -602,18 +610,11 @@ class TempVoice extends Component {
 					},
 				);
 
-				const embed = new EmbedBuilder()
-					.setAuthor({
-						name: member.displayName,
-						iconURL: member.displayAvatarURL({ forceStatic: true }),
-						url: `https://discord.com/users/${member.id}`,
-					})
-					.setColor(colors.success)
-					.setDescription(
-						`Successfully **${
-							value ? "enabled" : "disabled"
-						}** nsfw for your temp voice channel.`,
-					);
+				const embed = successEmbed.setDescription(
+					`Successfully **${
+						value ? "enabled" : "disabled"
+					}** nsfw for your temp voice channel.`,
+				);
 
 				await interaction.reply({
 					embeds: [embed],
@@ -684,14 +685,7 @@ class TempVoice extends Component {
 
 				await interaction.reply({
 					embeds: [
-						new EmbedBuilder()
-							.setAuthor({
-								name: member.displayName,
-								iconURL: member.displayAvatarURL({ forceStatic: true }),
-								url: `https://discord.com/users/${member.id}`,
-							})
-							.setDescription("Successfully claimed this temp voice channel!")
-							.setColor(colors.success),
+						successEmbed.setDescription("Successfully claimed this temp voice channel!"),
 					],
 				});
 
@@ -702,6 +696,33 @@ class TempVoice extends Component {
 						guild,
 					)) as GuildChannelEditOptions,
 				);
+
+				break;
+			}
+
+			case "lock": {
+				await message.channel.permissionOverwrites.create(guild.id, {
+					Connect: false,
+					ReadMessageHistory: false,
+				});
+
+				await interaction.reply({
+					embeds: [
+						successEmbed.setDescription("Successfully locked your temp voice channel!"),
+					],
+				});
+
+				break;
+			}
+
+			case "unlock": {
+				await message.channel.permissionOverwrites.delete(guild.id);
+
+				await interaction.reply({
+					embeds: [
+						successEmbed.setDescription("Successfully unlocked your temp voice channel!"),
+					],
+				});
 
 				break;
 			}

@@ -2,7 +2,7 @@
 	"watch": ["src", ".env", "scripts"],
 	"ext": "ts",
 	"exec": "pnpm build && pnpm start",
-	"delay": 500,
+	"delay": 2500,
 	"env": {
 		"NODE_ENV": "development"
 	}
