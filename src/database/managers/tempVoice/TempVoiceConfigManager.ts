@@ -7,7 +7,7 @@ class TempVoiceConfigManager extends BaseManager<TempVoiceConfig> {
 	}
 
 	public async create(
-		options: { memberId: string; guildId?: string },
+		options: { memberId: string; guildId?: string | null },
 		values: Partial<TempVoiceConfig> = {},
 	) {
 		const { memberId, guildId } = options;
@@ -34,7 +34,7 @@ class TempVoiceConfigManager extends BaseManager<TempVoiceConfig> {
 	}
 
 	public async edit(
-		options: { memberId: string; guildId?: string },
+		options: { memberId: string; guildId?: string | null },
 		values: Partial<TempVoiceConfig>,
 	) {
 		const { memberId, guildId } = options;
@@ -45,7 +45,7 @@ class TempVoiceConfigManager extends BaseManager<TempVoiceConfig> {
 			throw new Error("An error occurred while creating user config.");
 		}
 
-		await this.upd(
+		return await this.upd(
 			config.is_global
 				? {
 						id: memberId,

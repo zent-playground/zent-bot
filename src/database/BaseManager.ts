@@ -53,11 +53,7 @@ class BaseManager<T extends object> extends MySqlManager<T> {
 		return data || null;
 	}
 
-	public async set(
-		criteria: Partial<T>,
-		values: Partial<T>,
-		options: SetOptions = {},
-	): Promise<void> {
+	public async set(criteria: Partial<T>, values: Partial<T>, options: SetOptions = {}): Promise<T> {
 		values = Object.assign(criteria, values);
 
 		await this.insert(values);
@@ -65,18 +61,16 @@ class BaseManager<T extends object> extends MySqlManager<T> {
 		if (this.cache) {
 			await this.cache.set(this.createCacheKey(criteria), values as T, options);
 		}
+
+		return values as T;
 	}
 
-	public async upd(
-		criteria: Partial<T>,
-		values: Partial<T>,
-		options: SetOptions = {},
-	): Promise<void> {
+	public async upd(criteria: Partial<T>, values: Partial<T>, options: SetOptions = {}): Promise<T> {
 		await super.update(this.createWhereClause(criteria), values);
+		const updatedValues = (await this.get(criteria, true))!;
 
 		if (this.cache) {
 			const key = this.createCacheKey(criteria);
-			const updatedValues = (await this.get(criteria, true))!;
 
 			await this.cache.set(key, updatedValues, options);
 
@@ -93,6 +87,8 @@ class BaseManager<T extends object> extends MySqlManager<T> {
 				await this.cache.rename(key, this.createCacheKey(criteria));
 			}
 		}
+
+		return updatedValues;
 	}
 
 	public async del(criteria: Partial<T>): Promise<void> {

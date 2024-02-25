@@ -49,62 +49,84 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 		config: TempVoiceConfig,
 		guild: Guild,
 	): Promise<OverwriteResolvable[]> {
-		const { id, joinable, whitelisted_ids, blacklisted_ids } = config;
+		const { id, lock, hide, whitelisted_ids, blacklisted_ids } = config;
 
 		const permissionOverwrites: OverwriteResolvable[] = [
 			{
 				id,
-				allow: [PermissionFlagsBits.Connect],
+				allow: [
+					PermissionFlagsBits.Connect,
+					PermissionFlagsBits.ViewChannel,
+					PermissionFlagsBits.ReadMessageHistory,
+					PermissionFlagsBits.SendMessages,
+				],
 			},
 		];
 
-		switch (joinable) {
-			case TempVoiceJoinable.Everyone: {
-				for (const id of blacklisted_ids || []) {
-					const member = await guild.members.fetch(id).catch(() => 0);
+		if (hide) {
+			permissionOverwrites.push({
+				id: guild.id,
+				deny: [
+					PermissionFlagsBits.ViewChannel,
+					PermissionFlagsBits.ReadMessageHistory,
+					PermissionFlagsBits.Connect,
+					PermissionFlagsBits.SendMessages,
+				],
+			});
 
-					if (!member) {
-						continue;
-					}
+			for (const id of whitelisted_ids || []) {
+				const member = await guild.members.fetch(id).catch(() => 0);
 
+				if (member) {
 					permissionOverwrites.push({
 						id,
-						deny: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
+						allow: [
+							PermissionFlagsBits.ViewChannel,
+							PermissionFlagsBits.Connect,
+							PermissionFlagsBits.ManageChannels,
+						],
 					});
 				}
-
-				break;
 			}
+		} else if (lock) {
+			permissionOverwrites.push({
+				id: guild.id,
+				deny: [
+					PermissionFlagsBits.ReadMessageHistory,
+					PermissionFlagsBits.Connect,
+					PermissionFlagsBits.SendMessages,
+				],
+			});
 
-			case TempVoiceJoinable.WhitelistedUsers: {
-				permissionOverwrites.push({
-					id: guild.id,
-					deny: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
-				});
+			for (const id of whitelisted_ids || []) {
+				const member = await guild.members.fetch(id).catch(() => 0);
 
-				for (const id of whitelisted_ids || []) {
-					const member = await guild.members.fetch(id).catch(() => 0);
-
-					if (!member) {
-						continue;
-					}
-
+				if (member) {
 					permissionOverwrites.push({
 						id,
-						allow: [PermissionFlagsBits.Connect],
+						allow: [
+							PermissionFlagsBits.ViewChannel,
+							PermissionFlagsBits.Connect,
+							PermissionFlagsBits.ManageChannels,
+						],
 					});
 				}
-
-				break;
 			}
+		} else {
+			for (const id of blacklisted_ids || []) {
+				const member = await guild.members.fetch(id).catch(() => 0);
 
-			case TempVoiceJoinable.Owner: {
-				permissionOverwrites.push({
-					id: guild.id,
-					deny: [PermissionFlagsBits.Connect, PermissionFlagsBits.ManageChannels],
-				});
-
-				break;
+				if (member) {
+					permissionOverwrites.push({
+						id,
+						deny: [
+							PermissionFlagsBits.Connect,
+							PermissionFlagsBits.ManageChannels,
+							PermissionFlagsBits.ReadMessageHistory,
+							PermissionFlagsBits.ViewChannel,
+						],
+					});
+				}
 			}
 		}
 

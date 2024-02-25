@@ -56,9 +56,7 @@ class VoiceStateUpdate extends Listener {
 								iconURL: guild.iconURL({ forceStatic: true })!,
 								url: guild.channels.cache.find((x) => x.isTextBased())?.url,
 							})
-							.setDescription(
-								"You can only create a temporary voice channel every 10 seconds.",
-							)
+							.setDescription("You can only create a temporary voice channel every 10 seconds.")
 							.setTimestamp()
 							.setColor(config.colors.error),
 					],
@@ -85,7 +83,7 @@ class VoiceStateUpdate extends Listener {
 		await voices.cooldowns.set(`${member.id}:${guild.id}`, true, { EX: 10 });
 		await member.voice.setChannel(temp).catch(() => void 0);
 
-		await temp.send({
+		const message = await temp.send({
 			content: `${member}`,
 			embeds: [
 				new EmbedBuilder()
@@ -143,20 +141,34 @@ class VoiceStateUpdate extends Listener {
 						.setOptions(
 							{
 								label: "Lock",
-								description: "Lock the channel",
+								description: "Only whitelisted users can join.",
 								value: "lock",
 								emoji: config.emojis.lock,
 							},
 							{
-								label: "unlock",
-								description: "Unlock the channel",
+								label: "Unlock",
+								description: "Only blacklisted users cannot join.",
 								value: "unlock",
 								emoji: config.emojis.unlock,
+							},
+							{
+								label: "Show",
+								description: "Only blacklisted users cannot join",
+								value: "show",
+								emoji: config.emojis.unghost,
+							},
+							{
+								label: "Hide",
+								description: "Only whitelisted users can join.",
+								value: "hide",
+								emoji: config.emojis.ghost,
 							},
 						),
 				),
 			],
 		});
+
+		await message.pin().catch(() => 0);
 	}
 
 	private async handleDeletion(oldState: VoiceState) {

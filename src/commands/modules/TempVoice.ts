@@ -1,7 +1,6 @@
 import {
 	EmbedBuilder,
 	SlashCommandBuilder,
-	codeBlock,
 	ActionRowBuilder,
 	ButtonBuilder,
 	ChannelType,
@@ -50,13 +49,6 @@ class TempVoice extends Command {
 						tempVoiceChannel: true,
 					},
 				},
-				{
-					name: "joinable",
-					hybrid: "setJoinable",
-					preconditions: {
-						tempVoiceChannel: true,
-					},
-				},
 			],
 		});
 	}
@@ -89,9 +81,7 @@ class TempVoice extends Command {
 								.setRequired(true),
 						)
 						.addBooleanOption((option) =>
-							option
-								.setName("global")
-								.setDescription("Change your voice channel name globally."),
+							option.setName("global").setDescription("Change your voice channel name globally."),
 						),
 				)
 				.addSubcommand((subcommand) =>
@@ -348,9 +338,7 @@ class TempVoice extends Command {
 				await ctx.send({
 					embeds: [
 						new EmbedBuilder()
-							.setDescription(
-								"An error occurred while changing your temporary voice channel name.",
-							)
+							.setDescription("An error occurred while changing your temporary voice channel name.")
 							.setColor(this.client.config.colors.error),
 					],
 					ephemeral: true,
@@ -369,9 +357,7 @@ class TempVoice extends Command {
 		const userConfig = await voices.configs.get({ id: data.author_id });
 		const target = await ctx.client.users
 			.fetch(
-				`${
-					this.client.utils.parseId(args[0]) || ctx.interaction?.options.getUser("member")?.id
-				}`,
+				`${this.client.utils.parseId(args[0]) || ctx.interaction?.options.getUser("member")?.id}`,
 			)
 			.catch(() => null);
 
@@ -432,9 +418,7 @@ class TempVoice extends Command {
 		const userConfig = await voices.configs.get({ id: data.author_id });
 		const target = await ctx.client.users
 			.fetch(
-				`${
-					this.client.utils.parseId(args[0]) || ctx.interaction?.options.getUser("member")?.id
-				}`,
+				`${this.client.utils.parseId(args[0]) || ctx.interaction?.options.getUser("member")?.id}`,
 			)
 			.catch(() => null);
 
@@ -481,59 +465,6 @@ class TempVoice extends Command {
 							? `Removed ${target} from your temp voice channel whitelist.`
 							: `Added ${target} to your temp voice channel whitelist.`,
 					)
-					.setColor(config.colors.success),
-			],
-		});
-	}
-
-	public async setJoinable(ctx: Command.HybridContext, args: Command.Args) {
-		const {
-			config,
-			database: { voices },
-		} = ctx.client;
-
-		let choice: number | null | undefined = Number(args[0]);
-
-		if (isNaN(choice)) {
-			choice = ctx.interaction?.options.getInteger("set");
-		}
-
-		if (choice === null || choice === undefined || !TempVoiceJoinable[choice!]) {
-			await ctx.send({
-				embeds: [
-					new EmbedBuilder()
-						.setDescription(codeBlock("0: Everyone\n1: Whitelisted users only\n2: Owner"))
-						.setColor(config.colors.default),
-				],
-			});
-
-			return;
-		}
-
-		await voices.configs.set(
-			{ id: ctx.author.id },
-			{
-				joinable: choice,
-			},
-		);
-
-		await ctx.member.voice.channel?.edit({
-			permissionOverwrites: await voices.createPermissionOverwrites(
-				(await voices.configs.get({ id: ctx.author.id }))!,
-				ctx.guild,
-			),
-		});
-
-		const formattedChoice = {
-			[TempVoiceJoinable.Everyone]: "Everyone",
-			[TempVoiceJoinable.Owner]: "Owner",
-			[TempVoiceJoinable.WhitelistedUsers]: "Whitelisted users",
-		}[choice];
-
-		await ctx.send({
-			embeds: [
-				new EmbedBuilder()
-					.setDescription(`Set your temp voice channel joinable to \`${formattedChoice}\`.`)
 					.setColor(config.colors.success),
 			],
 		});
