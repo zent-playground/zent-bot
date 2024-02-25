@@ -150,7 +150,7 @@ class VoiceStateUpdate extends Listener {
 							{
 								label: "unlock",
 								description: "Unlock the channel",
-								value: "lock",
+								value: "unlock",
 								emoji: config.emojis.unlock,
 							},
 						),
