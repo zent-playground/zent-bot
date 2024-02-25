@@ -30,7 +30,9 @@ class QueryBuilder {
 	}
 
 	public select(table: string, fields: string[] = ["*"]): this {
-		this.query = `SELECT ${fields.join(", ")} FROM ${table}`;
+		this.query = `SELECT ${fields
+			.map((x) => (x === "*" ? x : `\`${x}\``))
+			.join(", ")} FROM ${table}`;
 		return this;
 	}
 
@@ -45,7 +47,7 @@ class QueryBuilder {
 	}
 
 	public orderBy(orderBy: { field: string; direction: "ASC" | "DESC" }[]): this {
-		const orderClause = orderBy.map((order) => `${order.field} ${order.direction}`).join(", ");
+		const orderClause = orderBy.map((order) => `\`${order.field}\` ${order.direction}`).join(", ");
 		this.query += ` ORDER BY ${orderClause}`;
 		return this;
 	}
@@ -58,15 +60,21 @@ class QueryBuilder {
 	public insert(table: string, data: { [key: string]: any }): this {
 		const keys = Object.keys(data);
 		const values = keys.map((key) => QueryBuilder.formatValue(data[key]));
-		this.query = `INSERT INTO ${table} (${keys.join(", ")}) VALUES (${values.join(", ")})`;
+
+		this.query = `INSERT INTO ${table} (${keys
+			.map((k) => `\`${k}\``)
+			.join(", ")}) VALUES (${values.join(", ")})`;
+
 		return this;
 	}
 
 	public update(table: string, data: { [key: string]: any }, condition: string): this {
 		const updates = Object.keys(data)
-			.map((key) => `${key} = ${QueryBuilder.formatValue(data[key])}`)
+			.map((key) => `\`${key}\` = ${QueryBuilder.formatValue(data[key])}`)
 			.join(", ");
+
 		this.query = `UPDATE ${table} SET ${updates} WHERE ${condition}`;
+
 		return this;
 	}
 
