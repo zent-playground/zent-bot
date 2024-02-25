@@ -1,4 +1,11 @@
-import { Client, CommandInteraction, EmbedBuilder, Message, codeBlock } from "discord.js";
+import {
+	Client,
+	CommandInteraction,
+	EmbedBuilder,
+	GuildPremiumTier,
+	Message,
+	codeBlock,
+} from "discord.js";
 
 import Command, { Preconditions } from "../../commands/Command.js";
 
@@ -64,7 +71,7 @@ class ClientUtils {
 		args.entrySubcommand = entry;
 		args.parentSubcommand = parent;
 
-		if (!entry["subcommands"] && args[0]?.toLowerCase() === entry.name) {
+		if (!entry["subcommands"] && args.entries[0]?.toLowerCase() === entry.name) {
 			args.entries.splice(0, 1);
 		}
 
@@ -157,3 +164,23 @@ class ClientUtils {
 }
 
 export default ClientUtils;
+
+export const getGuildMaxBitrate = (premiumTier: GuildPremiumTier): number => {
+	switch (premiumTier) {
+		case GuildPremiumTier.None: {
+			return 96;
+		}
+
+		case GuildPremiumTier.Tier1: {
+			return 128;
+		}
+
+		case GuildPremiumTier.Tier2: {
+			return 256;
+		}
+
+		case GuildPremiumTier.Tier3: {
+			return 384;
+		}
+	}
+};

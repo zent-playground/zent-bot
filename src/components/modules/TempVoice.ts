@@ -407,27 +407,33 @@ class TempVoice extends Component {
 				}
 
 				case "bitrate": {
-					let bitrate: number = value ? Number(value) : 64;
+					let bitrate: number = 64;
 
-					if (isNaN(bitrate)) {
-						await interaction.reply({
-							embeds: [errorEmbed.setDescription(`\`${value}\` is not a valid number.`)],
-							ephemeral: true,
-						});
+					if (value.toLowerCase() === "max") {
+						bitrate = -1;
+					} else if (value) {
+						bitrate = Number(value);
 
-						return;
+						if (isNaN(bitrate)) {
+							await interaction.reply({
+								embeds: [errorEmbed.setDescription(`\`${value}\` is not a valid number.`)],
+								ephemeral: true,
+							});
+
+							return;
+						}
+
+						if (bitrate < 8 || bitrate > 128) {
+							await interaction.reply({
+								embeds: [errorEmbed.setDescription("Bitrate must be between 8 and 128.")],
+								ephemeral: true,
+							});
+
+							return;
+						}
+
+						bitrate = Math.floor(bitrate);
 					}
-
-					if (bitrate < 8 || bitrate > 128) {
-						await interaction.reply({
-							embeds: [errorEmbed.setDescription("Bitrate must be between 8 and 128.")],
-							ephemeral: true,
-						});
-
-						return;
-					}
-
-					bitrate = Math.floor(bitrate);
 
 					await voices.configs.edit(configOptions, { bitrate });
 
