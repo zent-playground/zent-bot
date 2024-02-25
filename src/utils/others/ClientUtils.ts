@@ -71,7 +71,7 @@ class ClientUtils {
 		args.entrySubcommand = entry;
 		args.parentSubcommand = parent;
 
-		if (!entry["subcommands"] && args[0]?.toLowerCase() === entry.name) {
+		if (!entry["subcommands"] && args.entries[0]?.toLowerCase() === entry.name) {
 			args.entries.splice(0, 1);
 		}
 

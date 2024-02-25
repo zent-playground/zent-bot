@@ -9,7 +9,6 @@ import {
 } from "discord.js";
 
 import Command from "../Command.js";
-import { TempVoiceJoinable } from "../../database/managers/tempVoice/TempVoiceManager.js";
 import { TempVoiceConfig } from "../../types/database.js";
 import Logger from "../../utils/others/Logger.js";
 
@@ -106,22 +105,6 @@ class TempVoice extends Command {
 								.setRequired(true),
 						),
 				)
-				.addSubcommand((subcommand) =>
-					subcommand
-						.setName("joinable")
-						.setDescription("Set voice channel joinable.")
-						.addIntegerOption((option) =>
-							option
-								.setName("set")
-								.setDescription("Select a choice to set.")
-								.setChoices(
-									{ name: "Everyone", value: TempVoiceJoinable.Everyone },
-									{ name: "Whitelisted users", value: TempVoiceJoinable.WhitelistedUsers },
-									{ name: "Owner", value: TempVoiceJoinable.Owner },
-								)
-								.setRequired(true),
-						),
-				)
 				.toJSON(),
 		);
 	}
@@ -156,7 +139,7 @@ class TempVoice extends Command {
 			return;
 		}
 
-		if (ctx.isMessage() && !args[0]) {
+		if (ctx.isMessage() && !args.entries[0]) {
 			await ctx.send({
 				embeds: [
 					new EmbedBuilder()
@@ -357,7 +340,10 @@ class TempVoice extends Command {
 		const userConfig = await voices.configs.get({ id: data.author_id });
 		const target = await ctx.client.users
 			.fetch(
-				`${this.client.utils.parseId(args[0]) || ctx.interaction?.options.getUser("member")?.id}`,
+				`${
+					this.client.utils.parseId(args.entries[0]) ||
+					ctx.interaction?.options.getUser("member")?.id
+				}`,
 			)
 			.catch(() => null);
 
@@ -418,7 +404,10 @@ class TempVoice extends Command {
 		const userConfig = await voices.configs.get({ id: data.author_id });
 		const target = await ctx.client.users
 			.fetch(
-				`${this.client.utils.parseId(args[0]) || ctx.interaction?.options.getUser("member")?.id}`,
+				`${
+					this.client.utils.parseId(args.entries[0]) ||
+					ctx.interaction?.options.getUser("member")?.id
+				}`,
 			)
 			.catch(() => null);
 
