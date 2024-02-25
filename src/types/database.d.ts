@@ -1,5 +1,3 @@
-import { TempVoiceJoinable } from "../database/managers/tempVoice/TempVoiceManager.js";
-
 export interface Guild {
 	id: string;
 	prefix: string;
@@ -37,7 +35,8 @@ export interface TempVoiceConfig {
 	is_global: boolean;
 	name: string | null;
 	nsfw: boolean;
-	joinable: TempVoiceJoinable;
+	lock: boolean;
+	hide: boolean;
 	user_limit: number | null;
 	bitrate: number;
 	blacklisted_ids: string[];

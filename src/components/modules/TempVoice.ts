@@ -6,6 +6,7 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 	GuildChannelEditOptions,
+	PermissionFlagsBits,
 } from "discord.js";
 
 import Component from "../Component.js";
@@ -271,9 +272,7 @@ class TempVoice extends Component {
 				embeds: [
 					new EmbedBuilder()
 						.setTitle(`${config.emojis.error} Cannot Update!`)
-						.setDescription(
-							"Unable to update the configuration of this channel, please try again.",
-						)
+						.setDescription("Unable to update the configuration of this channel, please try again.")
 						.setColor(config.colors.success),
 				],
 				ephemeral: true,
@@ -455,11 +454,7 @@ class TempVoice extends Component {
 
 		await interaction.member.voice.channel
 			?.edit(
-				(await voices.createOptions(
-					creator,
-					voice.author_id,
-					guild,
-				)) as GuildChannelEditOptions,
+				(await voices.createOptions(creator, voice.author_id, guild)) as GuildChannelEditOptions,
 			)
 			.catch(() => 0);
 	}
@@ -513,7 +508,7 @@ class TempVoice extends Component {
 			return;
 		}
 
-		const config = await voices.configs.create({
+		let config = await voices.configs.create({
 			memberId: voice.author_id,
 			guildId: guild.id,
 		});
@@ -533,9 +528,7 @@ class TempVoice extends Component {
 		switch (choice) {
 			default: {
 				await interaction.reply({
-					embeds: [
-						new EmbedBuilder().setDescription("Unknown choice.").setColor(colors.error),
-					],
+					embeds: [new EmbedBuilder().setDescription("Unknown choice.").setColor(colors.error)],
 					ephemeral: true,
 				});
 
@@ -611,9 +604,7 @@ class TempVoice extends Component {
 				);
 
 				const embed = successEmbed.setDescription(
-					`Successfully **${
-						value ? "enabled" : "disabled"
-					}** nsfw for your temp voice channel.`,
+					`Successfully **${value ? "enabled" : "disabled"}** nsfw for your temp voice channel.`,
 				);
 
 				await interaction.reply({
@@ -684,9 +675,7 @@ class TempVoice extends Component {
 				);
 
 				await interaction.reply({
-					embeds: [
-						successEmbed.setDescription("Successfully claimed this temp voice channel!"),
-					],
+					embeds: [successEmbed.setDescription("Successfully claimed this temp voice channel!")],
 				});
 
 				await member.voice.channel?.edit(
@@ -701,27 +690,98 @@ class TempVoice extends Component {
 			}
 
 			case "lock": {
-				await message.channel.permissionOverwrites.create(guild.id, {
-					Connect: false,
-					ReadMessageHistory: false,
+				config = await voices.configs.edit(
+					{
+						memberId: config.id,
+						guildId: config.guild_id || undefined,
+					},
+					{
+						lock: true,
+					},
+				);
+
+				await message.channel.edit({
+					permissionOverwrites: await voices.createPermissionOverwrites(config, guild),
+				});
+
+				await message.channel.edit({
+					permissionOverwrites: [
+						{
+							id: guild.id,
+							deny: PermissionFlagsBits.ViewChannel,
+						},
+						...(await voices.createPermissionOverwrites(config, guild)),
+					],
 				});
 
 				await interaction.reply({
-					embeds: [
-						successEmbed.setDescription("Successfully locked your temp voice channel!"),
-					],
+					embeds: [successEmbed.setDescription("Successfully locked your temp voice channel!")],
 				});
 
 				break;
 			}
 
 			case "unlock": {
-				await message.channel.permissionOverwrites.delete(guild.id);
+				config = await voices.configs.edit(
+					{
+						memberId: config.id,
+						guildId: config.guild_id || undefined,
+					},
+					{
+						lock: false,
+					},
+				);
+
+				await message.channel.edit({
+					permissionOverwrites: await voices.createPermissionOverwrites(config, guild),
+				});
 
 				await interaction.reply({
-					embeds: [
-						successEmbed.setDescription("Successfully unlocked your temp voice channel!"),
-					],
+					embeds: [successEmbed.setDescription("Successfully unlocked your temp voice channel!")],
+				});
+
+				break;
+			}
+
+			case "hide": {
+				config = await voices.configs.edit(
+					{
+						memberId: config.id,
+						guildId: config.guild_id || undefined,
+					},
+					{
+						hide: true,
+					},
+				);
+
+				await message.channel.edit({
+					permissionOverwrites: await voices.createPermissionOverwrites(config, guild),
+				});
+
+				await interaction.reply({
+					embeds: [successEmbed.setDescription("Successfully hide your temp voice channel!")],
+				});
+
+				break;
+			}
+
+			case "show": {
+				config = await voices.configs.edit(
+					{
+						memberId: config.id,
+						guildId: config.guild_id || undefined,
+					},
+					{
+						hide: false,
+					},
+				);
+
+				await message.channel.edit({
+					permissionOverwrites: await voices.createPermissionOverwrites(config, guild),
+				});
+
+				await interaction.reply({
+					embeds: [successEmbed.setDescription("Successfully show your temp voice channel!")],
 				});
 
 				break;
