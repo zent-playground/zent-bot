@@ -332,12 +332,22 @@ class TempVoice extends Command {
 	}
 
 	public async setBlacklist(ctx: Command.HybridContext, args: Command.Args) {
-		const { database, config } = ctx.client;
-		const { voices } = database;
+		const {
+			database: { voices },
+			config: { colors },
+		} = ctx.client;
 		const { channel } = ctx.member.voice;
 
 		const data = (await voices.get({ id: channel?.id }))!;
-		const userConfig = await voices.configs.get({ id: data.author_id });
+		let config = await voices.configs.create({
+			memberId: data.author_id,
+			guildId: data.guild_id,
+		});
+
+		if (!config) {
+			return;
+		}
+
 		const target = await ctx.client.users
 			.fetch(
 				`${
@@ -352,14 +362,14 @@ class TempVoice extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription("You must provide a member to add/remove.")
-						.setColor(config.colors.error),
+						.setColor(colors.error),
 				],
 			});
 
 			return;
 		}
 
-		const blacklistedIds = userConfig?.blacklisted_ids || [];
+		const blacklistedIds = config.blacklisted_ids || [];
 		const index = blacklistedIds.indexOf(target.id);
 
 		if (index !== -1) {
@@ -368,18 +378,15 @@ class TempVoice extends Command {
 			blacklistedIds.push(target.id);
 		}
 
-		await voices.configs.edit(
-			{ memberId: data.author_id, guildId: ctx.guild.id },
+		config = await voices.configs.edit(
+			{ memberId: config.id, guildId: config.guild_id },
 			{
 				blacklisted_ids: blacklistedIds,
 			},
 		);
 
 		await channel!.edit({
-			permissionOverwrites: await voices.createPermissionOverwrites(
-				(await voices.configs.get({ id: data.author_id }))!,
-				ctx.guild,
-			),
+			permissionOverwrites: await voices.createPermissionOverwrites(config, ctx.guild),
 		});
 
 		await ctx.send({
@@ -390,18 +397,28 @@ class TempVoice extends Command {
 							? `Removed ${target} from your temp voice channel blacklist.`
 							: `Added ${target} to your temp voice channel blacklist.`,
 					)
-					.setColor(config.colors.success),
+					.setColor(colors.success),
 			],
 		});
 	}
 
 	public async setWhitelist(ctx: Command.HybridContext, args: Command.Args) {
-		const { database, config } = ctx.client;
-		const { voices } = database;
+		const {
+			database: { voices },
+			config: { colors },
+		} = ctx.client;
 		const { channel } = ctx.member.voice;
 
 		const data = (await voices.get({ id: channel?.id }))!;
-		const userConfig = await voices.configs.get({ id: data.author_id });
+		let config = await voices.configs.create({
+			memberId: data.author_id,
+			guildId: data.guild_id,
+		});
+
+		if (!config) {
+			return;
+		}
+
 		const target = await ctx.client.users
 			.fetch(
 				`${
@@ -416,14 +433,14 @@ class TempVoice extends Command {
 				embeds: [
 					new EmbedBuilder()
 						.setDescription("You must provide a member to add/remove.")
-						.setColor(config.colors.error),
+						.setColor(colors.error),
 				],
 			});
 
 			return;
 		}
 
-		const whitelistedIds = userConfig?.whitelisted_ids || [];
+		const whitelistedIds = config.whitelisted_ids || [];
 		const index = whitelistedIds.indexOf(target.id);
 
 		if (index !== -1) {
@@ -432,7 +449,7 @@ class TempVoice extends Command {
 			whitelistedIds.push(target.id);
 		}
 
-		await voices.configs.edit(
+		config = await voices.configs.edit(
 			{ memberId: data.author_id, guildId: ctx.guild.id },
 			{
 				whitelisted_ids: whitelistedIds,
@@ -440,10 +457,7 @@ class TempVoice extends Command {
 		);
 
 		await channel!.edit({
-			permissionOverwrites: await voices.createPermissionOverwrites(
-				(await voices.configs.get({ id: data.author_id }))!,
-				ctx.guild,
-			),
+			permissionOverwrites: await voices.createPermissionOverwrites(config, ctx.guild),
 		});
 
 		await ctx.send({
@@ -454,7 +468,7 @@ class TempVoice extends Command {
 							? `Removed ${target} from your temp voice channel whitelist.`
 							: `Added ${target} to your temp voice channel whitelist.`,
 					)
-					.setColor(config.colors.success),
+					.setColor(colors.success),
 			],
 		});
 	}
