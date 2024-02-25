@@ -13,20 +13,7 @@ import { TempVoice, TempVoiceConfig, TempVoiceCreator } from "../../../types/dat
 import TempVoiceCreatorManager from "./TempVoiceCreatorManager.js";
 import TempVoiceConfigManager from "./TempVoiceConfigManager.js";
 
-export enum TempVoiceJoinable {
-	/**
-	 * Everyone can join the channel, excluding blacklisted users.
-	 */
-	Everyone,
-	/**
-	 * Only whitelisted users (provided by the owner) can join the channel.
-	 */
-	WhitelistedUsers,
-	/**
-	 * Only channel owner can join the channel.
-	 */
-	Owner,
-}
+import { getGuildMaxBitrate } from "../../../utils/others/ClientUtils.js";
 
 class TempVoiceManager extends BaseManager<TempVoice> {
 	public readonly cooldowns: RedisManager<boolean>;
@@ -141,6 +128,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 		member = await guild.members.fetch(member);
 
 		const { affix, generic_name, generic_limit, allow_custom_name } = creator;
+		const { premiumTier } = guild;
 		const { displayName } = member;
 
 		const options: GuildChannelCreateOptions = {
@@ -154,16 +142,18 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 		}
 
 		if (config) {
+			const { name, user_limit, nsfw, bitrate } = config;
+
 			if (allow_custom_name) {
-				options.name += config.name || displayName;
+				options.name += name || displayName;
 			}
 
-			if (config.user_limit) {
-				options.userLimit = config.user_limit;
+			if (user_limit) {
+				options.userLimit = user_limit;
 			}
 
-			options.nsfw = config.nsfw;
-			options.bitrate = config.bitrate * 1000;
+			options.nsfw = nsfw;
+			options.bitrate = (bitrate === -1 ? getGuildMaxBitrate(premiumTier) : bitrate) * 1000;
 			options.permissionOverwrites = await this.createPermissionOverwrites(config, guild);
 		}
 
