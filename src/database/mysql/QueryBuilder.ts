@@ -12,7 +12,7 @@ class QueryBuilder {
 
 		switch (typeof value) {
 			default: {
-				return `'${JSON.stringify(value)}`;
+				return `'${JSON.stringify(value)}'`;
 			}
 
 			case "string": {
