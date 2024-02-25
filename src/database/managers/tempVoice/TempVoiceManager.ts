@@ -53,12 +53,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 		if (hide) {
 			permissionOverwrites.push({
 				id: guild.id,
-				deny: [
-					PermissionFlagsBits.ViewChannel,
-					PermissionFlagsBits.ReadMessageHistory,
-					PermissionFlagsBits.Connect,
-					PermissionFlagsBits.SendMessages,
-				],
+				deny: [PermissionFlagsBits.ViewChannel],
 			});
 
 			for (const id of whitelisted_ids || []) {
@@ -70,7 +65,8 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 						allow: [
 							PermissionFlagsBits.ViewChannel,
 							PermissionFlagsBits.Connect,
-							PermissionFlagsBits.ManageChannels,
+							PermissionFlagsBits.ReadMessageHistory,
+							PermissionFlagsBits.SendMessages,
 						],
 					});
 				}
@@ -94,7 +90,8 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 						allow: [
 							PermissionFlagsBits.ViewChannel,
 							PermissionFlagsBits.Connect,
-							PermissionFlagsBits.ManageChannels,
+							PermissionFlagsBits.ReadMessageHistory,
+							PermissionFlagsBits.SendMessages,
 						],
 					});
 				}
