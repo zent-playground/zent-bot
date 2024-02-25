@@ -368,8 +368,8 @@ class TempVoice extends Command {
 			blacklistedIds.push(target.id);
 		}
 
-		await voices.configs.set(
-			{ id: data.author_id },
+		await voices.configs.edit(
+			{ memberId: data.author_id, guildId: ctx.guild.id },
 			{
 				blacklisted_ids: blacklistedIds,
 			},
@@ -432,8 +432,8 @@ class TempVoice extends Command {
 			whitelistedIds.push(target.id);
 		}
 
-		await voices.configs.set(
-			{ id: data.author_id },
+		await voices.configs.edit(
+			{ memberId: data.author_id, guildId: ctx.guild.id },
 			{
 				whitelisted_ids: whitelistedIds,
 			},
