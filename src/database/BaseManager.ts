@@ -28,7 +28,7 @@ class BaseManager<T extends object> extends MySqlManager<T> {
 	private createCacheKey(criteria: Partial<T>): string {
 		return Object.keys(criteria)
 			.sort()
-			.map((k) => criteria[k])
+			.map((k) => `'${k}'='${criteria[k]}'`)
 			.join(":");
 	}
 
