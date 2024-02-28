@@ -32,6 +32,10 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 		this.configs = new TempVoiceConfigManager(mysql, redis);
 	}
 
+	public async fetch(id: string) {
+		return await this.get({ id });
+	}
+
 	public async createPermissionOverwrites(
 		config: TempVoiceConfig,
 		guild: Guild,
