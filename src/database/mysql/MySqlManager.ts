@@ -24,12 +24,12 @@ class MySqlManager<T> {
 		this.table = table;
 	}
 
-	protected async insert(values: Partial<T>): Promise<void> {
+	public async insert(values: Partial<T>): Promise<void> {
 		const query = new QueryBuilder().insert(this.table, values);
 		await this.db.query(`${query}`);
 	}
 
-	protected async delete(condition: string): Promise<void> {
+	public async delete(condition: string): Promise<void> {
 		if (!condition) {
 			throw new Error("Attempted to delete with empty condition.");
 		}
@@ -38,7 +38,7 @@ class MySqlManager<T> {
 		await this.db.query(`${query}`);
 	}
 
-	protected async select(options: QueryOptions<T> = {}): Promise<T[]> {
+	public async select(options: QueryOptions<T> = {}): Promise<T[]> {
 		const query = new QueryBuilder().select(this.table, options?.selectFields);
 
 		if (options.joins) {
@@ -67,7 +67,7 @@ class MySqlManager<T> {
 		return await this.db.query(`${query}`);
 	}
 
-	protected async update(condition: string, values: Partial<T>): Promise<void> {
+	public async update(condition: string, values: Partial<T>): Promise<void> {
 		const query = new QueryBuilder().update(this.table, values, condition);
 		await this.db.query(`${query}`);
 	}

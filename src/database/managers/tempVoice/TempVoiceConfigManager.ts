@@ -6,6 +6,31 @@ class TempVoiceConfigManager extends BaseManager<TempVoiceConfig> {
 		super("temp_voice_configs", mysql, redis);
 	}
 
+	public async get(id: string, guildId?: string) {
+		const values: Partial<TempVoiceConfig> = {
+			id,
+			is_global: !guildId,
+		};
+
+		if (guildId) {
+			values.guild_id = guildId;
+		}
+
+		return await super._get(values);
+	}
+
+	public async delete(id: string) {
+		return await super._del({ id });
+	}
+
+	public async set(id: string, values: Partial<TempVoiceConfig>) {
+		return await super._set({ id }, values);
+	}
+
+	public async update(id: string, values: Partial<TempVoiceConfig>) {
+		return await super._upd({ id }, values);
+	}
+
 	public async create(
 		options: { memberId: string; guildId?: string | null },
 		values: Partial<TempVoiceConfig> = {},
