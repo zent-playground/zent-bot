@@ -30,7 +30,7 @@ class BaseManager<T extends object> {
 			.join(":");
 	}
 
-	public async _get(criteria: Partial<T>, force = false): Promise<T | null> {
+	protected async _get(criteria: Partial<T>, force = false): Promise<T | null> {
 		const key = this.createCacheKey(criteria);
 
 		let data: T | undefined | null = force ? null : await this.cache?.get(key);
@@ -51,7 +51,7 @@ class BaseManager<T extends object> {
 		return data || null;
 	}
 
-	public async _set(
+	protected async _set(
 		criteria: Partial<T>,
 		values: Partial<T>,
 		options: SetOptions = {},
@@ -67,7 +67,7 @@ class BaseManager<T extends object> {
 		return values as T;
 	}
 
-	public async _upd(
+	protected async _upd(
 		criteria: Partial<T>,
 		values: Partial<T>,
 		options: SetOptions = {},
@@ -97,7 +97,7 @@ class BaseManager<T extends object> {
 		return updatedValues;
 	}
 
-	public async _del(criteria: Partial<T>): Promise<void> {
+	protected async _del(criteria: Partial<T>): Promise<void> {
 		await this.db.delete(this.createWhereClause(criteria));
 
 		if (this.cache) {

@@ -61,7 +61,7 @@ class Prefix extends Command {
 
 	public async show(ctx: Command.HybridContext) {
 		const { guilds } = this.client.database;
-		const { prefix } = (await guilds.get({ id: ctx.guild.id }))!;
+		const { prefix } = (await guilds.get(ctx.guild.id))!;
 
 		await ctx.send({
 			embeds: [
@@ -121,7 +121,7 @@ class Prefix extends Command {
 			return;
 		}
 
-		await guilds.upd({ id: ctx.guild.id }, { prefix: prefixToSet });
+		await guilds.update(ctx.guild.id, { prefix: prefixToSet });
 
 		await ctx.send({
 			embeds: [

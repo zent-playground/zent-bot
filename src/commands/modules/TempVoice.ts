@@ -9,7 +9,6 @@ import {
 } from "discord.js";
 
 import Command from "../Command.js";
-import { TempVoiceConfig } from "../../types/database.js";
 import Logger from "../../utils/others/Logger.js";
 
 class TempVoice extends Command {
@@ -181,7 +180,7 @@ class TempVoice extends Command {
 			});
 		}
 
-		const creators = await voices.creators.get({ id: channel.id });
+		const creators = await voices.creators.get(channel.id);
 
 		if (creators) {
 			await ctx.send({
@@ -197,7 +196,7 @@ class TempVoice extends Command {
 			return;
 		}
 
-		await voices.creators.set({ id: channel.id }, { guild_id: ctx.guild.id });
+		await voices.creators.set(channel.id, { guild_id: ctx.guild.id });
 
 		await ctx.send({
 			embeds: [
@@ -236,7 +235,7 @@ class TempVoice extends Command {
 			return;
 		}
 
-		const temp = (await voices.get({ id: member.voice.channel!.id, active: true }))!;
+		const temp = (await voices.get(member.voice.channel!.id))!;
 
 		if (temp.author_id !== member.id) {
 			await ctx.send({
@@ -251,7 +250,7 @@ class TempVoice extends Command {
 			return;
 		}
 
-		const creator = (await voices.creators.get({ id: temp.creator_channel_id }))!;
+		const creator = (await voices.creators.get(temp.creator_channel_id))!;
 
 		if (creator.affix || creator.generic_name || creator.allow_custom_name) {
 			await ctx.send({
@@ -268,36 +267,27 @@ class TempVoice extends Command {
 			return;
 		}
 
-		const criteria: Partial<TempVoiceConfig> = {
+		const configOptions = {
 			id: member.id,
+			guildId: globally ? ctx.guild.id : undefined,
 		};
 
-		if (globally) {
-			criteria.is_global = true;
-		} else {
-			criteria.guild_id = ctx.guild.id;
+		const config = await voices.configs.create(configOptions);
+
+		if (config.name === name) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription("This name is already assigned to your temporary voice channel!")
+						.setColor(this.client.config.colors.error),
+				],
+				ephemeral: true,
+			});
+
+			return;
 		}
 
-		const config = await voices.configs.get(criteria);
-
-		if (!config) {
-			await voices.configs.set(criteria, { name });
-		} else {
-			if (config.name === name) {
-				await ctx.send({
-					embeds: [
-						new EmbedBuilder()
-							.setDescription("This name is already assigned to your temporary voice channel!")
-							.setColor(this.client.config.colors.error),
-					],
-					ephemeral: true,
-				});
-
-				return;
-			}
-
-			await voices.configs.upd(criteria, { name });
-		}
+		await voices.configs.edit(configOptions, { name });
 
 		await member.voice
 			.channel!.edit({
@@ -327,7 +317,7 @@ class TempVoice extends Command {
 					ephemeral: true,
 				});
 
-				await voices.configs.upd(criteria, { name: member.voice.channel!.name });
+				await voices.configs.edit(configOptions, { name: member.voice.channel!.name });
 			});
 	}
 
@@ -338,9 +328,10 @@ class TempVoice extends Command {
 		} = ctx.client;
 		const { channel } = ctx.member.voice;
 
-		const data = (await voices.get({ id: channel?.id }))!;
+		const data = (await voices.get(channel!.id))!;
+
 		let config = await voices.configs.create({
-			memberId: data.author_id,
+			id: data.author_id,
 			guildId: data.guild_id,
 		});
 
@@ -379,7 +370,7 @@ class TempVoice extends Command {
 		}
 
 		config = await voices.configs.edit(
-			{ memberId: config.id, guildId: config.guild_id },
+			{ id: config.id, guildId: config.guild_id },
 			{
 				blacklisted_ids: blacklistedIds,
 			},
@@ -409,9 +400,10 @@ class TempVoice extends Command {
 		} = ctx.client;
 		const { channel } = ctx.member.voice;
 
-		const data = (await voices.get({ id: channel?.id }))!;
+		const data = (await voices.get(channel!.id))!;
+
 		let config = await voices.configs.create({
-			memberId: data.author_id,
+			id: data.author_id,
 			guildId: data.guild_id,
 		});
 
@@ -450,7 +442,7 @@ class TempVoice extends Command {
 		}
 
 		config = await voices.configs.edit(
-			{ memberId: data.author_id, guildId: ctx.guild.id },
+			{ id: data.author_id, guildId: ctx.guild.id },
 			{
 				whitelisted_ids: whitelistedIds,
 			},

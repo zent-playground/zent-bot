@@ -6,63 +6,30 @@ class TempVoiceConfigManager extends BaseManager<TempVoiceConfig> {
 		super("temp_voice_configs", mysql, redis);
 	}
 
-	public async get(id: string, guildId?: string) {
-		const values: Partial<TempVoiceConfig> = {
-			id,
-			is_global: !guildId,
-		};
-
-		if (guildId) {
-			values.guild_id = guildId;
-		}
-
-		return await super._get(values);
-	}
-
-	public async delete(id: string) {
-		return await super._del({ id });
-	}
-
-	public async set(id: string, values: Partial<TempVoiceConfig>) {
-		return await super._set({ id }, values);
-	}
-
-	public async update(id: string, values: Partial<TempVoiceConfig>) {
-		return await super._upd({ id }, values);
-	}
-
 	public async create(
-		options: { memberId: string; guildId?: string | null },
+		options: { id: string; guildId?: string | null; forceGuild?: boolean },
 		values: Partial<TempVoiceConfig> = {},
 	) {
-		const { memberId, guildId } = options;
+		const { id, guildId } = options;
 
-		let config = await this.get({ id: memberId, is_global: true });
-
-		if (!config && guildId) {
-			config = await this.get({ id: memberId, guild_id: guildId });
-		}
-
-		if (!config) {
-			await this.set(
-				{
-					id: memberId,
-					is_global: true,
-				},
-				values,
+		if (guildId) {
+			return (
+				(await this._get({ id, guild_id: guildId })) ||
+				(await this._set({ id, guild_id: guildId }, values))
 			);
-
-			config = await this.get({ id: memberId, is_global: true });
+		} else {
+			return (
+				(await this._get({ id, is_global: true })) ||
+				(await this._set({ id, is_global: true }, values))
+			);
 		}
-
-		return config;
 	}
 
 	public async edit(
-		options: { memberId: string; guildId?: string | null },
+		options: { id: string; guildId?: string | null },
 		values: Partial<TempVoiceConfig>,
 	) {
-		const { memberId, guildId } = options;
+		const { id, guildId } = options;
 
 		const config = await this.create(options, values);
 
@@ -70,18 +37,15 @@ class TempVoiceConfigManager extends BaseManager<TempVoiceConfig> {
 			throw new Error("An error occurred while creating user config.");
 		}
 
-		return await this.upd(
-			config.is_global
-				? {
-						id: memberId,
-						is_global: true,
-					}
-				: {
-						id: memberId,
-						guild_id: guildId,
-					},
+		return await this._upd(
+			config.is_global ? { id, is_global: true } : { id, guild_id: guildId },
 			values,
 		);
+	}
+
+	public async delete(options: { id: string; guildId: string }) {
+		const { id, guildId } = options;
+		await this._del(guildId ? { id, guild_id: guildId } : { id, is_global: true });
 	}
 }
 

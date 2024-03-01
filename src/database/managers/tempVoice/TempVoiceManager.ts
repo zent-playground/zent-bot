@@ -148,11 +148,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 			name: affix ? `${affix} ` : "",
 		};
 
-		let config = await this.configs.get({ id: member.id, is_global: true });
-
-		if (!config) {
-			config = await this.configs.get({ id: member.id, guild_id: guild.id });
-		}
+		const config = await this.configs.create({ id: member.id, guildId: guild.id });
 
 		if (config) {
 			const { name, user_limit, nsfw, bitrate } = config;
