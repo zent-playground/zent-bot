@@ -515,11 +515,7 @@ class TempVoice extends Component {
 			guildId: guild.id,
 		};
 
-		let config = await voices.configs.update(configOptions);
-
-		if (!config) {
-			return;
-		}
+		let config = await voices.configs.default(configOptions);
 
 		const successEmbed = new EmbedBuilder()
 			.setAuthor({
