@@ -47,7 +47,7 @@ class TempVoiceConfigManager extends BaseManager<TempVoiceConfig> {
 			: await this._set({ id, is_global: true }, values);
 	}
 
-	public async update({ id, guildId }: Options, values: Partial<TempVoiceConfig> = {}) {
+	public async update({ id, guildId }: Options, values: Partial<TempVoiceConfig>) {
 		return guildId
 			? await this._upd({ id, guild_id: guildId }, values)
 			: await this._upd({ id, is_global: true }, values);
