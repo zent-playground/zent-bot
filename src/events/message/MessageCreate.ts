@@ -23,7 +23,7 @@ class MessageCreate extends Listener {
 
 		const { guilds, users } = this.client.database;
 
-		const guild = (await guilds.get({ id: message.guildId }))!;
+		const guild = (await guilds.get(message.guild.id))!;
 
 		const prefixes: string[] = [this.client.user.toString()];
 
@@ -60,8 +60,8 @@ class MessageCreate extends Listener {
 		args.language = guild.language;
 		args.prefix = guild.prefix;
 
-		if (!(await users.get({ id: message.author.id }))) {
-			await users.set({ id: message.author.id }, {});
+		if (!(await users.get(message.author.id))) {
+			await users.set(message.author.id);
 		}
 
 		command.executeMessage?.(message, args);

@@ -56,15 +56,15 @@ class InteractionCreate extends Listener {
 				}
 			}
 
-			const guild = (await guilds.get({ id: interaction.guild.id }))!;
+			const guild = (await guilds.get(interaction.guild.id))!;
 
 			const args = new CommandArgs();
 
 			args.language = guild.language;
 			args.prefix = guild.prefix;
 
-			if (!(await users.get({ id: interaction.user.id }))) {
-				await users.set({ id: interaction.user.id }, {});
+			if (!(await users.get(interaction.user.id))) {
+				await users.set(interaction.user.id);
 			}
 
 			if (interaction.isChatInputCommand()) {
@@ -104,14 +104,14 @@ class InteractionCreate extends Listener {
 			return;
 		}
 
-		const guild = (await guilds.get({ id: interaction.guild!.id }))!;
+		const guild = (await guilds.get(interaction.guild!.id))!;
 
 		const args = new ComponentArgs(...references);
 
 		args.language = guild.language;
 
-		if (!(await users.get({ id: interaction.user.id }))) {
-			await users.set({ id: interaction.user.id }, {});
+		if (!(await users.get(interaction.user.id))) {
+			await users.set(interaction.user.id);
 		}
 
 		if (

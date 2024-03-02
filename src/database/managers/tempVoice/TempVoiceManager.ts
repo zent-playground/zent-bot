@@ -1,4 +1,5 @@
 import {
+	Client,
 	Guild,
 	GuildChannelCreateOptions,
 	GuildMemberResolvable,
@@ -20,16 +21,13 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 	public readonly creators: TempVoiceCreatorManager;
 	public readonly configs: TempVoiceConfigManager;
 
-	public constructor(mysql: BaseManager.MySql, redis: BaseManager.Redis) {
-		super("temp_voices", mysql);
+	public constructor(client: Client) {
+		const { redis } = client;
+		super(client, "temp_voices");
 
-		this.cooldowns = new RedisManager<boolean>(
-			redis.client,
-			`${redis.prefix}:temp_voice_cooldowns`,
-		);
-
-		this.creators = new TempVoiceCreatorManager(mysql, redis);
-		this.configs = new TempVoiceConfigManager(mysql, redis);
+		this.cooldowns = new RedisManager<boolean>(redis, "temp_voice_cooldowns");
+		this.creators = new TempVoiceCreatorManager(client);
+		this.configs = new TempVoiceConfigManager(client);
 	}
 
 	public async get(id: string) {
@@ -148,7 +146,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 			name: affix ? `${affix} ` : "",
 		};
 
-		const config = await this.configs.create({ id: member.id, guildId: guild.id });
+		const config = await this.configs.default({ id: member.id, guildId: guild.id });
 
 		if (config) {
 			const { name, user_limit, nsfw, bitrate } = config;

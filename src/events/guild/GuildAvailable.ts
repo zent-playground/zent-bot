@@ -10,8 +10,8 @@ class GuildCreate extends Listener {
 	public override async execute(guild: Guild) {
 		const { guilds } = this.client.database;
 
-		if (!(await guilds.get({ id: guild.id }))) {
-			await guilds.set({ id: guild.id }, {});
+		if (!(await guilds.get(guild.id))) {
+			await guilds.set(guild.id);
 		}
 	}
 }

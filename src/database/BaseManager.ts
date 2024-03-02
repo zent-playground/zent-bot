@@ -1,4 +1,6 @@
+import { Client } from "discord.js";
 import { SetOptions } from "redis";
+
 import MySqlManager from "./mysql/MySqlManager.js";
 import RedisManager from "./redis/RedisManager.js";
 import QueryBuilder from "./mysql/QueryBuilder.js";
@@ -10,11 +12,16 @@ namespace BaseManager {
 
 class BaseManager<T extends object> {
 	private readonly db: MySqlManager<T>;
-	private readonly cache: RedisManager<T> | null;
+	private readonly cache: RedisManager<T>;
 
-	public constructor(table: string, mysql: BaseManager.MySql, redis?: BaseManager.Redis) {
+	public constructor(
+		public client: Client,
+		table: string,
+	) {
+		const { redis, mysql } = client;
+
 		this.db = new MySqlManager(mysql, table);
-		this.cache = redis ? new RedisManager(redis.client, `${redis.prefix}:${table}`) : null;
+		this.cache = new RedisManager(redis, table);
 	}
 
 	private createWhereClause(criteria: Partial<T>): string {

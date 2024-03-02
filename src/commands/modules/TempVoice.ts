@@ -9,7 +9,6 @@ import {
 } from "discord.js";
 
 import Command from "../Command.js";
-import Logger from "../../utils/others/Logger.js";
 
 class TempVoice extends Command {
 	public constructor() {
@@ -224,102 +223,7 @@ class TempVoice extends Command {
 		});
 	}
 
-	public async setName(ctx: Command.HybridContext, args: Command.Args) {
-		const { voices } = this.client.database;
-		const { member } = ctx;
-
-		const globally = this.globally(args) || ctx.interaction?.options.getBoolean("globally");
-		const name = args.entries.join(" ") || ctx.interaction?.options.getString("name");
-
-		if (!name) {
-			return;
-		}
-
-		const temp = (await voices.get(member.voice.channel!.id))!;
-
-		if (temp.author_id !== member.id) {
-			await ctx.send({
-				embeds: [
-					new EmbedBuilder()
-						.setDescription("You must be the channel owner to use this command!")
-						.setColor(this.client.config.colors.error),
-				],
-				ephemeral: true,
-			});
-
-			return;
-		}
-
-		const creator = (await voices.creators.get(temp.creator_channel_id))!;
-
-		if (creator.affix || creator.generic_name || creator.allow_custom_name) {
-			await ctx.send({
-				embeds: [
-					new EmbedBuilder()
-						.setDescription(
-							"This guild does not allow custom names for this temporary voice channel!",
-						)
-						.setColor(this.client.config.colors.error),
-				],
-				ephemeral: true,
-			});
-
-			return;
-		}
-
-		const configOptions = {
-			id: member.id,
-			guildId: globally ? ctx.guild.id : undefined,
-		};
-
-		const config = await voices.configs.create(configOptions);
-
-		if (config.name === name) {
-			await ctx.send({
-				embeds: [
-					new EmbedBuilder()
-						.setDescription("This name is already assigned to your temporary voice channel!")
-						.setColor(this.client.config.colors.error),
-				],
-				ephemeral: true,
-			});
-
-			return;
-		}
-
-		await voices.configs.edit(configOptions, { name });
-
-		await member.voice
-			.channel!.edit({
-				name: name,
-			})
-			.then(async () => {
-				await ctx.send({
-					embeds: [
-						new EmbedBuilder()
-							.setDescription(`Set your temporary voice channel name to **\`${name}\`**!`)
-							.setColor(this.client.config.colors.success),
-					],
-				});
-			})
-			.catch(async (error) => {
-				Logger.error(
-					`An error occurred while changing ${member.user.tag} temporary voice channel name.`,
-					error,
-				);
-
-				await ctx.send({
-					embeds: [
-						new EmbedBuilder()
-							.setDescription("An error occurred while changing your temporary voice channel name.")
-							.setColor(this.client.config.colors.error),
-					],
-					ephemeral: true,
-				});
-
-				await voices.configs.edit(configOptions, { name: member.voice.channel!.name });
-			});
-	}
+	// public async setName(ctx: Command.HybridContext, args: Command.Args) {}
 
 	public async setBlacklist(ctx: Command.HybridContext, args: Command.Args) {
 		const {
@@ -330,14 +234,7 @@ class TempVoice extends Command {
 
 		const data = (await voices.get(channel!.id))!;
 
-		let config = await voices.configs.create({
-			id: data.author_id,
-			guildId: data.guild_id,
-		});
-
-		if (!config) {
-			return;
-		}
+		let config = await voices.configs.default({ id: data.author_id, guildId: data.guild_id });
 
 		const target = await ctx.client.users
 			.fetch(
@@ -369,7 +266,7 @@ class TempVoice extends Command {
 			blacklistedIds.push(target.id);
 		}
 
-		config = await voices.configs.edit(
+		config = await voices.configs.update(
 			{ id: config.id, guildId: config.guild_id },
 			{
 				blacklisted_ids: blacklistedIds,
@@ -401,11 +298,7 @@ class TempVoice extends Command {
 		const { channel } = ctx.member.voice;
 
 		const data = (await voices.get(channel!.id))!;
-
-		let config = await voices.configs.create({
-			id: data.author_id,
-			guildId: data.guild_id,
-		});
+		let config = await voices.configs.default({ id: data.author_id, guildId: data.guild_id });
 
 		if (!config) {
 			return;
@@ -441,7 +334,7 @@ class TempVoice extends Command {
 			whitelistedIds.push(target.id);
 		}
 
-		config = await voices.configs.edit(
+		config = await voices.configs.update(
 			{ id: data.author_id, guildId: ctx.guild.id },
 			{
 				whitelisted_ids: whitelistedIds,

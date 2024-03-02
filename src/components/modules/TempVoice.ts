@@ -317,7 +317,7 @@ class TempVoice extends Component {
 			guildId: guild.id,
 		};
 
-		const config = await voices.configs.create(configOptions);
+		const config = await voices.configs.default(configOptions);
 
 		if (!config) {
 			await interaction.reply({
@@ -328,12 +328,14 @@ class TempVoice extends Component {
 			return;
 		}
 
+		configOptions.guildId = config.guild_id!;
+
 		if (type === "settings") {
 			const value = interaction.fields.getTextInputValue("value");
 
 			switch (choice) {
 				case "name": {
-					await voices.configs.edit(configOptions, {
+					await voices.configs.update(configOptions, {
 						name: value || null,
 					});
 
@@ -383,7 +385,7 @@ class TempVoice extends Component {
 						limit = Math.floor(limit);
 					}
 
-					await voices.configs.edit(configOptions, {
+					await voices.configs.update(configOptions, {
 						user_limit: limit,
 					});
 
@@ -429,7 +431,7 @@ class TempVoice extends Component {
 						bitrate = Math.floor(bitrate);
 					}
 
-					await voices.configs.edit(configOptions, { bitrate });
+					await voices.configs.update(configOptions, { bitrate });
 
 					await interaction.reply({
 						embeds: [
@@ -513,7 +515,7 @@ class TempVoice extends Component {
 			guildId: guild.id,
 		};
 
-		let config = await voices.configs.create(configOptions);
+		let config = await voices.configs.update(configOptions);
 
 		if (!config) {
 			return;
@@ -595,7 +597,7 @@ class TempVoice extends Component {
 			case "nsfw": {
 				const value = !config.nsfw;
 
-				await voices.configs.edit(
+				await voices.configs.update(
 					{
 						id: voice.author_id,
 						guildId: guild.id,
@@ -686,7 +688,7 @@ class TempVoice extends Component {
 			}
 
 			case "lock": {
-				config = await voices.configs.edit(configOptions, {
+				config = await voices.configs.update(configOptions, {
 					lock: true,
 				});
 
@@ -712,7 +714,7 @@ class TempVoice extends Component {
 			}
 
 			case "unlock": {
-				config = await voices.configs.edit(configOptions, {
+				config = await voices.configs.update(configOptions, {
 					lock: false,
 				});
 
@@ -728,7 +730,7 @@ class TempVoice extends Component {
 			}
 
 			case "hide": {
-				config = await voices.configs.edit(configOptions, {
+				config = await voices.configs.update(configOptions, {
 					hide: true,
 				});
 
@@ -744,7 +746,7 @@ class TempVoice extends Component {
 			}
 
 			case "show": {
-				config = await voices.configs.edit(configOptions, {
+				config = await voices.configs.update(configOptions, {
 					hide: false,
 				});
 

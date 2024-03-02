@@ -17,6 +17,7 @@ class Redis {
 		this.client = createClient({
 			url: `redis://${config.user}:${config.password}@${config.host}:${config.port}`,
 		});
+
 		this.prefix = config.prefix;
 	}
 
