@@ -1,12 +1,13 @@
 import { RedisClientType, SetOptions } from "redis";
+import Redis from "./Redis";
 
 class RedisManager<T> {
 	private client: RedisClientType;
 	private readonly prefix: string;
 
-	constructor(client: RedisClientType, prefix: string) {
-		this.client = client;
-		this.prefix = prefix;
+	constructor(redis: Redis, prefix: string) {
+		this.client = redis.client;
+		this.prefix = `${redis.prefix}:${prefix}`;
 	}
 
 	private getFullKey(key: string): string {

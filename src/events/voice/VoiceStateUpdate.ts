@@ -33,7 +33,7 @@ class VoiceStateUpdate extends Listener {
 			database: { voices },
 		} = this.client;
 
-		const creator = await voices.creators.get({ id: channel.id, guild_id: guild.id });
+		const creator = await voices.creators.get(channel.id);
 
 		if (!creator) {
 			return;
@@ -75,10 +75,11 @@ class VoiceStateUpdate extends Listener {
 			parent: channel.parent,
 		});
 
-		await voices.set(
-			{ id: temp.id },
-			{ author_id: member.id, guild_id: guild.id, creator_channel_id: channel.id },
-		);
+		await voices.set(temp.id, {
+			author_id: member.id,
+			guild_id: guild.id,
+			creator_channel_id: channel.id,
+		});
 
 		await voices.cooldowns.set(`${member.id}:${guild.id}`, true, { EX: 10 });
 		await member.voice.setChannel(temp).catch(() => void 0);
@@ -179,11 +180,11 @@ class VoiceStateUpdate extends Listener {
 		}
 
 		const { voices } = this.client.database;
-		const temp = await voices.get({ id: channel.id });
+		const temp = await voices.get(channel.id);
 
 		if (temp && channel.members.size === 0) {
 			await channel.delete().catch(() => void 0);
-			await voices.upd({ id: channel.id }, { active: false }).catch(() => void 0);
+			await voices.update(channel.id, { active: false }).catch(() => void 0);
 		}
 	}
 }

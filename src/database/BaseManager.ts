@@ -1,4 +1,6 @@
+import { Client } from "discord.js";
 import { SetOptions } from "redis";
+
 import MySqlManager from "./mysql/MySqlManager.js";
 import RedisManager from "./redis/RedisManager.js";
 import QueryBuilder from "./mysql/QueryBuilder.js";
@@ -8,15 +10,18 @@ namespace BaseManager {
 	export type Redis = import("./redis/Redis.js").default;
 }
 
-class BaseManager<T extends object> extends MySqlManager<T> {
-	private readonly cache: RedisManager<T> | null = null;
+class BaseManager<T extends object> {
+	private readonly db: MySqlManager<T>;
+	private readonly cache: RedisManager<T>;
 
-	public constructor(table: string, mysql: BaseManager.MySql, redis?: BaseManager.Redis) {
-		super(mysql, table);
+	public constructor(
+		public client: Client,
+		table: string,
+	) {
+		const { redis, mysql } = client;
 
-		if (redis) {
-			this.cache = new RedisManager(redis.client, `${redis.prefix}:${table}`);
-		}
+		this.db = new MySqlManager(mysql, table);
+		this.cache = new RedisManager(redis, table);
 	}
 
 	private createWhereClause(criteria: Partial<T>): string {
@@ -32,14 +37,14 @@ class BaseManager<T extends object> extends MySqlManager<T> {
 			.join(":");
 	}
 
-	public async get(criteria: Partial<T>, force = false): Promise<T | null> {
+	protected async _get(criteria: Partial<T>, force = false): Promise<T | null> {
 		const key = this.createCacheKey(criteria);
 
 		let data: T | undefined | null = force ? null : await this.cache?.get(key);
 
 		if (!data || force) {
 			data = (
-				await this.select({
+				await this.db.select({
 					where: this.createWhereClause(criteria),
 					selectFields: ["*"],
 				})
@@ -53,10 +58,14 @@ class BaseManager<T extends object> extends MySqlManager<T> {
 		return data || null;
 	}
 
-	public async set(criteria: Partial<T>, values: Partial<T>, options: SetOptions = {}): Promise<T> {
+	protected async _set(
+		criteria: Partial<T>,
+		values: Partial<T>,
+		options: SetOptions = {},
+	): Promise<T> {
 		values = Object.assign(criteria, values);
 
-		await this.insert(values);
+		await this.db.insert(values);
 
 		if (this.cache) {
 			await this.cache.set(this.createCacheKey(criteria), values as T, options);
@@ -65,9 +74,13 @@ class BaseManager<T extends object> extends MySqlManager<T> {
 		return values as T;
 	}
 
-	public async upd(criteria: Partial<T>, values: Partial<T>, options: SetOptions = {}): Promise<T> {
-		await super.update(this.createWhereClause(criteria), values);
-		const updatedValues = (await this.get(criteria, true))!;
+	protected async _upd(
+		criteria: Partial<T>,
+		values: Partial<T>,
+		options: SetOptions = {},
+	): Promise<T> {
+		await this.db.update(this.createWhereClause(criteria), values);
+		const updatedValues = (await this._get(criteria, true))!;
 
 		if (this.cache) {
 			const key = this.createCacheKey(criteria);
@@ -91,8 +104,8 @@ class BaseManager<T extends object> extends MySqlManager<T> {
 		return updatedValues;
 	}
 
-	public async del(criteria: Partial<T>): Promise<void> {
-		await super.delete(this.createWhereClause(criteria));
+	protected async _del(criteria: Partial<T>): Promise<void> {
+		await this.db.delete(this.createWhereClause(criteria));
 
 		if (this.cache) {
 			const cacheKeys = this.createCacheKey(criteria);

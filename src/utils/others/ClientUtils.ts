@@ -143,10 +143,7 @@ class ClientUtils {
 		}
 
 		if (preconditions.tempVoiceChannel) {
-			if (
-				!context.member.voice.channelId ||
-				!(await voices.get({ id: context.member.voice.channelId }))
-			) {
+			if (!context.member.voice.channelId || !(await voices.get(context.member.voice.channelId))) {
 				await context.send({
 					embeds: [
 						new EmbedBuilder()

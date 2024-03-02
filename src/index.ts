@@ -69,7 +69,7 @@ client.components = new Collection();
 
 client.mysql = new MySql(client.config.mysql);
 client.redis = new Redis(client.config.redis);
-client.database = new Database(client.mysql, client.redis);
+client.database = new Database(client);
 
 client.utils = new ClientUtils(client);
 

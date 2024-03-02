@@ -35,14 +35,12 @@ class TempVoice extends Component {
 		const { client } = interaction;
 		const {
 			config: { emojis, colors },
+			database: { voices },
 		} = client;
 
 		const [choice, id] = args.entries.slice(1);
 
-		const creator = await this.client.database.voices.creators.get({
-			id: id,
-			guild_id: interaction.guild!.id,
-		});
+		const creator = await voices.creators.get(id);
 
 		if (!creator) {
 			await interaction.message.edit({
@@ -117,10 +115,9 @@ class TempVoice extends Component {
 
 				break;
 			case "custom": {
-				await this.client.database.voices.creators.upd(
-					{ id: id, guild_id: interaction.guild.id },
-					{ allow_custom_name: !creator.allow_custom_name },
-				);
+				await this.client.database.voices.creators.update(id, {
+					allow_custom_name: !creator.allow_custom_name,
+				});
 
 				await interaction.message.edit({
 					components: interaction.message.components.map((row) =>
@@ -252,7 +249,7 @@ class TempVoice extends Component {
 		}
 
 		try {
-			await voices.creators.upd({ id: id, guild_id: interaction.guildId }, values);
+			await voices.creators.update(id, values);
 
 			await interaction.reply({
 				embeds: [
@@ -289,11 +286,8 @@ class TempVoice extends Component {
 
 		const [type, choice] = args.entries.slice(1);
 
-		const voice = await voices.get({ id: interaction.message?.channelId });
-		const creator = await voices.creators.get({
-			id: voice?.creator_channel_id,
-			guild_id: guild.id,
-		});
+		const voice = await voices.get(`${interaction.message?.channelId}`);
+		const creator = await voices.creators.get(`${voice?.creator_channel_id}`);
 
 		const successEmbed = new EmbedBuilder()
 			.setAuthor({
@@ -319,11 +313,11 @@ class TempVoice extends Component {
 		}
 
 		const configOptions = {
-			memberId: voice.author_id,
+			id: voice.author_id,
 			guildId: guild.id,
 		};
 
-		const config = await voices.configs.create(configOptions);
+		const config = await voices.configs.default(configOptions);
 
 		if (!config) {
 			await interaction.reply({
@@ -334,12 +328,14 @@ class TempVoice extends Component {
 			return;
 		}
 
+		configOptions.guildId = config.guild_id!;
+
 		if (type === "settings") {
 			const value = interaction.fields.getTextInputValue("value");
 
 			switch (choice) {
 				case "name": {
-					await voices.configs.edit(configOptions, {
+					await voices.configs.update(configOptions, {
 						name: value || null,
 					});
 
@@ -389,7 +385,7 @@ class TempVoice extends Component {
 						limit = Math.floor(limit);
 					}
 
-					await voices.configs.edit(configOptions, {
+					await voices.configs.update(configOptions, {
 						user_limit: limit,
 					});
 
@@ -435,7 +431,7 @@ class TempVoice extends Component {
 						bitrate = Math.floor(bitrate);
 					}
 
-					await voices.configs.edit(configOptions, { bitrate });
+					await voices.configs.update(configOptions, { bitrate });
 
 					await interaction.reply({
 						embeds: [
@@ -496,7 +492,7 @@ class TempVoice extends Component {
 			.setTitle("Voice Settings")
 			.setCustomId(`voice:panel:${args.entries[1]}:${choice}`);
 
-		const voice = (await voices.get({ id: message.channelId }))!;
+		const voice = (await voices.get(message.channelId))!;
 
 		if (
 			(choice !== "claim" && voice?.author_id !== interaction.user.id) ||
@@ -514,10 +510,12 @@ class TempVoice extends Component {
 			return;
 		}
 
-		let config = await voices.configs.create({
-			memberId: voice.author_id,
+		const configOptions = {
+			id: voice.author_id,
 			guildId: guild.id,
-		});
+		};
+
+		let config = await voices.configs.update(configOptions);
 
 		if (!config) {
 			return;
@@ -599,9 +597,9 @@ class TempVoice extends Component {
 			case "nsfw": {
 				const value = !config.nsfw;
 
-				await voices.configs.edit(
+				await voices.configs.update(
 					{
-						memberId: voice.author_id,
+						id: voice.author_id,
 						guildId: guild.id,
 					},
 					{
@@ -619,7 +617,7 @@ class TempVoice extends Component {
 
 				await member.voice.channel?.edit(
 					(await voices.createOptions(
-						(await voices.creators.get({ id: voice.creator_channel_id }))!,
+						(await voices.creators.get(voice.creator_channel_id))!,
 						voice.author_id,
 						guild,
 					)) as GuildChannelEditOptions,
@@ -670,15 +668,9 @@ class TempVoice extends Component {
 					return;
 				}
 
-				await voices.upd(
-					{
-						id: voice.id,
-						author_id: voice.author_id,
-					},
-					{
-						author_id: member.id,
-					},
-				);
+				await voices.update(voice.id, {
+					author_id: member.id,
+				});
 
 				await interaction.reply({
 					embeds: [successEmbed.setDescription("Successfully claimed this temp voice channel!")],
@@ -686,7 +678,7 @@ class TempVoice extends Component {
 
 				await member.voice.channel?.edit(
 					(await voices.createOptions(
-						(await voices.creators.get({ id: voice.creator_channel_id }))!,
+						(await voices.creators.get(voice.creator_channel_id))!,
 						member.id,
 						guild,
 					)) as GuildChannelEditOptions,
@@ -696,15 +688,9 @@ class TempVoice extends Component {
 			}
 
 			case "lock": {
-				config = await voices.configs.edit(
-					{
-						memberId: config.id,
-						guildId: config.guild_id || undefined,
-					},
-					{
-						lock: true,
-					},
-				);
+				config = await voices.configs.update(configOptions, {
+					lock: true,
+				});
 
 				await message.channel.edit({
 					permissionOverwrites: await voices.createPermissionOverwrites(config, guild),
@@ -728,15 +714,9 @@ class TempVoice extends Component {
 			}
 
 			case "unlock": {
-				config = await voices.configs.edit(
-					{
-						memberId: config.id,
-						guildId: config.guild_id || undefined,
-					},
-					{
-						lock: false,
-					},
-				);
+				config = await voices.configs.update(configOptions, {
+					lock: false,
+				});
 
 				await message.channel.edit({
 					permissionOverwrites: await voices.createPermissionOverwrites(config, guild),
@@ -750,15 +730,9 @@ class TempVoice extends Component {
 			}
 
 			case "hide": {
-				config = await voices.configs.edit(
-					{
-						memberId: config.id,
-						guildId: config.guild_id || undefined,
-					},
-					{
-						hide: true,
-					},
-				);
+				config = await voices.configs.update(configOptions, {
+					hide: true,
+				});
 
 				await message.channel.edit({
 					permissionOverwrites: await voices.createPermissionOverwrites(config, guild),
@@ -772,15 +746,9 @@ class TempVoice extends Component {
 			}
 
 			case "show": {
-				config = await voices.configs.edit(
-					{
-						memberId: config.id,
-						guildId: config.guild_id || undefined,
-					},
-					{
-						hide: false,
-					},
-				);
+				config = await voices.configs.update(configOptions, {
+					hide: false,
+				});
 
 				await message.channel.edit({
 					permissionOverwrites: await voices.createPermissionOverwrites(config, guild),

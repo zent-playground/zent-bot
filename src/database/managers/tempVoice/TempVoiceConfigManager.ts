@@ -1,62 +1,62 @@
+import { Client } from "discord.js";
+
 import { TempVoiceConfig } from "../../../types/database.js";
 import BaseManager from "../../BaseManager.js";
 
+interface Options {
+	id: string;
+	guildId?: string | null;
+}
+
 class TempVoiceConfigManager extends BaseManager<TempVoiceConfig> {
-	public constructor(mysql: BaseManager.MySql, redis: BaseManager.Redis) {
-		super("temp_voice_configs", mysql, redis);
+	public constructor(client: Client) {
+		super(client, "temp_voice_configs");
 	}
 
-	public async create(
-		options: { memberId: string; guildId?: string | null },
-		values: Partial<TempVoiceConfig> = {},
-	) {
-		const { memberId, guildId } = options;
+	public async default({ id, guildId }: Options) {
+		const { voices } = this.client.database;
 
-		let config = await this.get({ id: memberId, is_global: true });
-
-		if (!config && guildId) {
-			config = await this.get({ id: memberId, guild_id: guildId });
-		}
-
-		if (!config) {
-			await this.set(
-				{
-					id: memberId,
-					is_global: true,
-				},
-				values,
-			);
-
-			config = await this.get({ id: memberId, is_global: true });
-		}
-
-		return config;
-	}
-
-	public async edit(
-		options: { memberId: string; guildId?: string | null },
-		values: Partial<TempVoiceConfig>,
-	) {
-		const { memberId, guildId } = options;
-
-		const config = await this.create(options, values);
-
-		if (!config) {
-			throw new Error("An error occurred while creating user config.");
-		}
-
-		return await this.upd(
-			config.is_global
-				? {
-						id: memberId,
-						is_global: true,
-					}
-				: {
-						id: memberId,
-						guild_id: guildId,
-					},
-			values,
+		return (
+			(await voices.configs.get({ id, guildId: guildId, auto: true })) ||
+			(await voices.configs.set({ id }))
 		);
+	}
+
+	public async get({ id, guildId, auto = false }: Options & { auto?: boolean }) {
+		const guildOptions = { id, guild_id: guildId };
+		const globalOptions = { id, is_global: true };
+
+		if (auto) {
+			if (guildId) {
+				return (await this._get(guildOptions)) || (await this._get(globalOptions));
+			} else {
+				return await this._get(globalOptions);
+			}
+		} else {
+			if (guildId) {
+				return await this._get(guildOptions);
+			} else {
+				return await this._get(globalOptions);
+			}
+		}
+	}
+
+	public async set({ id, guildId }: Options, values: Partial<TempVoiceConfig> = {}) {
+		return guildId
+			? await this._set({ id, guild_id: guildId }, values)
+			: await this._set({ id, is_global: true }, values);
+	}
+
+	public async update({ id, guildId }: Options, values: Partial<TempVoiceConfig> = {}) {
+		return guildId
+			? await this._upd({ id, guild_id: guildId }, values)
+			: await this._upd({ id, is_global: true }, values);
+	}
+
+	public async delete({ id, guildId }: Options) {
+		return guildId
+			? await this._del({ id, guild_id: guildId })
+			: await this._del({ id, is_global: true });
 	}
 }
 

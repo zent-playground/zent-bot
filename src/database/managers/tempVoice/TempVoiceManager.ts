@@ -1,4 +1,5 @@
 import {
+	Client,
 	Guild,
 	GuildChannelCreateOptions,
 	GuildMemberResolvable,
@@ -20,20 +21,29 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 	public readonly creators: TempVoiceCreatorManager;
 	public readonly configs: TempVoiceConfigManager;
 
-	public constructor(mysql: BaseManager.MySql, redis: BaseManager.Redis) {
-		super("temp_voices", mysql);
+	public constructor(client: Client) {
+		const { redis } = client;
+		super(client, "temp_voices");
 
-		this.cooldowns = new RedisManager<boolean>(
-			redis.client,
-			`${redis.prefix}:temp_voice_cooldowns`,
-		);
-
-		this.creators = new TempVoiceCreatorManager(mysql, redis);
-		this.configs = new TempVoiceConfigManager(mysql, redis);
+		this.cooldowns = new RedisManager<boolean>(redis, "temp_voice_cooldowns");
+		this.creators = new TempVoiceCreatorManager(client);
+		this.configs = new TempVoiceConfigManager(client);
 	}
 
-	public async fetch(id: string) {
-		return await this.get({ id });
+	public async get(id: string) {
+		return await super._get({ id });
+	}
+
+	public async delete(id: string) {
+		return await super._del({ id });
+	}
+
+	public async set(id: string, values: Partial<TempVoice>) {
+		return await super._set({ id }, values);
+	}
+
+	public async update(id: string, values: Partial<TempVoice>) {
+		return await super._upd({ id }, values);
 	}
 
 	public async createPermissionOverwrites(
@@ -136,11 +146,7 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 			name: affix ? `${affix} ` : "",
 		};
 
-		let config = await this.configs.get({ id: member.id, is_global: true });
-
-		if (!config) {
-			config = await this.configs.get({ id: member.id, guild_id: guild.id });
-		}
+		const config = await this.configs.default({ id: member.id, guildId: guild.id });
 
 		if (config) {
 			const { name, user_limit, nsfw, bitrate } = config;
