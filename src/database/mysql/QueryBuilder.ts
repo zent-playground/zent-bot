@@ -73,6 +73,10 @@ class QueryBuilder {
 			.map((key) => `\`${key}\` = ${QueryBuilder.formatValue(data[key])}`)
 			.join(", ");
 
+		if (!updates) {
+			throw new Error("Missing values.");
+		}
+
 		this.query = `UPDATE ${table} SET ${updates} WHERE ${condition}`;
 
 		return this;

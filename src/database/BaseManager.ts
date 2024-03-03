@@ -5,12 +5,8 @@ import MySqlManager from "./mysql/MySqlManager.js";
 import RedisManager from "./redis/RedisManager.js";
 import QueryBuilder from "./mysql/QueryBuilder.js";
 
-namespace BaseManager {
-	export type MySql = import("./mysql/MySql.js").default;
-	export type Redis = import("./redis/Redis.js").default;
-}
-
 class BaseManager<T extends object> {
+	private defaultExpire = 30 * 60;
 	private readonly db: MySqlManager<T>;
 	private readonly cache: RedisManager<T>;
 
@@ -49,10 +45,10 @@ class BaseManager<T extends object> {
 					selectFields: ["*"],
 				})
 			)?.[0];
+		}
 
-			if (data && this.cache) {
-				await this.cache.set(key, data);
-			}
+		if (data) {
+			await this.cache.set(key, data, { EX: this.defaultExpire });
 		}
 
 		return data || null;
@@ -66,10 +62,11 @@ class BaseManager<T extends object> {
 		values = Object.assign(criteria, values);
 
 		await this.db.insert(values);
-
-		if (this.cache) {
-			await this.cache.set(this.createCacheKey(criteria), values as T, options);
-		}
+		await this.cache.set(
+			this.createCacheKey(criteria),
+			values as T,
+			Object.assign({ EX: this.defaultExpire }, options),
+		);
 
 		return values as T;
 	}
@@ -82,23 +79,21 @@ class BaseManager<T extends object> {
 		await this.db.update(this.createWhereClause(criteria), values);
 		const updatedValues = (await this._get(criteria, true))!;
 
-		if (this.cache) {
-			const key = this.createCacheKey(criteria);
+		const key = this.createCacheKey(criteria);
 
-			await this.cache.set(key, updatedValues, options);
+		await this.cache.set(key, updatedValues, options);
 
-			let isCriteriaUpdated = false;
+		let isCriteriaUpdated = false;
 
-			for (const k of Object.keys(criteria)) {
-				if (k in updatedValues && criteria[k] !== updatedValues[k]) {
-					criteria[k] = updatedValues[k];
-					isCriteriaUpdated = true;
-				}
+		for (const k of Object.keys(criteria)) {
+			if (k in updatedValues && criteria[k] !== updatedValues[k]) {
+				criteria[k] = updatedValues[k];
+				isCriteriaUpdated = true;
 			}
+		}
 
-			if (isCriteriaUpdated) {
-				await this.cache.rename(key, this.createCacheKey(criteria));
-			}
+		if (isCriteriaUpdated) {
+			await this.cache.rename(key, this.createCacheKey(criteria));
 		}
 
 		return updatedValues;
