@@ -28,23 +28,14 @@ class TempVoice extends Command {
 				{
 					name: "name",
 					hybrid: "setName",
-					preconditions: {
-						tempVoiceChannel: true,
-					},
 				},
 				{
 					name: "blacklist",
 					hybrid: "setBlacklist",
-					preconditions: {
-						tempVoiceChannel: true,
-					},
 				},
 				{
 					name: "whitelist",
 					hybrid: "setWhitelist",
-					preconditions: {
-						tempVoiceChannel: true,
-					},
 				},
 			],
 		});
@@ -223,7 +214,72 @@ class TempVoice extends Command {
 		});
 	}
 
-	// public async setName(ctx: Command.HybridContext, args: Command.Args) {}
+	public async setName(ctx: Command.HybridContext, args: Command.Args) {
+		const { client, guild, member } = ctx;
+		const {
+			config: { colors },
+			database: { voices },
+		} = client;
+
+		const voice = await voices.get(`${member.voice.channelId}`);
+
+		if (!voice) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription("You must join a temp voice channel to use this command.")
+						.setColor(colors.error),
+				],
+				ephemeral: true,
+			});
+
+			return;
+		}
+
+		const creator = (await voices.creators.get(`${voice.creator_channel_id}`))!;
+		const config = await voices.configs.getDefault(`${voice.author_id}`, guild.id);
+
+		const name = ctx.isInteraction()
+			? ctx.interaction.options.getString("name", true)
+			: args.entries.join(" ").trim();
+
+		if (!name) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription("You must provide a name to set.")
+						.setColor(colors.error),
+				],
+				ephemeral: true,
+			});
+
+			return;
+		}
+
+		if (!creator.allow_custom_name) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription("This temp voice channel cannot set a custom name.")
+						.setColor(colors.error),
+				],
+				ephemeral: true,
+			});
+
+			return;
+		}
+
+		await voices.configs.update(config.id, config.guild_id, { name });
+		await member.voice.channel!.edit(await voices.createOptions(creator, member));
+
+		await ctx.send({
+			embeds: [
+				new EmbedBuilder()
+					.setDescription(`Successfully set your temp voice channel name to \`${name}\`.`)
+					.setColor(colors.success),
+			],
+		});
+	}
 
 	public async setBlacklist(ctx: Command.HybridContext, args: Command.Args) {
 		const {
@@ -234,7 +290,7 @@ class TempVoice extends Command {
 
 		const data = (await voices.get(channel!.id))!;
 
-		let config = await voices.configs.default({ id: data.author_id, guildId: data.guild_id });
+		let config = await voices.configs.getDefault(data.author_id, data.guild_id);
 
 		const target = await ctx.client.users
 			.fetch(
@@ -266,12 +322,9 @@ class TempVoice extends Command {
 			blacklistedIds.push(target.id);
 		}
 
-		config = await voices.configs.update(
-			{ id: config.id, guildId: config.guild_id },
-			{
-				blacklisted_ids: blacklistedIds,
-			},
-		);
+		config = await voices.configs.update(data.author_id, ctx.guild.id, {
+			blacklisted_ids: blacklistedIds,
+		});
 
 		await channel!.edit({
 			permissionOverwrites: await voices.createPermissionOverwrites(config, ctx.guild),
@@ -298,7 +351,7 @@ class TempVoice extends Command {
 		const { channel } = ctx.member.voice;
 
 		const data = (await voices.get(channel!.id))!;
-		let config = await voices.configs.default({ id: data.author_id, guildId: data.guild_id });
+		let config = await voices.configs.getDefault(data.author_id, data.guild_id);
 
 		if (!config) {
 			return;
@@ -334,12 +387,9 @@ class TempVoice extends Command {
 			whitelistedIds.push(target.id);
 		}
 
-		config = await voices.configs.update(
-			{ id: data.author_id, guildId: ctx.guild.id },
-			{
-				whitelisted_ids: whitelistedIds,
-			},
-		);
+		config = await voices.configs.update(data.author_id, ctx.guild.id, {
+			whitelisted_ids: whitelistedIds,
+		});
 
 		await channel!.edit({
 			permissionOverwrites: await voices.createPermissionOverwrites(config, ctx.guild),

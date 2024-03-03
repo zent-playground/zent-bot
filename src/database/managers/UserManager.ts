@@ -9,19 +9,19 @@ class UserManager extends BaseManager<User> {
 	}
 
 	public async get(id: string) {
-		return await super._get({ id });
+		return await this._get({ id });
 	}
 
 	public async delete(id: string) {
-		return await super._del({ id });
+		return await this._del({ id });
 	}
 
 	public async set(id: string, values: Partial<User> = {}) {
-		return await super._set({ id }, values);
+		return await this._set({ id }, values);
 	}
 
 	public async update(id: string, values: Partial<User> = {}) {
-		return await super._upd({ id }, values);
+		return await this._upd({ id }, values);
 	}
 }
 

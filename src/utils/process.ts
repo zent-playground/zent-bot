@@ -4,10 +4,5 @@ process.on("uncaughtException", async (error) => {
 	Logger.error(error);
 });
 
-process.once("SIGUSR2", () => {
-	process.kill(process.pid, "SIGUSR2");
-});
-
-process.on("SIGINT", () => {
-	process.kill(process.pid, "SIGINT");
-});
+process.on("SIGUSR2", () => process.exit(0));
+process.on("SIGINT", () => process.exit(0));
