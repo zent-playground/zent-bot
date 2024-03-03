@@ -6,7 +6,6 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 	GuildChannelEditOptions,
-	PermissionFlagsBits,
 } from "discord.js";
 
 import Component from "../Component.js";
@@ -278,7 +277,7 @@ class TempVoice extends Component {
 	}
 
 	private async handleModalPanel(interaction: Component.Modal, args: Component.Args) {
-		const { client, user, guild } = interaction;
+		const { client, user, guild, member } = interaction;
 		const {
 			database: { voices },
 			config: { colors, emojis },
@@ -286,18 +285,17 @@ class TempVoice extends Component {
 
 		const [type, choice] = args.entries.slice(1);
 
-		const voice = await voices.get(`${interaction.message?.channelId}`);
-		const creator = await voices.creators.get(`${voice?.creator_channel_id}`);
-
 		const successEmbed = new EmbedBuilder()
 			.setAuthor({
-				name: interaction.member.displayName,
-				iconURL: interaction.member.displayAvatarURL({ forceStatic: true }),
+				name: member.displayName,
+				iconURL: member.displayAvatarURL({ forceStatic: true }),
 				url: `https://discord.com/users/${user.id}`,
 			})
 			.setColor(colors.success);
-
 		const errorEmbed = new EmbedBuilder().setColor(colors.error);
+
+		const voice = await voices.get(`${interaction.message?.channelId}`);
+		const creator = await voices.creators.get(`${voice?.creator_channel_id}`);
 
 		if (!voice || !creator) {
 			await interaction.reply({
@@ -312,30 +310,28 @@ class TempVoice extends Component {
 			return;
 		}
 
-		const configOptions = {
-			id: voice.author_id,
-			guildId: guild.id,
-		};
+		const config = await voices.configs.getDefault(voice.author_id, voice.guild_id);
+		const author = await guild.members.fetch(config.id).catch(() => null);
 
-		const config = await voices.configs.default(configOptions);
-
-		if (!config) {
+		if (!config || !author) {
 			await interaction.reply({
-				embeds: [errorEmbed.setDescription("An error occurred while generating config data.")],
+				embeds: [
+					errorEmbed.setDescription(
+						"An error occurred while generating config data. Try to claim this temp voice channel an try again.",
+					),
+				],
 				ephemeral: true,
 			});
 
 			return;
 		}
 
-		configOptions.guildId = config.guild_id!;
-
 		if (type === "settings") {
 			const value = interaction.fields.getTextInputValue("value");
 
 			switch (choice) {
 				case "name": {
-					await voices.configs.update(configOptions, {
+					await voices.configs.update(config.id, config.guild_id, {
 						name: value || null,
 					});
 
@@ -385,7 +381,7 @@ class TempVoice extends Component {
 						limit = Math.floor(limit);
 					}
 
-					await voices.configs.update(configOptions, {
+					await voices.configs.update(config.id, config.guild_id, {
 						user_limit: limit,
 					});
 
@@ -431,7 +427,7 @@ class TempVoice extends Component {
 						bitrate = Math.floor(bitrate);
 					}
 
-					await voices.configs.update(configOptions, { bitrate });
+					await voices.configs.update(config.id, config.guild_id, { bitrate });
 
 					await interaction.reply({
 						embeds: [
@@ -455,9 +451,7 @@ class TempVoice extends Component {
 		}
 
 		await interaction.member.voice.channel
-			?.edit(
-				(await voices.createOptions(creator, voice.author_id, guild)) as GuildChannelEditOptions,
-			)
+			?.edit((await voices.createOptions(creator, author)) as GuildChannelEditOptions)
 			.catch(() => 0);
 	}
 
@@ -481,41 +475,17 @@ class TempVoice extends Component {
 		interaction: Component.StringSelectMenu,
 		args: Component.Args,
 	) {
-		const { client, guild, member, message } = interaction;
+		const { client, guild, message, member } = interaction;
 		const {
 			config: { colors },
 			database: { voices },
 		} = client;
+
 		const [choice] = interaction.values;
 
 		const modal = new ModalBuilder()
 			.setTitle("Voice Settings")
 			.setCustomId(`voice:panel:${args.entries[1]}:${choice}`);
-
-		const voice = (await voices.get(message.channelId))!;
-
-		if (
-			(choice !== "claim" && voice?.author_id !== interaction.user.id) ||
-			!message.channel.isVoiceBased()
-		) {
-			await interaction.reply({
-				embeds: [
-					new EmbedBuilder()
-						.setDescription("You cannot use this interaction.")
-						.setColor(colors.error),
-				],
-				ephemeral: true,
-			});
-
-			return;
-		}
-
-		const configOptions = {
-			id: voice.author_id,
-			guildId: guild.id,
-		};
-
-		let config = await voices.configs.default(configOptions);
 
 		const successEmbed = new EmbedBuilder()
 			.setAuthor({
@@ -524,6 +494,50 @@ class TempVoice extends Component {
 				url: `https://discord.com/users/${member.id}`,
 			})
 			.setColor(colors.success);
+		const errorEmbed = new EmbedBuilder().setColor(colors.error);
+
+		const voice = await voices.get(message.channelId);
+		const creator = await voices.creators.get(`${voice?.creator_channel_id}`);
+
+		if (!voice || !creator || !message.channel?.isVoiceBased()) {
+			await interaction.reply({
+				embeds: [
+					errorEmbed.setDescription(
+						"Couldn't fetch your data! Please create another temp voice channel and try again.",
+					),
+				],
+				ephemeral: true,
+			});
+
+			return;
+		}
+
+		let config = await voices.configs.getDefault(voice.author_id, voice.guild_id);
+		const author = (await guild.members.fetch(config.id).catch(() => null))!;
+
+		if (choice !== "claim") {
+			if (config && voice?.author_id !== interaction.user.id) {
+				await interaction.reply({
+					embeds: [errorEmbed.setDescription("You cannot use this interaction.")],
+					ephemeral: true,
+				});
+
+				return;
+			}
+
+			if (!config || !author) {
+				await interaction.reply({
+					embeds: [
+						errorEmbed.setDescription(
+							"An error occurred while generating config data. Try to claim this temp voice channel an try again.",
+						),
+					],
+					ephemeral: true,
+				});
+
+				return;
+			}
+		}
 
 		switch (choice) {
 			default: {
@@ -593,31 +607,21 @@ class TempVoice extends Component {
 			case "nsfw": {
 				const value = !config.nsfw;
 
-				await voices.configs.update(
-					{
-						id: voice.author_id,
-						guildId: guild.id,
-					},
-					{
-						nsfw: value,
-					},
-				);
-
-				const embed = successEmbed.setDescription(
-					`Successfully **${value ? "enabled" : "disabled"}** nsfw for your temp voice channel.`,
-				);
-
-				await interaction.reply({
-					embeds: [embed],
+				await voices.configs.update(config.id, config.guild_id, {
+					nsfw: value,
 				});
 
-				await member.voice.channel?.edit(
-					(await voices.createOptions(
-						(await voices.creators.get(voice.creator_channel_id))!,
-						voice.author_id,
-						guild,
-					)) as GuildChannelEditOptions,
-				);
+				await interaction.reply({
+					embeds: [
+						successEmbed.setDescription(
+							`Successfully **${
+								value ? "enabled" : "disabled"
+							}** nsfw for your temp voice channel.`,
+						),
+					],
+				});
+
+				await message.channel.edit(await voices.createOptions(creator, author));
 
 				break;
 			}
@@ -672,87 +676,63 @@ class TempVoice extends Component {
 					embeds: [successEmbed.setDescription("Successfully claimed this temp voice channel!")],
 				});
 
-				await member.voice.channel?.edit(
-					(await voices.createOptions(
-						(await voices.creators.get(voice.creator_channel_id))!,
-						member.id,
-						guild,
-					)) as GuildChannelEditOptions,
-				);
+				await message.channel.edit(await voices.createOptions(creator, author));
 
 				break;
 			}
 
 			case "lock": {
-				config = await voices.configs.update(configOptions, {
+				config = await voices.configs.update(config.id, guild.id, {
 					lock: true,
-				});
-
-				await message.channel.edit({
-					permissionOverwrites: await voices.createPermissionOverwrites(config, guild),
-				});
-
-				await message.channel.edit({
-					permissionOverwrites: [
-						{
-							id: guild.id,
-							deny: PermissionFlagsBits.ViewChannel,
-						},
-						...(await voices.createPermissionOverwrites(config, guild)),
-					],
 				});
 
 				await interaction.reply({
 					embeds: [successEmbed.setDescription("Successfully locked your temp voice channel!")],
 				});
 
+				await message.channel.edit(await voices.createOptions(creator, author));
+
 				break;
 			}
 
 			case "unlock": {
-				config = await voices.configs.update(configOptions, {
+				config = await voices.configs.update(config.id, config.guild_id, {
 					lock: false,
-				});
-
-				await message.channel.edit({
-					permissionOverwrites: await voices.createPermissionOverwrites(config, guild),
 				});
 
 				await interaction.reply({
 					embeds: [successEmbed.setDescription("Successfully unlocked your temp voice channel!")],
 				});
 
+				await message.channel.edit(await voices.createOptions(creator, author));
+
 				break;
 			}
 
 			case "hide": {
-				config = await voices.configs.update(configOptions, {
+				config = await voices.configs.update(config.id, config.guild_id, {
 					hide: true,
-				});
-
-				await message.channel.edit({
-					permissionOverwrites: await voices.createPermissionOverwrites(config, guild),
 				});
 
 				await interaction.reply({
 					embeds: [successEmbed.setDescription("Successfully hide your temp voice channel!")],
 				});
 
+				await message.channel.edit(await voices.createOptions(creator, author));
+
 				break;
 			}
 
 			case "show": {
-				config = await voices.configs.update(configOptions, {
+				config = await voices.configs.update(config.id, config.guild_id, {
 					hide: false,
-				});
-
-				await message.channel.edit({
-					permissionOverwrites: await voices.createPermissionOverwrites(config, guild),
 				});
 
 				await interaction.reply({
 					embeds: [successEmbed.setDescription("Successfully show your temp voice channel!")],
 				});
+
+				await message.channel.edit(await voices.createOptions(creator, author));
 
 				break;
 			}

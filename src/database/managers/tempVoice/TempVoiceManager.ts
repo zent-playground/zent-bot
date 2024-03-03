@@ -2,7 +2,8 @@ import {
 	Client,
 	Guild,
 	GuildChannelCreateOptions,
-	GuildMemberResolvable,
+	GuildChannelEditOptions,
+	GuildMember,
 	OverwriteResolvable,
 	PermissionFlagsBits,
 } from "discord.js";
@@ -133,20 +134,17 @@ class TempVoiceManager extends BaseManager<TempVoice> {
 
 	public async createOptions(
 		creator: TempVoiceCreator,
-		member: GuildMemberResolvable,
-		guild: Guild,
-	): Promise<GuildChannelCreateOptions> {
-		member = await guild.members.fetch(member);
-
+		member: GuildMember,
+	): Promise<GuildChannelCreateOptions & GuildChannelEditOptions> {
 		const { affix, generic_name, generic_limit, allow_custom_name } = creator;
+		const { displayName, guild } = member;
 		const { premiumTier } = guild;
-		const { displayName } = member;
 
-		const options: GuildChannelCreateOptions = {
+		const options: GuildChannelCreateOptions & GuildChannelEditOptions = {
 			name: affix ? `${affix} ` : "",
 		};
 
-		const config = await this.configs.default({ id: member.id, guildId: guild.id });
+		const config = await this.configs.getDefault(member.id, guild.id);
 
 		if (config) {
 			const { name, user_limit, nsfw, bitrate } = config;

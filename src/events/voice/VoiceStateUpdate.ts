@@ -68,7 +68,7 @@ class VoiceStateUpdate extends Listener {
 			return;
 		}
 
-		const options = await voices.createOptions(creator, member, guild);
+		const options = await voices.createOptions(creator, member);
 		const temp = await guild.channels.create({
 			...options,
 			type: ChannelType.GuildVoice,
