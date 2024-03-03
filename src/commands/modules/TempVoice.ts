@@ -98,13 +98,49 @@ class TempVoice extends Command {
 		);
 	}
 
-	private globally(args: Command.Args): boolean {
-		if (args[args.entries.length - 1] === "true") {
-			args.entries.pop();
-			return true;
+	private async getData(ctx: Command.HybridContext) {
+		const { client, member, guild } = ctx;
+		const {
+			database: { voices },
+			config: { colors },
+		} = client;
+
+		const voice = await voices.get(`${member.voice.channelId}`);
+
+		if (!voice) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+						.setDescription("You must join a temp voice channel to use this command.")
+						.setColor(colors.error),
+				],
+				ephemeral: true,
+			});
+
+			return;
 		}
 
-		return false;
+		const creator = (await voices.creators.get(`${voice.creator_channel_id}`))!;
+		const config = await voices.configs.getDefault(`${voice.author_id}`, guild.id);
+		const author = await guild.members.fetch(config.id).catch(() => null);
+
+		if (!config || !author) {
+			await ctx.send({
+				embeds: [
+					new EmbedBuilder()
+
+						.setDescription(
+							"An error occurred while generating config data. Try to claim this temp voice channel an try again.",
+						)
+						.setColor(colors.error),
+				],
+				ephemeral: true,
+			});
+
+			return;
+		}
+
+		return { creator, config, author, voice };
 	}
 
 	public async setup(ctx: Command.HybridContext, args: Command.Args) {
@@ -215,29 +251,19 @@ class TempVoice extends Command {
 	}
 
 	public async setName(ctx: Command.HybridContext, args: Command.Args) {
-		const { client, guild, member } = ctx;
+		const { client, member } = ctx;
 		const {
 			config: { colors },
 			database: { voices },
 		} = client;
 
-		const voice = await voices.get(`${member.voice.channelId}`);
+		const data = await this.getData(ctx);
 
-		if (!voice) {
-			await ctx.send({
-				embeds: [
-					new EmbedBuilder()
-						.setDescription("You must join a temp voice channel to use this command.")
-						.setColor(colors.error),
-				],
-				ephemeral: true,
-			});
-
+		if (!data) {
 			return;
 		}
 
-		const creator = (await voices.creators.get(`${voice.creator_channel_id}`))!;
-		const config = await voices.configs.getDefault(`${voice.author_id}`, guild.id);
+		const { config, creator, author } = data;
 
 		const name = ctx.isInteraction()
 			? ctx.interaction.options.getString("name", true)
@@ -270,7 +296,7 @@ class TempVoice extends Command {
 		}
 
 		await voices.configs.update(config.id, config.guild_id, { name });
-		await member.voice.channel!.edit(await voices.createOptions(creator, member));
+		await member.voice.channel!.edit(await voices.createOptions(creator, author));
 
 		await ctx.send({
 			embeds: [
@@ -282,15 +308,19 @@ class TempVoice extends Command {
 	}
 
 	public async setBlacklist(ctx: Command.HybridContext, args: Command.Args) {
+		const { client, member } = ctx;
 		const {
 			database: { voices },
 			config: { colors },
-		} = ctx.client;
-		const { channel } = ctx.member.voice;
+		} = client;
 
-		const data = (await voices.get(channel!.id))!;
+		const data = await this.getData(ctx);
 
-		let config = await voices.configs.getDefault(data.author_id, data.guild_id);
+		if (!data) {
+			return;
+		}
+
+		const { voice, config, creator, author } = data;
 
 		const target = await ctx.client.users
 			.fetch(
@@ -313,22 +343,20 @@ class TempVoice extends Command {
 			return;
 		}
 
-		const blacklistedIds = config.blacklisted_ids || [];
-		const index = blacklistedIds.indexOf(target.id);
+		const ids = config.blacklisted_ids || [];
+		const index = ids.indexOf(target.id);
 
 		if (index !== -1) {
-			blacklistedIds.splice(index, 1);
+			ids.splice(index, 1);
 		} else {
-			blacklistedIds.push(target.id);
+			ids.push(target.id);
 		}
 
-		config = await voices.configs.update(data.author_id, ctx.guild.id, {
-			blacklisted_ids: blacklistedIds,
+		await voices.configs.update(voice.author_id, ctx.guild.id, {
+			blacklisted_ids: ids,
 		});
 
-		await channel!.edit({
-			permissionOverwrites: await voices.createPermissionOverwrites(config, ctx.guild),
-		});
+		await member.voice.channel!.edit(await voices.createOptions(creator, author));
 
 		await ctx.send({
 			embeds: [
@@ -344,18 +372,19 @@ class TempVoice extends Command {
 	}
 
 	public async setWhitelist(ctx: Command.HybridContext, args: Command.Args) {
+		const { client, member } = ctx;
 		const {
 			database: { voices },
 			config: { colors },
-		} = ctx.client;
-		const { channel } = ctx.member.voice;
+		} = client;
 
-		const data = (await voices.get(channel!.id))!;
-		let config = await voices.configs.getDefault(data.author_id, data.guild_id);
+		const data = await this.getData(ctx);
 
-		if (!config) {
+		if (!data) {
 			return;
 		}
+
+		const { voice, config, creator, author } = data;
 
 		const target = await ctx.client.users
 			.fetch(
@@ -378,22 +407,20 @@ class TempVoice extends Command {
 			return;
 		}
 
-		const whitelistedIds = config.whitelisted_ids || [];
-		const index = whitelistedIds.indexOf(target.id);
+		const ids = config.whitelisted_ids || [];
+		const index = ids.indexOf(target.id);
 
 		if (index !== -1) {
-			whitelistedIds.splice(index, 1);
+			ids.splice(index, 1);
 		} else {
-			whitelistedIds.push(target.id);
+			ids.push(target.id);
 		}
 
-		config = await voices.configs.update(data.author_id, ctx.guild.id, {
-			whitelisted_ids: whitelistedIds,
+		await voices.configs.update(voice.author_id, ctx.guild.id, {
+			whitelisted_ids: ids,
 		});
 
-		await channel!.edit({
-			permissionOverwrites: await voices.createPermissionOverwrites(config, ctx.guild),
-		});
+		await member.voice.channel!.edit(await voices.createOptions(creator, author));
 
 		await ctx.send({
 			embeds: [

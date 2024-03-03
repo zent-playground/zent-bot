@@ -34,12 +34,6 @@ export interface CommandOptions {
 	name: string;
 	aliases?: string[];
 	subcommands?: Subcommand[];
-	preconditions?: Preconditions;
-}
-
-export interface Preconditions {
-	voiceChannel?: boolean;
-	tempVoiceChannel?: boolean;
 }
 
 class Command {
@@ -48,12 +42,10 @@ class Command {
 	public applicationCommands: RESTPostAPIApplicationCommandsJSONBody[] = [];
 	public client!: Client<true>;
 	public subcommand?: Subcommand;
-	public preconditions: Preconditions;
 
 	public constructor(public options: CommandOptions) {
 		this.name = options.name;
 		this.aliases = options.aliases || [];
-		this.preconditions = options.preconditions || {};
 	}
 
 	public initialize?(): Awaitable<void>;
