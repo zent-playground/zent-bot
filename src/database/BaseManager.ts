@@ -79,21 +79,23 @@ class BaseManager<T extends object> {
 		await this.db.update(this.createWhereClause(criteria), values);
 		const updatedValues = (await this._get(criteria, true))!;
 
-		const key = this.createCacheKey(criteria);
+		if (updatedValues) {
+			const key = this.createCacheKey(criteria);
 
-		await this.cache.set(key, updatedValues, options);
+			await this.cache.set(key, updatedValues, options);
 
-		let isCriteriaUpdated = false;
+			let isCriteriaUpdated = false;
 
-		for (const k of Object.keys(criteria)) {
-			if (k in updatedValues && criteria[k] !== updatedValues[k]) {
-				criteria[k] = updatedValues[k];
-				isCriteriaUpdated = true;
+			for (const k of Object.keys(criteria)) {
+				if (k in updatedValues && criteria[k] !== updatedValues[k]) {
+					criteria[k] = updatedValues[k];
+					isCriteriaUpdated = true;
+				}
 			}
-		}
 
-		if (isCriteriaUpdated) {
-			await this.cache.rename(key, this.createCacheKey(criteria));
+			if (isCriteriaUpdated) {
+				await this.cache.rename(key, this.createCacheKey(criteria));
+			}
 		}
 
 		return updatedValues;
