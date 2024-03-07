@@ -24,7 +24,7 @@ class InteractionCreate extends Listener {
 	public async handleCommand(
 		interaction: Command.Autocomplete | Command.ChatInput | Command.ContextMenu,
 	) {
-		const { database, config, utils } = this.client;
+		const { database, config } = this.client;
 		const { guilds, users } = database;
 
 		const command = this.client.commands.find((command) =>
@@ -50,14 +50,7 @@ class InteractionCreate extends Listener {
 				return;
 			}
 
-			if (command.preconditions) {
-				if (!(await utils.checkPreconditions(interaction, command.preconditions))) {
-					return;
-				}
-			}
-
 			const guild = (await guilds.get(interaction.guild.id))!;
-
 			const args = new CommandArgs();
 
 			args.language = guild.language;
@@ -92,7 +85,7 @@ class InteractionCreate extends Listener {
 	public async handleComponent(
 		interaction: Component.Button | Component.SelectMenu | Component.Modal,
 	) {
-		const { database, config } = this.client;
+		const { database } = this.client;
 		const { guilds, users } = database;
 
 		const splitted = interaction.customId.split(":");
@@ -105,53 +98,12 @@ class InteractionCreate extends Listener {
 		}
 
 		const guild = (await guilds.get(interaction.guild!.id))!;
-
 		const args = new ComponentArgs(...references);
 
 		args.language = guild.language;
 
 		if (!(await users.get(interaction.user.id))) {
 			await users.set(interaction.user.id);
-		}
-
-		if (
-			await this.client.users
-				.fetch(args.entries[args.entries.length - 1])
-				.then(() => true)
-				.catch(() => false)
-		) {
-			const userId = args.entries[args.entries.length - 1];
-
-			if (interaction.user.id !== userId) {
-				await interaction.reply({
-					embeds: [
-						new EmbedBuilder()
-							.setTitle(`${config.emojis.error} Unauthorized Interaction!`)
-							.setDescription("You are not authorized to execute this interaction.")
-							.setColor(config.colors.error),
-					],
-					ephemeral: true,
-				});
-
-				return;
-			}
-		}
-
-		if (
-			component.options?.memberPermissions &&
-			!interaction.memberPermissions?.has(component.options.memberPermissions)
-		) {
-			await interaction.reply({
-				embeds: [
-					new EmbedBuilder()
-						.setTitle(`${config.emojis.error} Insufficient Permissions!`)
-						.setDescription("You lack the required permissions to execute this command.")
-						.setColor(config.colors.error),
-				],
-				ephemeral: true,
-			});
-
-			return;
 		}
 
 		if (interaction.isButton()) {
@@ -185,31 +137,16 @@ class InteractionCreate extends Listener {
 		args: CommandArgs,
 	) {
 		const { utils } = this.client;
-		const subcommand = interaction.options.getSubcommand(false) || undefined;
-		const subcommandGroup = interaction.options.getSubcommandGroup(false) || undefined;
 
-		const parsed = utils.parseSubcommand(command, args, {
-			subcommand,
-			subcommandGroup,
-		});
+		const subcommand = interaction.options.getSubcommand(false);
+		const subcommandGroup = interaction.options.getSubcommandGroup(false);
+		const parsed = utils.parseSubcommand(command, args, { subcommand, subcommandGroup });
 
 		if (!parsed) {
 			return;
 		}
 
-		const { parent, entry } = parsed;
-
-		if (parent.preconditions) {
-			if (!(await utils.checkPreconditions(interaction, parent.preconditions))) {
-				return;
-			}
-		}
-
-		if (parent["subcommands"] && entry.preconditions) {
-			if (!(await utils.checkPreconditions(interaction, entry.preconditions))) {
-				return;
-			}
-		}
+		const { entry } = parsed;
 
 		if (entry.chatInput) {
 			const func = command[entry.chatInput] as typeof command.executeChatInput;
