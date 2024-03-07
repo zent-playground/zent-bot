@@ -2,7 +2,7 @@ import { Events, Message } from "discord.js";
 
 import Listener from "../Listener.js";
 
-import { BasedHybridContext, HybridContext } from "../../commands/HybridContext.js";
+import { HybridContextMessage } from "../../commands/HybridContext.js";
 import Command, { CommandArgs } from "../../commands/Command.js";
 
 class MessageCreate extends Listener {
@@ -47,12 +47,8 @@ class MessageCreate extends Listener {
 			command = this.client.commands.get("help");
 		}
 
-		if (!command) return;
-
-		if (command.preconditions) {
-			if (!(await this.client.utils.checkPreconditions(message, command.preconditions))) {
-				return;
-			}
+		if (!command) {
+			return;
 		}
 
 		const args = new CommandArgs(...content);
@@ -65,39 +61,26 @@ class MessageCreate extends Listener {
 		}
 
 		command.executeMessage?.(message, args);
-		command.executeHybrid?.(new BasedHybridContext(message) as HybridContext, args);
-		await this.handleSubcommand(message, command, args);
+		command.executeHybrid?.(new HybridContextMessage(message), args);
+		this.handleSubcommand(message, command, args);
 	}
 
 	public async handleSubcommand(message: Message<true>, command: Command, args: CommandArgs) {
-		let [first, second] = args.entries;
+		const {
+			utils: { parseSubcommand },
+		} = this.client;
 
-		first = first?.toLowerCase();
-		second = second?.toLowerCase();
+		const [first, second] = args.entries.map((x) => x.toLowerCase());
 
 		const parsed =
-			this.client.utils.parseSubcommand(command, args, {
-				subcommandGroup: first,
-				subcommand: second,
-			}) || this.client.utils.parseSubcommand(command, args, { subcommand: first });
+			parseSubcommand(command, args, { subcommandGroup: first, subcommand: second }) ||
+			parseSubcommand(command, args, { subcommand: first });
 
 		if (!parsed) {
 			return;
 		}
 
-		const { entry, parent } = parsed;
-
-		if (parent.preconditions) {
-			if (!(await this.client.utils.checkPreconditions(message, parent.preconditions))) {
-				return;
-			}
-		}
-
-		if (parent["subcommands"] && entry.preconditions) {
-			if (!(await this.client.utils.checkPreconditions(message, entry.preconditions))) {
-				return;
-			}
-		}
+		const { entry } = parsed;
 
 		if (entry.message) {
 			const func = command[entry.message] as typeof command.executeMessage;
@@ -106,7 +89,7 @@ class MessageCreate extends Listener {
 
 		if (entry.hybrid) {
 			const func = command[entry.hybrid] as typeof command.executeHybrid;
-			await func?.bind(command)(new BasedHybridContext(message) as HybridContext, args);
+			await func?.bind(command)(new HybridContextMessage(message), args);
 		}
 	}
 }

@@ -2,76 +2,68 @@ import { Client, EmbedBuilder, GuildPremiumTier, codeBlock } from "discord.js";
 
 import Command from "../../commands/Command.js";
 
-import { Subcommand, SubcommandBody } from "../../types/subcommand.js";
+import { SubcommandBody, SubcommandGroupBody } from "../../types/subcommand.js";
 
 class ClientUtils {
 	public constructor(public client: Client) {}
 
 	public parseId(value: string) {
-		if (!value) return;
+		if (!value) {
+			return;
+		}
+
 		return value.match(/[0-9]+/)?.[0];
 	}
 
 	public parseSubcommand(
 		command: Command,
 		args: Command.Args,
-		options: { subcommand?: string; subcommandGroup?: string },
+		{
+			subcommand,
+			subcommandGroup,
+		}: { subcommand?: string | null; subcommandGroup?: string | null },
 	) {
-		const { subcommand, subcommandGroup } = options;
-
-		let parent: Subcommand | undefined;
+		let parent: SubcommandGroupBody | null = null;
+		let entry: SubcommandBody | null = null;
 
 		for (const e of command.options.subcommands || []) {
-			if ("subcommands" in e) {
-				if (e.name === subcommandGroup) {
-					parent = e;
+			if (e.name === subcommandGroup && "subcommands" in e) {
+				parent = e;
+				break;
+			}
+
+			if ("subcommands" in e === false) {
+				if (e.name === subcommand) {
+					entry = e;
 					break;
 				}
-			} else {
-				const target = subcommandGroup || subcommand;
 
-				if (e.name === target) {
-					parent = e;
-					break;
-				} else if (e["default"]) {
-					parent = e;
+				if (e.default && !subcommand) {
+					entry = e;
 				}
 			}
 		}
 
-		if (!parent) return;
-
-		let entry: SubcommandBody | undefined;
-
-		if ("subcommands" in parent) {
-			for (const sub of parent.subcommands) {
-				if (sub.name === subcommand) {
-					entry = sub;
+		if (parent && !entry) {
+			for (const e of parent.subcommands) {
+				if (e.name === subcommand) {
+					entry = e;
 					break;
-				} else if (sub.default) {
-					entry = sub;
+				}
+
+				if (e.default && !subcommand) {
+					entry = e;
 				}
 			}
-
-			args.entries.splice(0, 1);
-		} else {
-			entry = parent;
 		}
 
-		if (!entry) return;
-
-		args.entrySubcommand = entry;
-		args.parentSubcommand = parent;
-
-		if (!entry["subcommands"] && args.entries[0]?.toLowerCase() === entry.name) {
-			args.entries.splice(0, 1);
+		if (!entry) {
+			return;
 		}
 
-		return {
-			entry,
-			parent,
-			command,
-		};
+		args.entries.splice(0, parent ? 2 : 1);
+
+		return { entry, parent, command, args };
 	}
 
 	public createHelpEmbed(
