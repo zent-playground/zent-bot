@@ -41,7 +41,6 @@ class Command {
 	public aliases: string[];
 	public applicationCommands: RESTPostAPIApplicationCommandsJSONBody[] = [];
 	public client!: Client<true>;
-	public subcommand?: Subcommand;
 
 	public constructor(public options: CommandOptions) {
 		this.name = options.name;

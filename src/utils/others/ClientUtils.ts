@@ -27,18 +27,18 @@ class ClientUtils {
 		let entry: SubcommandBody | null = null;
 
 		for (const e of command.options.subcommands || []) {
-			if (e.name === subcommandGroup && "subcommands" in e) {
-				parent = e;
-				break;
-			}
-
-			if ("subcommands" in e === false) {
-				if (e.name === subcommand) {
-					entry = e;
+			if ("subcommands" in e) {
+				if (e.name === subcommandGroup?.toLowerCase()) {
+					parent = e;
 					break;
 				}
-
-				if (e.default && !subcommand) {
+			} else {
+				if (subcommand) {
+					if (e.name === subcommand?.toLowerCase()) {
+						entry = e;
+						break;
+					}
+				} else if (e.default) {
 					entry = e;
 				}
 			}
@@ -46,12 +46,12 @@ class ClientUtils {
 
 		if (parent && !entry) {
 			for (const e of parent.subcommands) {
-				if (e.name === subcommand) {
-					entry = e;
-					break;
-				}
-
-				if (e.default && !subcommand) {
+				if (subcommand) {
+					if (e.name === subcommand?.toLowerCase()) {
+						entry = e;
+						break;
+					}
+				} else if (e.default) {
 					entry = e;
 				}
 			}
@@ -61,7 +61,9 @@ class ClientUtils {
 			return;
 		}
 
-		args.entries.splice(0, parent ? 2 : 1);
+		if (subcommand) {
+			args.entries.splice(0, parent ? 2 : 1);
+		}
 
 		return { entry, parent, command, args };
 	}
