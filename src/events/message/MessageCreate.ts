@@ -73,8 +73,8 @@ class MessageCreate extends Listener {
 		const [first, second] = args.entries.map((x) => x.toLowerCase());
 
 		const parsed =
-			parseSubcommand(command, args, { subcommandGroup: first, subcommand: second }) ||
-			parseSubcommand(command, args, { subcommand: first });
+			parseSubcommand(command, args, { subcommand: first }) ||
+			parseSubcommand(command, args, { subcommandGroup: first, subcommand: second });
 
 		if (!parsed) {
 			return;

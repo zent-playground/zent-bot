@@ -11,7 +11,6 @@ import {
 	UserSelectMenuInteraction,
 } from "discord.js";
 
-import { Preconditions } from "../commands/Command.js";
 import Args from "../utils/others/Args.js";
 
 export class ComponentArgs extends Args {
@@ -20,7 +19,6 @@ export class ComponentArgs extends Args {
 
 interface ComponentOptions {
 	memberPermissions?: PermissionResolvable;
-	preconditions?: Preconditions;
 }
 
 namespace Component {
@@ -36,14 +34,11 @@ namespace Component {
 
 class Component {
 	public client!: Client<true>;
-	public preconditions: Preconditions;
 
 	public constructor(
 		public key: string,
 		public options: ComponentOptions = {},
-	) {
-		this.preconditions = options.preconditions || {};
-	}
+	) {}
 
 	public executeButton?(interaction: Component.Button, args: Component.Args): Awaitable<void>;
 
