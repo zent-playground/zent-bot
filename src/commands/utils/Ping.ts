@@ -31,9 +31,9 @@ class Ping extends Command {
 					.setTitle("Pong!")
 					.setDescription(
 						[
-							`API: \`${message.createdTimestamp - ctx.createdTimestamp}ms`,
-							`Heartbeat: \`${this.client.ws.ping}\`ms`,
-							`Database: \`${await this.client.mysql.ping()}\`ms`,
+							`**API:** \`${message.createdTimestamp - ctx.createdTimestamp}\`ms`,
+							`**Heartbeat:** \`${this.client.ws.ping}\`ms`,
+							`**Database:** \`${await this.client.mysql.ping()}\`ms`,
 						].join("\n"),
 					)
 					.setColor(this.client.config.colors.default),
