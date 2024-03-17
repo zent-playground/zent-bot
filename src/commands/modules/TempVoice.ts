@@ -352,7 +352,7 @@ class TempVoice extends Command {
 			ids.push(target.id);
 		}
 
-		await voices.configs.update(voice.author_id, ctx.guild.id, {
+		await voices.configs.update(voice.author_id, config.guild_id, {
 			blacklisted_ids: ids,
 		});
 
@@ -416,7 +416,7 @@ class TempVoice extends Command {
 			ids.push(target.id);
 		}
 
-		await voices.configs.update(voice.author_id, ctx.guild.id, {
+		await voices.configs.update(voice.author_id, config.guild_id, {
 			whitelisted_ids: ids,
 		});
 
